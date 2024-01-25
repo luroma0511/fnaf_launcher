@@ -2,8 +2,8 @@ package game.deluxe.state;
 
 public class Engine {
     private byte engineState;
-    private Game game;
-    private Menu menu;
+    private final Game game;
+    private final Menu menu;
     private float deltaTime;
     private long previousTime;
 
@@ -21,10 +21,10 @@ public class Engine {
             game.update();
         }
 
-        previousTime = System.nanoTime();
+        previousTime = System.currentTimeMillis();
     }
 
     public void updateDeltaTime(){
-        deltaTime = (float) (System.nanoTime() - previousTime) / 100_000_000;
+        deltaTime = (float) (System.currentTimeMillis() - previousTime) / 1_000;
     }
 }
