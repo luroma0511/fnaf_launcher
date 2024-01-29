@@ -2,7 +2,6 @@ package game.engine;
 
 import com.badlogic.gdx.ApplicationAdapter;
 
-import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -13,16 +12,12 @@ import game.engine.util.RenderManager;
 public class Candys3Deluxe extends ApplicationAdapter {
 	private RenderManager renderManager;
 	private final ScheduledExecutorService engineTimer;
+	private final Engine engine;
 
 	public Candys3Deluxe(){
-		final Engine engine = new Engine();
+		engine = new Engine();
 		engineTimer = Executors.newSingleThreadScheduledExecutor();
-		engineTimer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-				engine.update();
-			}
-		}, 0, 16, TimeUnit.MILLISECONDS);
+		engineTimer.scheduleAtFixedRate(engine::update, 0, 16, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -32,6 +27,7 @@ public class Candys3Deluxe extends ApplicationAdapter {
 
 	@Override
 	public void render () {
+		renderManager.requests(engine);
 		renderManager.render();
 	}
 	

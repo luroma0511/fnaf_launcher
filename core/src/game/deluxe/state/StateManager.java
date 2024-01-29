@@ -1,5 +1,7 @@
 package game.deluxe.state;
 
+import java.util.Map;
+
 public class StateManager {
     private final Game game;
     private final Menu menu;
@@ -11,11 +13,11 @@ public class StateManager {
         gameState = 0;
     }
 
-    public void update(){
+    public void update(Map<String, String> requests){
         if (gameState == 0){
-            menu.update();
+            menu.update(requests);
         } else {
-            game.update();
+            game.update(requests);
         }
     }
 

@@ -16,7 +16,15 @@ public class RenderManager {
 
     }
 
+    public void requests(Engine engine){
+        for (String key: engine.getRequests().keySet()){
+
+        }
+    }
+
+
     public void render(){
+
         ScreenUtils.clear(0, 0, 0, 1);
         batch.begin();
         videoManager.updateRender(batch);
