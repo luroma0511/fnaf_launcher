@@ -10,9 +10,10 @@ public class SpriteManager {
         spriteSheetMap = new HashMap<>();
     }
 
-    public void create(String path, short width){
+    public void create(SpriteRequest spriteRequest){
+        String path = spriteRequest.getName();
         if (spriteSheetMap.containsKey(path)) return;
-        SpriteSheet sheet = new SpriteSheet(path, width);
+        SpriteSheet sheet = new SpriteSheet(path, spriteRequest.getWidth());
         spriteSheetMap.put(path, sheet);
     }
 

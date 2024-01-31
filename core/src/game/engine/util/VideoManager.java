@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 public class VideoManager {
     private final VideoPlayer videoPlayer;
     private boolean show;
+    private String request;
 
     public VideoManager(){
         videoPlayer = VideoPlayerCreator.createVideoPlayer();
@@ -20,9 +21,19 @@ public class VideoManager {
         });
     }
 
-    public void play(String path){
+    public void request(){
+        if (request == null) return;
+        play(request);
+        request = null;
+    }
+
+    public void setRequest(String path){
+        request = path;
+    }
+
+    private void play(String path){
         try {
-            videoPlayer.play(Gdx.files.internal(path));
+            videoPlayer.play(Gdx.files.internal(path + ".webm"));
         } catch (FileNotFoundException e){
             Gdx.app.error("gdx-video", "Something is wrong!");
         }

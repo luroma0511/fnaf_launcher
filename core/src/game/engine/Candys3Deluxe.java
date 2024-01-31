@@ -1,6 +1,7 @@
 package game.engine;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.Gdx;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,13 +23,13 @@ public class Candys3Deluxe extends ApplicationAdapter {
 
 	@Override
 	public void create(){
-		renderManager = new RenderManager();
+		renderManager = new RenderManager((short) Gdx.graphics.getWidth(), (short) Gdx.graphics.getHeight());
 	}
 
 	@Override
 	public void render () {
 		renderManager.requests(engine);
-		renderManager.render();
+		renderManager.render(engine);
 	}
 	
 	@Override

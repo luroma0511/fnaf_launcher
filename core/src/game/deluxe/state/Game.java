@@ -1,11 +1,10 @@
 package game.deluxe.state;
 
-import java.util.List;
-import java.util.Map;
-
 import game.deluxe.state.night.CustomNight;
 import game.deluxe.state.night.RatCatTheater;
 import game.deluxe.state.night.ShadowNight;
+import game.engine.util.Engine;
+import game.engine.util.RenderManager;
 
 public class Game {
     private final ShadowNight shadowNight;
@@ -23,7 +22,7 @@ public class Game {
         this.nightState = nightState;
     }
 
-    public void update(Map<String, String> requests){
+    public void update(Engine engine){
         if (nightState == 1){
             ratCatTheater.update();
         } else if (nightState == 2){
@@ -31,5 +30,9 @@ public class Game {
         } else if (nightState == 3){
             customNight.update();
         }
+    }
+
+    public void render(RenderManager renderManager){
+
     }
 }

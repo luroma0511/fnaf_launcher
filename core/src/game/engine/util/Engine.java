@@ -1,34 +1,48 @@
 package game.engine.util;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import game.deluxe.state.StateManager;
 
 public class Engine {
     private final StateManager stateManager;
-    private final Map<String, String> requests;
+    private SpriteRequest spriteRequest;
     private float deltaTime;
     private boolean lock;
     private long previousTime;
 
     public Engine(){
         stateManager = new StateManager();
-        requests = new HashMap<>();
     }
 
     public void update(){
-        stateManager.update(requests);
+        stateManager.update(this);
         previousTime = System.currentTimeMillis();
         lock = false;
     }
 
-    public Map<String, String> getRequests(){
-        return requests;
+    public SpriteRequest createSpriteRequest(SpriteRequest currentRequest, String name, short width){
+        if (currentRequest == null){
+            return new SpriteRequest(name, width);
+        }
+        SpriteRequest tempRequest = currentRequest;
+        currentRequest = new SpriteRequest(name, width);
+        currentRequest.setNext(tempRequest);
+        return currentRequest;
     }
 
-    public void clearRequest(){
-        requests.clear();
+    public SpriteRequest getSpriteRequest(){
+        return spriteRequest;
+    }
+
+    public void setSpriteRequest(SpriteRequest request){
+        spriteRequest = request;
+    }
+
+    public void next(){
+        spriteRequest = spriteRequest.getNext();
+    }
+
+    public StateManager getStateManager() {
+        return stateManager;
     }
 
     private void updateDeltaTime(){

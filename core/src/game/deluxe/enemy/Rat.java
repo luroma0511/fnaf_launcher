@@ -9,20 +9,31 @@ public class Rat {
     }
 
     public void jumpscare(VideoManager videoManager){
-        videoManager.play("game/Rat/Jumpscare/room.webm");
+        videoManager.setRequest("game/Rat/Jumpscare/room");
     }
 
-    public void load(SpriteManager spriteManager){
-        spriteManager.create("game/Rat/Battle/Left", (short) 464);
-        spriteManager.create("game/Rat/Battle/Middle", (short) 736);
-        spriteManager.create("game/Rat/Battle/Right", (short) 826);
-        spriteManager.create("game/Rat/Bed/LeftPeek", (short) 425);
-        spriteManager.create("game/Rat/Bed/RightPeek", (short) 589);
-        spriteManager.create("game/Rat/Leaving/Left", (short) 210);
-        spriteManager.create("game/Rat/Leaving/Right", (short) 311);
-        spriteManager.create("game/Rat/Tape/Tape", (short) 750);
-        spriteManager.create("game/Rat/Looking Away/Left", (short) 130);
-        spriteManager.create("game/Rat/Looking Away/Middle", (short) 232);
-        spriteManager.create("game/Rat/Looking Away/Right", (short) 105);
+
+    private final String[] textures = new String[]{
+            "Battle/Left -> 464",
+            "Battle/Middle -> 736",
+            "Battle/Right -> 826",
+            "Bed/LeftPeek -> 425",
+            "Bed/RightPeek -> 589",
+            "Leaving/Left -> 210",
+            "Leaving/Right -> 311",
+            "Tape/Tape -> 750",
+            "Looking Away/Left -> 130",
+            "Looking Away/Middle -> 232",
+            "Looking Away/Right -> 105"
+    };
+
+    public void load(Engine engine){
+        String prefix = "game/Rat/";
+        String token = " -> ";
+        for (String file: textures){
+            String name = file.substring(0, file.indexOf(token));
+            short width = Short.parseShort(file.substring(file.indexOf(token) + 4));
+            engine.setSpriteRequest(engine.createSpriteRequest(engine.getSpriteRequest(), prefix + name, width));
+        }
     }
 }

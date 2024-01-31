@@ -1,6 +1,6 @@
 package game.deluxe.state;
 
-import java.util.Map;
+import game.engine.util.Engine;
 
 public class StateManager {
     private final Game game;
@@ -13,12 +13,20 @@ public class StateManager {
         gameState = 0;
     }
 
-    public void update(Map<String, String> requests){
+    public void update(Engine engine){
         if (gameState == 0){
-            menu.update(requests);
+            menu.update(engine);
         } else {
-            game.update(requests);
+            game.update(engine);
         }
+    }
+
+    public Game getGame() {
+        return game;
+    }
+
+    public Menu getMenu() {
+        return menu;
     }
 
     public byte getGameState() {
