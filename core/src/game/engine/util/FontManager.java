@@ -26,6 +26,11 @@ public class FontManager {
         generator2.dispose();
     }
 
+    public void dispose(){
+        candysFont.dispose();
+        captionFont.dispose();
+    }
+
     public BitmapFont getCandysFont() {
         return candysFont;
     }

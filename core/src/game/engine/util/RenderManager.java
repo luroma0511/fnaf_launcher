@@ -1,6 +1,10 @@
 package game.engine.util;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class RenderManager {
@@ -11,6 +15,7 @@ public class RenderManager {
     private final VideoManager videoManager;
     private final FrameBufferManager frameBufferManager;
     private final CameraManager cameraManager;
+    private final InputManager inputManager;
 
     private final short width;
     private final short height;
@@ -26,6 +31,7 @@ public class RenderManager {
         frameBufferManager = new FrameBufferManager();
         frameBufferManager.createShape(batch, shapeRenderer);
         cameraManager = new CameraManager(width, height);
+        inputManager = new InputManager();
     }
 
     public void requests(Engine engine){
@@ -33,6 +39,18 @@ public class RenderManager {
             spriteManager.create(engine.getSpriteRequest());
             engine.setSpriteRequest(engine.getSpriteRequest().getNext());
         }
+    }
+
+    public void viewportAdjust(Engine engine){
+        Vector3 v3 = cameraManager.viewport.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
+        inputManager.x = v3.x - (float) width / 2;
+        inputManager.y = v3.y - (float) height / 2;
+        inputManager.readjust();
+
+        if (!engine.isPressed() && !inputManager.pressed) {
+            engine.setPressed(Gdx.input.isButtonPressed(Input.Buttons.LEFT));
+        }
+        inputManager.pressed = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
     }
 
     public void render(Engine engine){
@@ -52,8 +70,11 @@ public class RenderManager {
 
     public void dispose(){
         batch.dispose();
-        videoManager.dispose();
+        shapeRenderer.dispose();
+        fontManager.dispose();
         spriteManager.dispose();
+        videoManager.dispose();
+        frameBufferManager.dispose();
     }
 
     public CameraManager getCameraManager() {
@@ -86,5 +107,9 @@ public class RenderManager {
 
     public FrameBufferManager getFrameBufferManager() {
         return frameBufferManager;
+    }
+
+    public InputManager getInputManager() {
+        return inputManager;
     }
 }

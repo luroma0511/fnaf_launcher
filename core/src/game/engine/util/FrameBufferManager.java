@@ -35,4 +35,8 @@ public class FrameBufferManager {
     public FrameBuffer newFrameBuffer(){
         return new FrameBuffer(Pixmap.Format.RGBA8888, 1280, 720, true);
     }
+
+    public void dispose(){
+        shapeFrameBufferManager.dispose();
+    }
 }

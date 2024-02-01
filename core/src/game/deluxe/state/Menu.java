@@ -1,6 +1,7 @@
 package game.deluxe.state;
 
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
@@ -32,6 +33,8 @@ public class Menu {
 
     public void render(RenderManager renderManager){
         Sprite sprite;
+        BitmapFont candysFont = renderManager.getFontManager().getCandysFont();
+        BitmapFont captionFont = renderManager.getFontManager().getCaptionFont();
 
         sprite = renderManager.getSpriteManager().spriteSheetMap.get("Static/Static").getRegion((byte) staticAnimation);
         sprite.setColor(0.25f, 0, 0, 1);
@@ -47,10 +50,14 @@ public class Menu {
 
         renderManager.getBatch().setBlendFunction(srcFunc, dstFunc);
 
-        renderManager.getFontManager().getCandysFont().setColor(1, 0, 0, 1);
+        candysFont.setColor(1, 0, 0, 1);
         GlyphLayout layout = new GlyphLayout();
-        layout.setText(renderManager.getFontManager().getCandysFont(), "Custom Night");
+        layout.setText(candysFont, "Custom Night");
 
-        renderManager.getFontManager().getCandysFont().draw(renderManager.getBatch(), layout, (float) renderManager.getWidth() / 2 - layout.width / 2, 660);
+        candysFont.draw(renderManager.getBatch(), layout,
+                (float) renderManager.getWidth() / 2 - layout.width / 2, 670);
+        captionFont.draw(renderManager.getBatch(),
+                "Mouse: " + (int) renderManager.getInputManager().getX() + " | " + (int) renderManager.getInputManager().getY(),
+                24, 696);
     }
 }

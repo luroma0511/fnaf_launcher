@@ -6,17 +6,22 @@ public class Engine {
     private final StateManager stateManager;
     private SpriteRequest spriteRequest;
     private float deltaTime;
-    private boolean lock;
     private long previousTime;
+    private boolean lock;
+    private boolean pressed;
 
     public Engine(){
         stateManager = new StateManager();
     }
 
     public void update(){
+        if (pressed){
+            System.out.println("Passed");
+        }
         stateManager.update(this);
         previousTime = System.currentTimeMillis();
         lock = false;
+        pressed = false;
     }
 
     public SpriteRequest createSpriteRequest(SpriteRequest currentRequest, String name, short width){
@@ -37,12 +42,16 @@ public class Engine {
         spriteRequest = request;
     }
 
-    public void next(){
-        spriteRequest = spriteRequest.getNext();
-    }
-
     public StateManager getStateManager() {
         return stateManager;
+    }
+
+    public boolean isPressed() {
+        return pressed;
+    }
+
+    public void setPressed(boolean pressed) {
+        this.pressed = pressed;
     }
 
     private void updateDeltaTime(){

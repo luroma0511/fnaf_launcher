@@ -24,11 +24,21 @@ public class Candys3Deluxe extends ApplicationAdapter {
 	@Override
 	public void create(){
 		renderManager = new RenderManager((short) Gdx.graphics.getWidth(), (short) Gdx.graphics.getHeight());
+		Gdx.input.setInputProcessor(renderManager.getInputManager());
+	}
+
+	@Override
+	public void resize(int width, int height){
+		if (renderManager.getCameraManager().getViewport() != null){
+			renderManager.getCameraManager().getViewport().update(width, height);
+			renderManager.getCameraManager().getViewport().apply();
+		}
 	}
 
 	@Override
 	public void render () {
 		renderManager.requests(engine);
+		renderManager.viewportAdjust(engine);
 		renderManager.render(engine);
 	}
 	
