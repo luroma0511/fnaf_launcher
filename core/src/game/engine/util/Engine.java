@@ -1,10 +1,14 @@
 package game.engine.util;
 
+import game.api.DiscordRichPresenceAPI;
 import game.deluxe.state.StateManager;
 
 public class Engine {
+    private final DiscordRichPresenceAPI discordRichPresenceAPI;
+
     private final StateManager stateManager;
     private SpriteRequest spriteRequest;
+    private TextureRequest textureRequest;
     private float deltaTime;
     private long previousTime;
     private boolean lock;
@@ -12,6 +16,8 @@ public class Engine {
 
     public Engine(){
         stateManager = new StateManager();
+        discordRichPresenceAPI = new DiscordRichPresenceAPI();
+        discordRichPresenceAPI.startThread();
     }
 
     public void update(){
@@ -24,6 +30,16 @@ public class Engine {
         pressed = false;
     }
 
+    public TextureRequest createTextureRequest(TextureRequest currentRequest, String name){
+        if (currentRequest == null){
+            return new TextureRequest(name);
+        }
+        TextureRequest tempRequest = currentRequest;
+        currentRequest = new TextureRequest(name);
+        currentRequest.setNext(tempRequest);
+        return currentRequest;
+    }
+
     public SpriteRequest createSpriteRequest(SpriteRequest currentRequest, String name, short width){
         if (currentRequest == null){
             return new SpriteRequest(name, width);
@@ -34,12 +50,20 @@ public class Engine {
         return currentRequest;
     }
 
+    public TextureRequest getTextureRequest() {
+        return textureRequest;
+    }
+
     public SpriteRequest getSpriteRequest(){
         return spriteRequest;
     }
 
     public void setSpriteRequest(SpriteRequest request){
         spriteRequest = request;
+    }
+
+    public void setTextureRequest(TextureRequest request){
+        textureRequest = request;
     }
 
     public StateManager getStateManager() {

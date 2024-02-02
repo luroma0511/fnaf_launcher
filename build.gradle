@@ -60,6 +60,7 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
         api "com.badlogicgames.gdx-controllers:gdx-controllers-core:$gdxControllersVersion"
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        api 'club.minnced:java-discord-rpc:2.0.1'
         implementation "com.badlogicgames.gdx-video:gdx-video:$gdxVideo";
         
     }

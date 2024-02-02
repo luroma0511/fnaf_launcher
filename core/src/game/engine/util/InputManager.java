@@ -11,18 +11,20 @@ public class InputManager extends InputAdapter {
 
     }
 
-    public void readjust(){
-        if (x > 1280){
-            x = 1280;
-        } else if (x < 0){
-            x = 0;
-        }
+    public boolean mouseOver(short x, short y, short width, short height){
+        return mouseOverExact(x, y, (short) (x + width), (short) (y + height));
+    }
 
-        if (y > 720){
-            y = 720;
-        } else if (y < 0){
-            y = 0;
-        }
+    public boolean mouseOverExact(short x, short y, short x2, short y2){
+        return this.x >= x && this.x <= x2 && this.y >= y && this.y <= y2;
+    }
+
+    public void readjust(){
+        x = Math.min(x, 1280);
+        x = Math.max(x, 0);
+
+        y = Math.min(y, 720);
+        y = Math.max(y, 0);
     }
 
     public float getX() {

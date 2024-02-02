@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SpriteManager {
-    public Map<String, SpriteSheet> spriteSheetMap;
+    private final Map<String, SpriteSheet> spriteSheetMap;
 
     public SpriteManager(){
         spriteSheetMap = new HashMap<>();
@@ -15,6 +15,10 @@ public class SpriteManager {
         if (spriteSheetMap.containsKey(path)) return;
         SpriteSheet sheet = new SpriteSheet(path, spriteRequest.getWidth());
         spriteSheetMap.put(path, sheet);
+    }
+
+    public Map<String, SpriteSheet> getSpriteSheetMap() {
+        return spriteSheetMap;
     }
 
     public void dispose(){

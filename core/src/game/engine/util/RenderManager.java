@@ -1,7 +1,7 @@
 package game.engine.util;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector3;
@@ -12,10 +12,12 @@ public class RenderManager {
     private final ShapeRenderer shapeRenderer;
     private final FontManager fontManager;
     private final SpriteManager spriteManager;
+    private final TextureManager textureManager;
     private final VideoManager videoManager;
     private final FrameBufferManager frameBufferManager;
     private final CameraManager cameraManager;
     private final InputManager inputManager;
+    private final GlyphLayout layout;
 
     private final short width;
     private final short height;
@@ -27,17 +29,24 @@ public class RenderManager {
         shapeRenderer = new ShapeRenderer();
         fontManager = new FontManager();
         spriteManager = new SpriteManager();
+        textureManager = new TextureManager();
         videoManager = new VideoManager();
         frameBufferManager = new FrameBufferManager();
         frameBufferManager.createShape(batch, shapeRenderer);
         cameraManager = new CameraManager(width, height);
         inputManager = new InputManager();
+        layout = new GlyphLayout();
     }
 
     public void requests(Engine engine){
         while(engine.getSpriteRequest() != null){
             spriteManager.create(engine.getSpriteRequest());
             engine.setSpriteRequest(engine.getSpriteRequest().getNext());
+        }
+
+        while (engine.getTextureRequest() != null){
+            textureManager.create(engine.getTextureRequest());
+            engine.setTextureRequest(engine.getTextureRequest().getNext());
         }
     }
 
@@ -97,6 +106,10 @@ public class RenderManager {
         return fontManager;
     }
 
+    public TextureManager getTextureManager() {
+        return textureManager;
+    }
+
     public SpriteManager getSpriteManager() {
         return spriteManager;
     }
@@ -107,6 +120,10 @@ public class RenderManager {
 
     public FrameBufferManager getFrameBufferManager() {
         return frameBufferManager;
+    }
+
+    public GlyphLayout getLayout() {
+        return layout;
     }
 
     public InputManager getInputManager() {
