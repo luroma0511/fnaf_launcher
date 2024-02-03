@@ -1,4 +1,4 @@
-package game.deluxe.enemy;
+package game.deluxe.data;
 
 public class EnemyAI {
     private boolean shadowNight_Rat;

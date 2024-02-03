@@ -4,7 +4,8 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 
-import game.deluxe.enemy.EnemyAI;
+import game.deluxe.data.ChallengesData;
+import game.deluxe.data.EnemyAI;
 import game.engine.util.Engine;
 import game.engine.util.RenderManager;
 
@@ -13,6 +14,7 @@ public class Menu {
     private float staticAnimation;
     private boolean loaded;
     private final EnemyAI enemyAI;
+    private final ChallengesData challengesData;
 
     private float characterPanX;
     private float characterPanY;
@@ -22,6 +24,7 @@ public class Menu {
 
     public Menu(){
         enemyAI = new EnemyAI();
+        challengesData = new ChallengesData();
     }
 
     public void update(Engine engine){
@@ -29,7 +32,9 @@ public class Menu {
             engine.setSpriteRequest(engine.createSpriteRequest(engine.getSpriteRequest(), "Static/Static", (short) 1024));
             engine.setSpriteRequest(engine.createSpriteRequest(engine.getSpriteRequest(), "Static/DarkStatic", (short) 1024));
             engine.setSpriteRequest(engine.createSpriteRequest(engine.getSpriteRequest(), "menu/buttons", (short) 200));
+            engine.setSpriteRequest(engine.createSpriteRequest(engine.getSpriteRequest(), "menu/option", (short) 84));
             engine.setTextureRequest(engine.createTextureRequest(engine.getTextureRequest(), "menu/window"));
+            engine.setTextureRequest(engine.createTextureRequest(engine.getTextureRequest(), "menu/scroll_bar"));
             engine.setTextureRequest(engine.createTextureRequest(engine.getTextureRequest(), "menu/shadow_rat"));
             engine.setTextureRequest(engine.createTextureRequest(engine.getTextureRequest(), "menu/shadow_cat"));
             loaded = true;
@@ -77,21 +82,8 @@ public class Menu {
         renderManager.getBatch().flush();
         renderManager.getBatch().setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_DST_ALPHA);
 
-        if (Float.isNaN(characterPanX)){
-            characterPanX = 0;
-        }
-
-        float targetX = (renderManager.getInputManager().getX() - (float) renderManager.getWidth() / 2) * 0.1f;
-        float distanceX = (characterPanX - targetX) / 4;
-        characterPanX -= distanceX;
-
-        if (Float.isNaN(characterPanY)){
-            characterPanY = 0;
-        }
-
-        float targetY = (renderManager.getInputManager().getY() - (float) renderManager.getHeight() / 2) * 0.1f;
-        float distanceY = (characterPanY - targetY) / 4;
-        characterPanY -= distanceY;
+        characterPanX = characterPan(characterPanX, renderManager.getInputManager().getX(), renderManager.getWidth());
+        characterPanY = characterPan(characterPanY, renderManager.getInputManager().getY(), renderManager.getHeight());
 
         Sprite ratSprite = new Sprite(renderManager.getTextureManager().getTextureMap().get("menu/shadow_rat"));
         ratSprite.setSize(553, 553);
@@ -102,7 +94,7 @@ public class Menu {
         Sprite catSprite = new Sprite(renderManager.getTextureManager().getTextureMap().get("menu/shadow_cat"));
         catSprite.setSize(374.5f, 553);
         catSprite.setColor(1, 1, 1, 0.65f);
-        catSprite.setPosition(725 - characterPanX, 100 - characterPanY);
+        catSprite.setPosition(Math.max(725, 725 - catSprite.getWidth()) - characterPanX, 100 - characterPanY);
         catSprite.draw(renderManager.getBatch());
 
         renderManager.getBatch().flush();
@@ -132,6 +124,8 @@ public class Menu {
         candysFont.draw(renderManager.getBatch(), renderManager.getLayout(),
                 (float) renderManager.getWidth() / 2 - renderManager.getLayout().width / 2, 696);
 
+        optionsAlpha = 1;
+
         sprite = new Sprite(renderManager.getTextureManager().getTextureMap().get("menu/window"));
         sprite.setColor(1, 1, 1, optionsAlpha);
         sprite.setPosition(190, 144);
@@ -142,6 +136,45 @@ public class Menu {
         candysFont.draw(renderManager.getBatch(), renderManager.getLayout(),
                 (float) renderManager.getWidth() / 2 - renderManager.getLayout().width / 2, 629);
 
+        for (int i = 0; i < 4; i++) {
+            sprite = new Sprite(renderManager.getSpriteManager().getSpriteSheetMap().get("menu/option").getRegion((byte) 0));
+            sprite.setPosition(236, 470 - 98 * i);
+            sprite.draw(renderManager.getBatch());
+
+            if (i < 2) {
+                sprite = new Sprite(renderManager.getTextureManager().getTextureMap().get("menu/scroll_bar"));
+                if (!((i == 0 && challengesData.isLaserPointer()) || challengesData.isHardCassette())) {
+                    sprite.setColor(1, 1, 1, 0.25f);
+                }
+                sprite.setPosition(680, 496 - 98 * i);
+                sprite.draw(renderManager.getBatch());
+
+            }
+
+            if (i == 0){
+                renderManager.getLayout().setText(candysFont, "Laser Pointer");
+            } else if (i == 1){
+                renderManager.getLayout().setText(candysFont, "Hard Cassette");
+            } else if (i == 2){
+                renderManager.getLayout().setText(candysFont, "Classic Cat");
+            } else {
+                renderManager.getLayout().setText(candysFont, "Free Scroll");
+            }
+            candysFont.draw(renderManager.getBatch(), renderManager.getLayout(), 336, 525 - 98 * i);
+        }
+
+        sprite = new Sprite(renderManager.getSpriteManager().getSpriteSheetMap().get("menu/option").getRegion((byte) 2));
+        short distance = 354;
+        for (byte i = 0; i < 2; i++){
+            if ((i == 0 && challengesData.isLaserPointer()) || challengesData.isHardCassette()) {
+                sprite.setColor(1, 1, 1, 1);
+            } else {
+                sprite.setColor(1, 1, 1, 0.25f);
+            }
+            sprite.setPosition(638, 470 - 98 * i);
+            sprite.draw(renderManager.getBatch());
+        }
+
         captionFont.draw(renderManager.getBatch(),
                 "Mouse: " + (int) renderManager.getInputManager().getX() + " | " + (int) renderManager.getInputManager().getY(),
                 24, 696);
@@ -149,6 +182,13 @@ public class Menu {
         captionFont.draw(renderManager.getBatch(),
                 "Panning: " + characterPanX + " | " + characterPanY,
                 24, 666);
+    }
+
+    private float characterPan(float value, float mouseCoord, short length){
+        if (Float.isNaN(mouseCoord)) return value;
+        float target = (mouseCoord - (float) length / 2) * 0.1f;
+        float distance = (value - target) / 4;
+        return value - distance;
     }
 
     private void nightSetColor(Sprite sprite, float divider){
