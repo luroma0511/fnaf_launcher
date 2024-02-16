@@ -1,23 +1,29 @@
 package game.deluxe.state;
 
+import game.deluxe.data.GameData;
+import game.deluxe.state.Game.Game;
+import game.deluxe.state.Menu.Menu;
 import game.engine.util.Engine;
+import game.engine.util.SoundManager;
 
 public class StateManager {
     private final Game game;
     private final Menu menu;
-    private byte gameState;
+    private final GameData gameData;
+    private int gameState;
 
     public StateManager(){
         game = new Game();
         menu = new Menu();
+        gameData = new GameData();
         gameState = 0;
     }
 
-    public void update(Engine engine){
+    public void update(Engine engine, SoundManager soundManager){
         if (gameState == 0){
-            menu.update(engine);
+            menu.update(engine, soundManager);
         } else {
-            game.update(engine);
+            game.update(engine, gameData);
         }
     }
 
@@ -29,7 +35,7 @@ public class StateManager {
         return menu;
     }
 
-    public byte getGameState() {
+    public int getGameState() {
         return gameState;
     }
 

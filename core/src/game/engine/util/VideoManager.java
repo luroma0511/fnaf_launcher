@@ -10,21 +10,11 @@ import java.io.FileNotFoundException;
 
 public class VideoManager {
     private final VideoPlayer videoPlayer;
-    private boolean show;
     private String request;
 
     public VideoManager(){
         videoPlayer = VideoPlayerCreator.createVideoPlayer();
-        videoPlayer.setOnCompletionListener(file -> {
-            show = false;
-            dispose();
-        });
-    }
-
-    public void request(){
-        if (request == null) return;
-        play(request);
-        request = null;
+        videoPlayer.setOnCompletionListener(file -> dispose());
     }
 
     public void setRequest(String path){
@@ -37,15 +27,18 @@ public class VideoManager {
         } catch (FileNotFoundException e){
             Gdx.app.error("gdx-video", "Something is wrong!");
         }
-        show = true;
     }
 
-    public void updateRender(SpriteBatch batch){
-        if (!show) return;
+    public void updateRender(SpriteBatch batch, int width, int height){
+        if (request != null){
+            play(request);
+            request = null;
+        }
+        if (!videoPlayer.isPlaying()) return;
         videoPlayer.update();
         Texture video = videoPlayer.getTexture();
         if (video != null){
-            batch.draw(video, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            batch.draw(video, 0, 0, width, height);
         }
     }
 

@@ -8,23 +8,42 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import game.engine.util.Engine;
+import game.engine.util.InputManager;
 import game.engine.util.RenderManager;
+import game.engine.util.SoundManager;
 
 public class Candys3Deluxe extends ApplicationAdapter {
 	private RenderManager renderManager;
-	private final ScheduledExecutorService engineTimer;
-	private final Engine engine;
+	private SoundManager soundManager;
+	private ScheduledExecutorService engineTimer;
+	private Engine engine;
+	public static int width;
+	public static int height;
 
-	public Candys3Deluxe(){
-		engine = new Engine();
-		engineTimer = Executors.newSingleThreadScheduledExecutor();
-		engineTimer.scheduleAtFixedRate(engine::update, 0, 16, TimeUnit.MILLISECONDS);
+	public Candys3Deluxe(int width, int height){
+		Candys3Deluxe.width = width;
+		Candys3Deluxe.height = height;
 	}
 
 	@Override
 	public void create(){
-		renderManager = new RenderManager((short) Gdx.graphics.getWidth(), (short) Gdx.graphics.getHeight());
-		Gdx.input.setInputProcessor(renderManager.getInputManager());
+		InputManager inputManager = new InputManager();
+		Gdx.input.setInputProcessor(inputManager);
+		renderManager = new RenderManager(width, height);
+		renderManager.setInputManager(inputManager);
+		soundManager = new SoundManager();
+		engine = new Engine();
+		engine.setInputManager(inputManager);
+		engine.getRequest().addImageRequest("Static/Static");
+		engine.getRequest().addImageRequest("menu/button");
+		engine.getRequest().addImageRequest("menu/window");
+		engine.getRequest().addImageRequest("menu/option");
+		engine.getRequest().addImageRequest("menu/scroll_bar");
+		engine.getRequest().addImageRequest("menu/shadow_rat");
+		engine.getRequest().addImageRequest("menu/shadow_cat");
+		engine.getRequest().addSoundRequest("menu");
+		engineTimer = Executors.newSingleThreadScheduledExecutor();
+		engineTimer.scheduleAtFixedRate(() -> engine.update(soundManager), 0, 16, TimeUnit.MILLISECONDS);
 	}
 
 	@Override
@@ -37,14 +56,15 @@ public class Candys3Deluxe extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		renderManager.requests(engine);
-		renderManager.viewportAdjust(engine);
+		renderManager.requests(soundManager, engine.getRequest());
+		renderManager.viewportAdjust();
 		renderManager.render(engine);
 	}
 	
 	@Override
 	public void dispose () {
-		renderManager.dispose();
 		engineTimer.shutdown();
+		soundManager.dispose();
+		renderManager.dispose();
 	}
 }

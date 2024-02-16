@@ -13,6 +13,6 @@ public class DesktopLauncher {
 		config.setWindowedMode(1280, 720);
 		config.setResizable(false);
 		config.setTitle("Candys 3 Deluxe");
-		new Lwjgl3Application(new Candys3Deluxe(), config);
+		new Lwjgl3Application(new Candys3Deluxe(1280, 720), config);
 	}
 }

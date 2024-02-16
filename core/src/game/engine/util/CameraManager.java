@@ -9,17 +9,16 @@ public class CameraManager {
     private float x;
     private float y;
 
-    public CameraManager(short width, short height){
+    public CameraManager(int width, int height){
         final OrthographicCamera camera = new OrthographicCamera(width, height);
         camera.setToOrtho(false);
         viewport = new FitViewport(width, height, camera);
-        viewport.getCamera().translate((float) width / 2, (float) height / 2, 0);
+//        viewport.getCamera().translate((float) (width / 2), (float) (height / 2), 0);
         viewport.getCamera().update();
         viewport.update(width, height);
         viewport.apply();
     }
-
-    public void translate(short x, short y){
+    public void translate(float x, float y){
         viewport.getCamera().translate(x, y, 0);
         this.x += x;
         this.y += y;

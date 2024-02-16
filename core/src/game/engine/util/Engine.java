@@ -7,86 +7,59 @@ public class Engine {
     private final DiscordRichPresenceAPI discordRichPresenceAPI;
 
     private final StateManager stateManager;
-    private SpriteRequest spriteRequest;
-    private TextureRequest textureRequest;
+    private InputManager inputManager;
+    private final Request request;
     private float deltaTime;
     private long previousTime;
-    private boolean lock;
-    private boolean pressed;
 
     public Engine(){
         stateManager = new StateManager();
+        request = new Request();
         discordRichPresenceAPI = new DiscordRichPresenceAPI();
         discordRichPresenceAPI.startThread();
     }
 
-    public void update(){
-        if (pressed){
-            System.out.println("Passed");
-        }
-        stateManager.update(this);
+    public void update(SoundManager soundManager){
+        deltaTime = (float) (System.currentTimeMillis() - previousTime) / 1_000;
+        stateManager.update(this, soundManager);
         previousTime = System.currentTimeMillis();
-        lock = false;
-        pressed = false;
-    }
-
-    public TextureRequest createTextureRequest(TextureRequest currentRequest, String name){
-        if (currentRequest == null){
-            return new TextureRequest(name);
+        if (inputManager.pressed) {
+            inputManager.pressed = false;
         }
-        TextureRequest tempRequest = currentRequest;
-        currentRequest = new TextureRequest(name);
-        currentRequest.setNext(tempRequest);
-        return currentRequest;
+        inputManager.scrolled = false;
     }
 
-    public SpriteRequest createSpriteRequest(SpriteRequest currentRequest, String name, short width){
-        if (currentRequest == null){
-            return new SpriteRequest(name, width);
-        }
-        SpriteRequest tempRequest = currentRequest;
-        currentRequest = new SpriteRequest(name, width);
-        currentRequest.setNext(tempRequest);
-        return currentRequest;
+    public float increaseTimeValue(float value, float limit, float speed){
+        if (value >= limit) return value;
+        value += deltaTime * speed;
+        if (value > limit) value = limit;
+        return value;
     }
 
-    public TextureRequest getTextureRequest() {
-        return textureRequest;
+    public float decreaseTimeValue(float value, float limit, float speed) {
+        if (value <= limit) return value;
+        value -= deltaTime * speed;
+        if (value < limit) value = limit;
+        return value;
     }
 
-    public SpriteRequest getSpriteRequest(){
-        return spriteRequest;
-    }
-
-    public void setSpriteRequest(SpriteRequest request){
-        spriteRequest = request;
-    }
-
-    public void setTextureRequest(TextureRequest request){
-        textureRequest = request;
+    public float convertValue(float value){
+        return value * deltaTime;
     }
 
     public StateManager getStateManager() {
         return stateManager;
     }
 
-    public boolean isPressed() {
-        return pressed;
+    public InputManager getInputManager() {
+        return inputManager;
     }
 
-    public void setPressed(boolean pressed) {
-        this.pressed = pressed;
+    public void setInputManager(InputManager inputManager) {
+        this.inputManager = inputManager;
     }
 
-    private void updateDeltaTime(){
-        deltaTime = (float) (System.currentTimeMillis() - previousTime) / 1_000;
-    }
-
-    public float getDeltaTime() {
-        if (!lock) {
-            updateDeltaTime();
-            lock = true;
-        }
-        return deltaTime;
+    public Request getRequest() {
+        return request;
     }
 }
