@@ -3,7 +3,6 @@ package game.engine.util;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -30,7 +29,6 @@ public class FrameBufferManager {
         shapeRenderer.end();
         end(batch);
 
-        imageManager.add("rect", new TextureRegion(frameBuffer.getColorBufferTexture()));
         shapeRenderer.dispose();
     }
 
@@ -47,5 +45,9 @@ public class FrameBufferManager {
 
     public FrameBuffer newFrameBuffer(){
         return new FrameBuffer(Pixmap.Format.RGBA8888, 1280, 720, true);
+    }
+
+    public void dispose(){
+        frameBuffer.dispose();
     }
 }

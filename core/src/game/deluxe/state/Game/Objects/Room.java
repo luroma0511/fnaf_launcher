@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import game.deluxe.state.Game.Objects.Character.Characters;
 import game.engine.util.CameraManager;
 import game.engine.util.FrameBufferManager;
 import game.engine.util.ImageManager;
@@ -27,7 +28,7 @@ public class Room extends SpriteObject {
 
     }
 
-    public void render(RenderManager renderManager, Flashlight flashlight){
+    public void render(RenderManager renderManager, Characters characters, Flashlight flashlight){
         SpriteBatch batch = renderManager.getBatch();
         ImageManager imageManager = renderManager.getImageManager();
         FrameBufferManager frameBufferManager = renderManager.getFrameBufferManager();
@@ -39,7 +40,7 @@ public class Room extends SpriteObject {
 
                 if (state == 0){
                     batch.setColor(0, 0, 0, 1);
-                    batch.draw(imageManager.get("rect"), cameraManager.getX(), cameraManager.getY());
+                    batch.draw(frameBufferManager.getTexture(), cameraManager.getX(), cameraManager.getY());
                     renderManager.restoreColor(batch);
                     batch.draw(imageManager.get("game/room/FullRoomEffect"), 0, 0);
                     region = imageManager.get("game/Flashlight");
@@ -70,6 +71,7 @@ public class Room extends SpriteObject {
         }
 
         batch.draw(region, 0, 0);
+        characters.render(batch, imageManager);
 
         if (state != 2 && (int) frame == 0) {
             int srcFunc = batch.getBlendSrcFunc();

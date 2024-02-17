@@ -1,6 +1,11 @@
 package game.deluxe.state.Game.Objects.Character;
 
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+
+import game.deluxe.state.Game.Objects.Flashlight;
 import game.engine.util.Engine;
+import game.engine.util.ImageManager;
 import game.engine.util.Request;
 
 public class Characters {
@@ -26,15 +31,29 @@ public class Characters {
 //        if (characters.getShadowCat() != null) characters.getShadowCat().load(engine);
     }
 
-    public void update(Engine engine){
+    public void update(Engine engine, Flashlight flashlight){
         if (rat != null) {
-            rat.input(engine, engine.getInputManager().getX(), engine.getInputManager().getY());
+            rat.input(engine, flashlight.getX(), flashlight.getY());
             rat.update(engine);
         }
     }
 
-    public void render(){
+    public void render(SpriteBatch batch, ImageManager imageManager){
+        TextureRegion region;
+        if (rat != null){
+            rat.render();
+            if (rat.getDoor().getFrame() != 13) {
+                if (rat.getSide() == 0){
+                    region = imageManager.getRegion(getRat().getPath(), 130, (int) getRat().getDoor().getFrame());
+                } else if (rat.getSide() == 1){
+                    region = imageManager.getRegion(getRat().getPath(), 232, (int) getRat().getDoor().getFrame());
+                } else {
+                    region = imageManager.getRegion(getRat().getPath(), 105, (int) getRat().getDoor().getFrame());
+                }
 
+                batch.draw(region, getRat().getX(), getRat().getY());
+            }
+        }
     }
 
     public Rat getRat() {

@@ -54,6 +54,8 @@ public class ImageManager {
     }
 
     public void dispose(){
+        if (textures.isEmpty()) return;
         for (TextureRegion texture: textures.values()) texture.getTexture().dispose();
+        textures.clear();
     }
 }

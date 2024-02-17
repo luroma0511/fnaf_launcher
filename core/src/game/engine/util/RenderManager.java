@@ -29,9 +29,9 @@ public class RenderManager {
     }
 
     public void requests(SoundManager soundManager, Request request){
-        if (request.imagesIsEmpty() && request.soundsIsEmpty()) return;
+        if (!request.isStartLoading()) return;
         long time = System.currentTimeMillis();
-
+        imageManager.dispose();
         while (soundManager.loadingSounds(request)){
 
         }
@@ -39,6 +39,8 @@ public class RenderManager {
         while (imageManager.loadingTextures(request)){
 
         }
+        request.setStartLoading(false);
+        request.setNow(false);
         System.out.println("Time: " + (System.currentTimeMillis() - time) + "ms");
     }
 
@@ -53,9 +55,11 @@ public class RenderManager {
     }
 
     public void render(Engine engine){
+        if (engine.getRequest().isNow()) return;
+        int state = engine.getStateManager().getPreviousGameState();
         ScreenUtils.clear(0, 0, 0, 1);
 
-        if (engine.getStateManager().getGameState() == 0){
+        if (state == 0){
             engine.getStateManager().getMenu().render(this);
         } else {
             engine.getStateManager().getGame().render(this);
@@ -74,6 +78,7 @@ public class RenderManager {
         fontManager.dispose();
         imageManager.dispose();
         videoManager.dispose();
+        frameBufferManager.dispose();
     }
 
     public CameraManager getCameraManager() {

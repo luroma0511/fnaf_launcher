@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import game.engine.util.Engine;
 import game.engine.util.InputManager;
 import game.engine.util.RenderManager;
+import game.engine.util.Request;
 import game.engine.util.SoundManager;
 
 public class Candys3Deluxe extends ApplicationAdapter {
@@ -25,6 +26,10 @@ public class Candys3Deluxe extends ApplicationAdapter {
 		Candys3Deluxe.height = height;
 	}
 
+	public void requestSounds(Request request){
+		request.addSoundRequest("menu");
+	}
+
 	@Override
 	public void create(){
 		InputManager inputManager = new InputManager();
@@ -33,15 +38,8 @@ public class Candys3Deluxe extends ApplicationAdapter {
 		renderManager.setInputManager(inputManager);
 		soundManager = new SoundManager();
 		engine = new Engine();
+		requestSounds(engine.getRequest());
 		engine.setInputManager(inputManager);
-		engine.getRequest().addImageRequest("Static/Static");
-		engine.getRequest().addImageRequest("menu/button");
-		engine.getRequest().addImageRequest("menu/window");
-		engine.getRequest().addImageRequest("menu/option");
-		engine.getRequest().addImageRequest("menu/scroll_bar");
-		engine.getRequest().addImageRequest("menu/shadow_rat");
-		engine.getRequest().addImageRequest("menu/shadow_cat");
-		engine.getRequest().addSoundRequest("menu");
 		engineTimer = Executors.newSingleThreadScheduledExecutor();
 		engineTimer.scheduleAtFixedRate(() -> engine.update(soundManager), 0, 16, TimeUnit.MILLISECONDS);
 	}

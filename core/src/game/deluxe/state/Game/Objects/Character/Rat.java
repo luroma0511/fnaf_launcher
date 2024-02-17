@@ -23,14 +23,17 @@ public class Rat extends SpriteObject {
         this.ai = ai;
         random = new Random();
         hitbox = new Hitbox();
-        door = new Door(4, 4, 13, 30);
+        hitbox.initLeftDoor(481, 663);
+        hitbox.initMiddleDoor(1531, 696);
+        hitbox.initRightDoor(2525, 715);
+        door = new Door(4, 4);
         attack = new Attack(1, 1.15f, 0.225f, (byte) 0, 24, 30);
     }
 
     public void input(Engine engine, float mx, float my){
         switch (roomState){
             case 0:
-                door.input(hitbox, side, mx, my);
+                door.input(hitbox, mx, my);
                 break;
             case 1:
                 attack.input(engine);
@@ -41,18 +44,9 @@ public class Rat extends SpriteObject {
     public void update(Engine engine){
         switch (roomState){
             case 0:
-                if (doorUpdate(engine)) return;
-                if (!door.isDoorSignal() && door.getDoorCooldown() == 0) {
-                    if (door.getLeftDoorTimes() == 3) {
-                        side = (byte) (1 + random.nextInt(2));
-                    } else if (door.getMiddleDoorTimes() == 3) {
-                        side = (byte) (2 * random.nextInt(2));
-                    } else if (door.getRightDoorTimes() == 3) {
-                        side = (byte) random.nextInt(2);
-                    } else {
-                        side = (byte) random.nextInt(3);
-                    }
-                }
+                side = door.update(engine, hitbox, random, side);
+                if (!door.isTimeUp()) return;
+                transitionRoomState((byte) 1);
                 break;
             case 1:
                 if (roomUpdate(engine)) return;
@@ -60,12 +54,22 @@ public class Rat extends SpriteObject {
         }
     }
 
-    private boolean doorUpdate(Engine engine){
-        if (door.update(engine, hitbox)){
-            transitionRoomState((byte) 1);
-            return true;
+    public void render(){
+        if (roomState == 0) {
+            if (side == 0) {
+                setPath("game/Rat/Looking Away/Left");
+                setX(380);
+                setY(372);
+            } else if (side == 1) {
+                setPath("game/Rat/Looking Away/Middle");
+                setX(1411);
+                setY(382);
+            } else {
+                setPath("game/Rat/Looking Away/Right");
+                setX(2483);
+                setY(321);
+            }
         }
-        return false;
     }
 
     private boolean roomUpdate(Engine engine){
@@ -106,7 +110,15 @@ public class Rat extends SpriteObject {
     public void load(Request request){
         String prefix = "game/Rat/";
         for (String file: textures){
-            request.addImageRequest(prefix + file + ".png");
+            request.addImageRequest(prefix + file);
         }
+    }
+
+    public byte getSide() {
+        return side;
+    }
+
+    public Door getDoor() {
+        return door;
     }
 }

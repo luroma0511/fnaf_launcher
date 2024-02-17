@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import game.deluxe.data.ChallengesData;
+import game.deluxe.data.GameData;
 import game.deluxe.state.Menu.Objects.Button;
 import game.deluxe.state.Menu.Objects.Caption;
 import game.deluxe.state.Menu.Objects.MenuCharacter;
@@ -14,6 +15,7 @@ import game.engine.Candys3Deluxe;
 import game.engine.util.Engine;
 import game.engine.util.InputManager;
 import game.engine.util.RenderManager;
+import game.engine.util.Request;
 import game.engine.util.SoundManager;
 
 public class Menu {
@@ -42,8 +44,18 @@ public class Menu {
         caption = new Caption();
     }
 
-    public void update(Engine engine, SoundManager soundManager) {
-        if (!engine.getRequest().imagesIsEmpty()) return;
+    public void load(Request request){
+        request.addImageRequest("Static/Static");
+        request.addImageRequest("menu/button");
+        request.addImageRequest("menu/window");
+        request.addImageRequest("menu/option");
+        request.addImageRequest("menu/scroll_bar");
+        request.addImageRequest("menu/shadow_rat");
+        request.addImageRequest("menu/shadow_cat");
+    }
+
+    public void update(Engine engine, GameData gameData, SoundManager soundManager) {
+        if (engine.getRequest().isNow()) return;
 
         if (!playMenu){
             soundManager.play("menu");
@@ -69,8 +81,10 @@ public class Menu {
 
         playButton.update(engine);
         if (playButton.isSelected()){
+            gameData.writeData(nightSelection, shadowRat.getAi(), (byte) 0, (byte) 0, (byte) 0, (byte) 0);
             engine.getStateManager().setGameState((byte) 1);
             playButton.setSelected(false);
+            return;
         }
 
         caption.setActive(false);
@@ -223,8 +237,8 @@ public class Menu {
         InputManager inputManager = renderManager.getInputManager();
         renderManager.restoreColor(batch);
 
-        shadowRat.debugRender(batch, renderManager);
-        shadowCat.debugRender(batch, renderManager);
+//        shadowRat.debugRender(batch, renderManager);
+//        shadowCat.debugRender(batch, renderManager);
 
         debugFont.draw(batch,
                 "Mouse: " + (int) inputManager.getX() + " | " + (int) inputManager.getY(),

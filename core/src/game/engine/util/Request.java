@@ -8,10 +8,13 @@ public class Request {
     private final List<String> soundRequests;
     private boolean imagesEmptyLock;
     private boolean soundsEmptyLock;
+    private boolean now;
+    private boolean startLoading;
 
     public Request(){
         imageRequests = new ArrayList<>();
         soundRequests = new ArrayList<>();
+        now = true;
     }
 
     public void addImageRequest(String path){
@@ -52,5 +55,21 @@ public class Request {
             soundsEmptyLock = true;
         }
         return soundsEmptyLock;
+    }
+
+    public boolean isStartLoading() {
+        return startLoading;
+    }
+
+    public void setStartLoading(boolean startLoading) {
+        this.startLoading = startLoading;
+    }
+
+    public boolean isNow() {
+        return now;
+    }
+
+    public void setNow(boolean now) {
+        this.now = now;
     }
 }

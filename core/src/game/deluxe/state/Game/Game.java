@@ -15,7 +15,6 @@ import game.engine.util.RenderManager;
 
 public class Game {
     private byte nightState;
-    private boolean loaded;
     private boolean reset;
     private final Characters characters;
     private final Player player;
@@ -27,13 +26,15 @@ public class Game {
         player = new Player(2, 896, 152);
         flashlight = new Flashlight();
         room = new Room();
-        reset = true;
+        reset = false;
     }
 
-    public void reset(byte ratAI, byte catAI, byte vinnieAI, byte shadowRatAI, byte shadowCatAI, Request request){
+    public void reset(byte ratAI, byte catAI, byte vinnieAI, byte shadowRatAI, byte shadowCatAI){
         characters.reset(ratAI, catAI, vinnieAI, shadowRatAI, shadowCatAI);
-        if (loaded) return;
+    }
 
+    public void load(GameData gameData, Request request){
+        reset(gameData);
         characters.load(request);
         StringBuilder sb = new StringBuilder("game/");
         String prefix = sb.append("Buttons/").toString();
@@ -77,8 +78,6 @@ public class Game {
         request.addImageRequest(prefix + "BattleOverlay");
         request.addImageRequest(prefix + "Clock");
         request.addImageRequest(prefix + "Flashlight");
-
-        loaded = true;
     }
 
     public void setNightState(byte nightState){
@@ -87,27 +86,29 @@ public class Game {
 
     public void update(Engine engine, GameData gameData){
         if (reset) {
-            reset(gameData.getRatAI(),
-                    gameData.getCatAI(),
-                    gameData.getVinnieAI(),
-                    gameData.getShadowRatAI(),
-                    gameData.getShadowCatAI(),
-                    engine.getRequest());
-            player.reset();
+            reset(gameData);
             reset = false;
         }
-        if (!engine.getRequest().imagesIsEmpty()) return;
+        if (engine.getRequest().isNow()) return;
 
         player.update(engine, engine.getInputManager());
-        characters.update(engine);
+        characters.update(engine, flashlight);
+    }
+
+    public void reset(GameData gameData){
+        reset(gameData.getRatAI(),
+                gameData.getShadowCatAI(),
+                gameData.getVinnieAI(),
+                gameData.getShadowCatAI(),
+                gameData.getShadowCatAI());
+        player.reset();
     }
 
     public void quit(){
-        loaded = false;
+
     }
 
     public void render(RenderManager renderManager){
-        if (!loaded) return;
         SpriteBatch batch = renderManager.getBatch();
         player.adjustCamera(flashlight, renderManager.getInputManager(), renderManager.getCameraManager());
 
@@ -115,7 +116,7 @@ public class Game {
         batch.enableBlending();
         batch.begin();
 
-        room.render(renderManager, flashlight);
+        room.render(renderManager, characters, flashlight);
 
         debugRender(renderManager, renderManager.getFontManager().getDebugFont());
     }

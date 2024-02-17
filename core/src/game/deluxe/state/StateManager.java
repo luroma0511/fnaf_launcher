@@ -11,19 +11,29 @@ public class StateManager {
     private final Menu menu;
     private final GameData gameData;
     private int gameState;
+    private int previousGameState;
 
     public StateManager(){
         game = new Game();
         menu = new Menu();
         gameData = new GameData();
         gameState = 0;
+        previousGameState = -1;
     }
 
     public void update(Engine engine, SoundManager soundManager){
         if (gameState == 0){
-            menu.update(engine, soundManager);
+            menu.update(engine, gameData, soundManager);
         } else {
             game.update(engine, gameData);
+        }
+
+        if (previousGameState != gameState){
+            engine.getRequest().setNow(true);
+            if (gameState == 0) menu.load(engine.getRequest());
+            else if (gameState == 1) game.load(gameData, engine.getRequest());
+            previousGameState = gameState;
+            engine.getRequest().setStartLoading(true);
         }
     }
 
@@ -33,6 +43,10 @@ public class StateManager {
 
     public Menu getMenu() {
         return menu;
+    }
+
+    public int getPreviousGameState() {
+        return previousGameState;
     }
 
     public int getGameState() {

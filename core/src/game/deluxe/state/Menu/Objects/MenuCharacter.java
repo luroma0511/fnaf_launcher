@@ -48,7 +48,7 @@ public class MenuCharacter extends SpriteObject {
 
     public void debugRender(SpriteBatch batch, RenderManager renderManager){
         if (boxRegion == null){
-            boxRegion = new TextureRegion(renderManager.getImageManager().get("rect").getTexture());
+            boxRegion = new TextureRegion(renderManager.getFrameBufferManager().getTexture());
             boxRegion.setRegion(0, 0, (int) (getWidth() / 2), (int) (getHeight() / 1.5f));
         }
         batch.setColor(1, 0, 0, 0.5f);

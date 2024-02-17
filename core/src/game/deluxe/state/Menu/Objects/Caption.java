@@ -48,7 +48,7 @@ public class Caption extends SpriteObject {
     public void render(SpriteBatch batch, RenderManager renderManager, BitmapFont captionFont){
         if (getAlpha() == 0) return;
         if (boxRegion == null){
-            boxRegion = new TextureRegion(renderManager.getImageManager().get("rect").getTexture());
+            boxRegion = new TextureRegion(renderManager.getFrameBufferManager().getTexture());
         }
         if (getWidth() == 0) {
             for (String caption : captions) {
