@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
-from retrieve import Jars
+from res.retrieve import Jars
 from threading import Thread
 from time import sleep
-import execute
+import res.execute
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.jar_load = False
         window_width = 1280
         window_height = 720
         screen_width = self.winfo_screenwidth()
@@ -25,6 +26,10 @@ class App(tk.Tk):
     def __version_update_options__(self, files):
         self.options = files
 
+    def __close__(self):
+        self.jar_load = True
+        self.destroy()
+
     def __version_options__(self):
         self.value = tk.StringVar()
         self.value.set("Select version")
@@ -34,21 +39,25 @@ class App(tk.Tk):
         drop.pack()
         drop.bind("<<ComboboxSelected>>", lambda e:  self.update_attribute(drop.get()))
 
+        self.B = tk.Button(self, text ="Play", command=self.__close__)
+        self.B.place(x=200, y=200)
+        self.B.pack()
+
     def __is_tk_app_running__(self):
         try:
             return self.winfo_viewable()
         except:
             return False
 
-def __load_jars__(app):
+def __load_jars__(app: App):
     jars = Jars()
     app.__version_update_options__(jars.files)
     app.__version_options__()
     while (app.__is_tk_app_running__()):
         sleep(0.05)
     
-    # print("Execute the ending operations")
-    execute.__execute__(app.option)
+    if (app.jar_load):
+        res.execute.__execute__(app.option)
 
 app = App()
 thread = Thread(target=__load_jars__, args=(app,), daemon=True)
