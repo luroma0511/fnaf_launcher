@@ -1,3 +1,4 @@
-java
-logs
+res/game/java
+res/logs
 __pycache__
+res/__pycache__
