@@ -3,7 +3,7 @@ import os
 import subprocess
 
 def __execute__(version):
-    new_directory = f"{os.getcwd()}/res/game"
+    new_directory = f"{os.getcwd()}/res"
     os.chdir(new_directory)
 
     print(os.getcwd())

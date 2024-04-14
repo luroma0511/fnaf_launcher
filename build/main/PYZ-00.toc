@@ -163,9 +163,6 @@
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.752.0_x64__qbz5n2kfra8p0\\Lib\\email\\utils.py',
    'PYMODULE'),
-  ('execute',
-   'C:\\Users\\lurom\\Documents\\candys3deluxe\\execute.py',
-   'PYMODULE'),
   ('fnmatch',
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.752.0_x64__qbz5n2kfra8p0\\Lib\\fnmatch.py',
@@ -326,8 +323,12 @@
    'C:\\Program '
    'Files\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_3.12.752.0_x64__qbz5n2kfra8p0\\Lib\\random.py',
    'PYMODULE'),
-  ('retrieve',
-   'C:\\Users\\lurom\\Documents\\candys3deluxe\\retrieve.py',
+  ('res', '-', 'PYMODULE'),
+  ('res.execute',
+   'C:\\Users\\lurom\\Documents\\candys3deluxe\\res\\execute.py',
+   'PYMODULE'),
+  ('res.retrieve',
+   'C:\\Users\\lurom\\Documents\\candys3deluxe\\res\\retrieve.py',
    'PYMODULE'),
   ('selectors',
    'C:\\Program '
