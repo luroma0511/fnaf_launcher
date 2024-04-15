@@ -2,6 +2,7 @@ package core.state.Game;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -49,26 +50,25 @@ public class Game {
         room.load();
         StringBuilder sb = new StringBuilder("game/");
         String prefix = sb.append("Buttons/").toString();
-        ImageManager.add(prefix + "TapePlayer");
-        ImageManager.add(prefix + "TapePlayerBack");
-        ImageManager.add(prefix + "UnderBed");
-        ImageManager.add(prefix + "UnderBedBack");
+        Pixmap.Format fullFormat = Pixmap.Format.RGBA8888;
+        Pixmap.Format alphaFormat = Pixmap.Format.Alpha;
+        ImageManager.add(prefix + "TapePlayer", fullFormat);
+        ImageManager.add(prefix + "TapePlayerBack", fullFormat);
+        ImageManager.add(prefix + "UnderBed", fullFormat);
+        ImageManager.add(prefix + "UnderBedBack", fullFormat);
 
         sb.delete(sb.indexOf("/") + 1, sb.length());
         prefix = sb.append("room/").toString();
-        ImageManager.add(prefix + "Room");
-        ImageManager.add(prefix + "FullRoomEffect");
+        ImageManager.add(prefix + "Room", fullFormat);
+        ImageManager.add(prefix + "FullRoomEffect", alphaFormat);
         ImageManager.add(prefix + "UnderBed");
-        ImageManager.add(prefix + "UnderBedEffect");
+        ImageManager.add(prefix + "UnderBedEffect", alphaFormat);
 
         sb.delete(sb.indexOf("/") + 1, sb.length());
         prefix = sb.append("Tape/").toString();
         ImageManager.add(prefix + "Tape");
         prefix = sb.append("Buttons/").toString();
-        ImageManager.add(prefix + "Buttons");
-        ImageManager.add(prefix + "PlayButton");
-        ImageManager.add(prefix + "StopButton");
-        ImageManager.add(prefix + "RewindButton");
+        ImageManager.add(prefix + "Buttons", fullFormat);
 
         sb.delete(sb.indexOf("/") + 1, sb.length());
         prefix = sb.append("Moving/").toString();
@@ -83,7 +83,7 @@ public class Game {
         prefix = sb.delete(sb.indexOf("/") + 1, sb.length()).toString();
         ImageManager.add(prefix + "BattleOverlay");
         ImageManager.add(prefix + "Clock");
-        ImageManager.add(prefix + "Flashlight");
+        ImageManager.add(prefix + "Flashlight", alphaFormat);
 
         SoundManager.addGameSounds();
     }

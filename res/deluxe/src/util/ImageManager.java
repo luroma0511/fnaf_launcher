@@ -10,22 +10,20 @@ import org.lwjgl.stb.STBImage;
 
 import java.nio.ByteBuffer;
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class ImageManager {
     private static final Map<String, TextureRegion> images = new HashMap<>();
-    static final Queue<String> queue = new LinkedList<>();
+    static final Queue<ImageData> queue = new LinkedList<>();
 
     public static void loadImages(){
         ExecutorService executorService = Executors.newFixedThreadPool(4);
         final Map<String, Pixmap> pixmaps = new HashMap<>();
-        for (String file: queue) {
+        for (ImageData imageData: queue) {
             executorService.submit(() -> {
-                Pixmap pixmap = loadImageBuffer(file);
-                pixmaps.put(file, pixmap);
+                Pixmap pixmap = loadImageBuffer(imageData);
+                pixmaps.put(imageData.getFile(), pixmap);
             });
         }
         executorService.shutdown();
@@ -35,7 +33,8 @@ public class ImageManager {
             } catch (InterruptedException e){
                 e.printStackTrace();
             }
-            for (String key : queue) {
+            for (ImageData imageData: queue) {
+                String key = imageData.getFile();
                 if (!pixmaps.containsKey(key)) continue;
                 Pixmap pixmap = pixmaps.get(key);
                 pixmaps.remove(key);
@@ -48,13 +47,17 @@ public class ImageManager {
         queue.clear();
     }
 
-    public static Pixmap loadImageBuffer(String path){
+    public static Pixmap loadImageBuffer(ImageData imageData){
+        return loadImageBuffer(imageData.getFile(), imageData.getFormat());
+    }
+
+    public static Pixmap loadImageBuffer(String path, Pixmap.Format format){
         FileHandle file = Gdx.files.local("assets/" + path + ".png");
         int[] width = new int[1];
         int[] height = new int[1];
         ByteBuffer bytes = STBImage.stbi_load(file.path(), width, height, new int[1], 0);
         if (bytes == null) throw new RuntimeException("Image not loaded: " + file.path());
-        Pixmap pixmap = new Pixmap(width[0], height[0], Pixmap.Format.RGBA8888);
+        Pixmap pixmap = new Pixmap(width[0], height[0], format);
         pixmap.setPixels(bytes);
         STBImage.stbi_image_free(bytes);
         return pixmap;
@@ -74,7 +77,12 @@ public class ImageManager {
     }
 
     public static void add(String path){
-        queue.add(path);
+        add(path, Pixmap.Format.RGB888);
+    }
+
+    public static void add(String path, Pixmap.Format format){
+        ImageData imageData = new ImageData(path, format);
+        queue.add(imageData);
     }
 
     public static TextureRegion get(String path){
