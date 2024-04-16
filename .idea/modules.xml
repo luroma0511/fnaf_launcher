@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/candys3deluxe.iml" filepath="$PROJECT_DIR$/.idea/candys3deluxe.iml" />
       <module fileurl="file://$PROJECT_DIR$/res/candys3/deluxe/deluxe.iml" filepath="$PROJECT_DIR$/res/candys3/deluxe/deluxe.iml" />
       <module fileurl="file://$PROJECT_DIR$/res/discord/discord.iml" filepath="$PROJECT_DIR$/res/discord/discord.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/fnaf_launcher.iml" filepath="$PROJECT_DIR$/.idea/fnaf_launcher.iml" />
     </modules>
   </component>
 </project>
