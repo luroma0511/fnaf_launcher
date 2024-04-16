@@ -19,7 +19,8 @@ public class ImageManager {
     static final Queue<String> queue = new LinkedList<>();
 
     public static void loadImages(){
-        ExecutorService executorService = Executors.newFixedThreadPool(4);
+        int threadsAvailable = Runtime.getRuntime().availableProcessors();
+        ExecutorService executorService = Executors.newFixedThreadPool(threadsAvailable);
         final Map<String, Pixmap> pixmaps = new HashMap<>();
         for (String key: queue) {
             executorService.submit(() -> {
