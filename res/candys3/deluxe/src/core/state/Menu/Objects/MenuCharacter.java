@@ -25,12 +25,12 @@ public class MenuCharacter extends SpriteObject {
             setX(getX() - characterPan(getX(), initX, inputManager.getX(), Candys3Deluxe.width));
             setY(getY() - characterPan(getY(), initY, inputManager.getY(), Candys3Deluxe.height));
         }
-        boolean hovered = mouseOver(true) && focus;
+        boolean hovered = mouseOver(inputManager, true) && focus;
         if (!hovered) return;
         caption.setID(captionID);
         caption.setActive(true);
         if (inputManager.getScrolled() == 0) return;
-        ai += inputManager.getScrolled();
+        ai += (byte) inputManager.getScrolled();
         if (ai < 0) ai = 0;
         if (ai > 20) ai = 20;
     }

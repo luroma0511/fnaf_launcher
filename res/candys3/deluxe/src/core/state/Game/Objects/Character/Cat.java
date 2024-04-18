@@ -1,5 +1,6 @@
 package core.state.Game.Objects.Character;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import core.state.Game.Objects.Character.Attributes.*;
@@ -49,9 +50,11 @@ public class Cat extends SpriteObject {
         boolean hovered = hitbox.isHovered(mx, my);
         boolean imageHovered = this.mouseOverWithPanning(mx, my);
         if (!catPlay){
-            SoundManager.play("cat");
-            SoundManager.setVolume("cat", 0);
-            SoundManager.setLoop("cat", true);
+            for (String catValue: Arrays.asList("cat", "catLeft", "catRight")) {
+                SoundManager.play(catValue);
+                SoundManager.setVolume(catValue, 0);
+                SoundManager.setLoop(catValue, true);
+            }
             catPlay = true;
         }
         switch (roomState){
@@ -111,6 +114,8 @@ public class Cat extends SpriteObject {
                     else bedSide.setPhase(3);
                     if (bedPhase == bedSide.getPhase()) change = false;
                     if (change) changePath();
+                    if (side == 0) SoundManager.setVolume("catLeft", (float) (bedSide.getFrame() - 23) / 75);
+                    else SoundManager.setVolume("catRight", (float) (bedSide.getFrame() - 23) / 75);
                 }
                 if (bedSide.isSignal()) {
                     if (side == 0) {
@@ -324,7 +329,7 @@ public class Cat extends SpriteObject {
         if (roomState == 0){
             bedSide.reset();
         } else if (roomState == 1){
-            attack.reset(1.15f, 0.0375f, 12, (byte) 0, (byte) 0, 26);
+            attack.reset(1.15f, 0.0375f, 7, (byte) 0, (byte) 0, 26);
             changePath();
         } else if (roomState == 2){
             bed.reset(15, 1.15f);

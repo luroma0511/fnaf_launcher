@@ -1,7 +1,5 @@
 package util;
 
-import core.Candys3Deluxe;
-
 public abstract class SpriteObject {
     private float x;
     private float y;
@@ -25,10 +23,10 @@ public abstract class SpriteObject {
         sb.append(path);
     }
 
-    public boolean mouseOver(boolean smaller){
-        if (smaller) return Candys3Deluxe.inputManager.mouseOver(x + width / 4, y + height / 4,
+    public boolean mouseOver(InputManager inputManager, boolean smaller){
+        if (smaller) return inputManager.mouseOver(x + width / 4, y + height / 4,
                 width / 2, height / 1.5f);
-        return Candys3Deluxe.inputManager.mouseOver(x, y, width, height);
+        return inputManager.mouseOver(x, y, width, height);
     }
 
     public boolean mouseOverWithPanning(float mx, float my){

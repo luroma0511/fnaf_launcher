@@ -17,7 +17,7 @@ public class Button extends SpriteObject {
     }
 
     public void update(Caption caption, InputManager inputManager, boolean alphaConfig, short captionID){
-        hovered = mouseOver(false);
+        hovered = mouseOver(inputManager, false);
         if (hovered && inputManager.isPressed()) selected = !selected;
         if (alphaConfig && (hovered || selected)) setAlpha(Time.increaseTimeValue(getAlpha(), 1, 8));
         else setAlpha(Time.decreaseTimeValue(getAlpha(), 0, 8));

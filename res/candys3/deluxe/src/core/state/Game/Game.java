@@ -22,7 +22,6 @@ public class Game {
     private float nightTime;
     private final float nightTimeLength;
     private StringBuilder nightTimeBuilder;
-    private boolean infiniteNight;
     private Characters characters;
     private final Player player;
     private final Flashlight flashlight;
@@ -103,12 +102,12 @@ public class Game {
             return;
         }
 
-        player.update(room);
+        player.update(flashlight, room);
         if (player.getY() == 0) room.input(Candys3Deluxe.inputManager.getX(), Candys3Deluxe.inputManager.getY(), player, Candys3Deluxe.inputManager.isPressed());
         room.update(player);
         characters.update(player, room, flashlight);
 
-        if (!infiniteNight && !Challenges.hardCassette && room.isMusicPlaying()) nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 2);
+        if (!Challenges.infiniteNight && !Challenges.hardCassette && room.isMusicPlaying()) nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 2);
         else nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 1);
         if (nightTime != nightTimeLength) return;
         Candys3Deluxe.stateManager.setState((byte) 2);
@@ -183,10 +182,10 @@ public class Game {
         GlyphLayout layout = FontManager.layout;
         Candys3Deluxe.candysFont.setColor(1, 1, 1, 1);
         nightTimeBuilder.delete(0, nightTimeBuilder.length());
-        if (infiniteNight) {
+        if (Challenges.infiniteNight) {
             int hour = (int) nightTime / 60;
             nightTimeBuilder.append(hour).append(":");
-            int tempTime = (int) nightTime - hour;
+            int tempTime = (int) (nightTime % 60);
             if (tempTime < 10) nightTimeBuilder.append(0);
             nightTimeBuilder.append(tempTime);
         } else {
@@ -221,6 +220,8 @@ public class Game {
             "attack",
             "bed",
             "cat",
+            "catLeft",
+            "catRight",
             "catEerie",
             "catPulse",
             "ambience",

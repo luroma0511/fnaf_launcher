@@ -25,6 +25,9 @@ public class Menu {
     private final Button hardCassetteButton;
     private final Button nightmareCandyButton;
     private final Button shadowChallengeButton;
+    private final Button freeScrollButton;
+    private final Button infiniteNightButton;
+    private final Button hellCastButton;
     private final Caption caption;
 
     private boolean shadow;
@@ -47,6 +50,9 @@ public class Menu {
         hardCassetteButton = new Button("Hard Cassette", 220, 372, 84, 84, 0);
         nightmareCandyButton = new Button("Old Candy", 220, 274, 84, 84, 0);
         shadowChallengeButton = new Button("The Shadow Cast", 220, 176, 84, 84, 0);
+        freeScrollButton = new Button("Free Scroll", 664, 470, 84, 84, 0);
+        infiniteNightButton = new Button("Infinite Night", 664, 372, 84, 84, 0);
+        hellCastButton = new Button("The Hell Cast", 664, 274, 84, 84, 0);
         caption = new Caption();
     }
 
@@ -95,9 +101,14 @@ public class Menu {
             Challenges.laserPointer = laserPointerButton.isSelected();
             hardCassetteButton.update(caption, inputManager, false, (short) 6);
             Challenges.hardCassette = hardCassetteButton.isSelected();
-            nightmareCandyButton.update(caption, inputManager, false, (short) 7);
+            nightmareCandyButton.update(caption, inputManager, false, (short) 9);
 //            Challenges.nightmareCandy = nightmareCandyButton.isSelected();
             shadowChallengeButton.update(inputManager, false);
+            freeScrollButton.update(caption, inputManager, false, (short) 7);
+            Challenges.freeScroll = freeScrollButton.isSelected();
+            infiniteNightButton.update(caption, inputManager, false, (short) 8);
+            Challenges.infiniteNight = infiniteNightButton.isSelected();
+            hellCastButton.update(caption, inputManager, false, (short) 9);
         }
         else if ((shadowChallengeButton.isSelected() && !shadow) || (!shadowChallengeButton.isSelected() && shadow)) {
             shadow = !shadow;
@@ -217,26 +228,31 @@ public class Menu {
                     (float) Candys3Deluxe.width / 2 - layout.width / 2, 629);
 
             byte fileIndex = -1;
-            for (byte i = 0; i < 4; i++){
+            for (byte i = 0; i < 7; i++){
                 Button button;
                 if (i == 0) button = laserPointerButton;
                 else if (i == 1) button = hardCassetteButton;
                 else if (i == 2) {
                     button = nightmareCandyButton;
                     fontAlpha(Candys3Deluxe.candysFont, optionWindowAlpha / 2, false);
-                } else {
+                } else if (i == 3){
                     button = shadowChallengeButton;
                     fontAlpha(Candys3Deluxe.candysFont, optionWindowAlpha, false);
+                } else if (i == 4) button = freeScrollButton;
+                else if (i == 5) button = infiniteNightButton;
+                else {
+                    button = hellCastButton;
+                    fontAlpha(Candys3Deluxe.candysFont, optionWindowAlpha / 2, false);
                 }
                 layout.setText(Candys3Deluxe.candysFont, button.getPath());
-                Candys3Deluxe.candysFont.draw(batch, layout, button.getX() + 100, 525 - 98 * i);
+                Candys3Deluxe.candysFont.draw(batch, layout, button.getX() + 100, button.getY() + 55);
 
                 if (fileIndex != 1 && button.isSelected()) fileIndex = 1;
                 else if (fileIndex != 0 && !button.isSelected()) fileIndex = 0;
                 region = ImageManager.getRegion("menu/option", 84, fileIndex);
-                if (i == 2) challengeButtonColor(batch, false, false, optionWindowAlpha / 2);
+                if (i == 2 || i == 6) challengeButtonColor(batch, false, false, optionWindowAlpha / 2);
                 else challengeButtonColor(batch, button.isHovered(), button.isSelected(), optionWindowAlpha);
-                batch.draw(region, button.getX(), 470 - 98 * i);
+                batch.draw(region, button.getX(), button.getY());
                 batch.setColor(1, 1, 1, 1);
             }
         }

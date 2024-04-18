@@ -297,7 +297,7 @@ public class Rat extends SpriteObject {
         if (roomState == 0){
             door.reset(5);
         } else if (roomState == 1){
-            attack.reset(1.15f, 0.1f, 12, (byte) 0, (byte) 0, 26);
+            attack.reset(1.15f, 0.1f, 7, (byte) 0, (byte) 0, 26);
             changePath();
         } else if (roomState == 2){
             bed.reset(10, 1.15f);

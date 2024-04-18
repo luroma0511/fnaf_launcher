@@ -19,25 +19,27 @@ public class ImageManager {
     static final Queue<String> queue = new LinkedList<>();
 
     public static void loadImages(){
-        int threadsAvailable = Runtime.getRuntime().availableProcessors();
-        ExecutorService executorService = Executors.newFixedThreadPool(threadsAvailable);
         final Map<String, Pixmap> pixmaps = new HashMap<>();
-        for (String key: queue) {
-            executorService.submit(() -> {
-                Pixmap pixmap = loadImageBuffer(key);
-                pixmaps.put(key, pixmap);
-            });
-        }
-        executorService.shutdown();
         try {
+            ExecutorService executorService = Executors.newFixedThreadPool(4);
+            for (String key : queue) {
+                executorService.submit(() -> {
+                    Pixmap pixmap = loadImageBuffer(key);
+                    pixmaps.put(key, pixmap);
+                });
+            }
+            executorService.shutdown();
             executorService.awaitTermination(15, TimeUnit.SECONDS);
-        } catch (InterruptedException e){
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
         for (String key: queue) {
-            if (!pixmaps.containsKey(key)) continue;
-            Pixmap pixmap = pixmaps.get(key);
-            pixmaps.remove(key);
+            Pixmap pixmap;
+            if (!pixmaps.containsKey(key)) pixmap = loadImageBuffer(key);
+            else {
+                pixmap = pixmaps.get(key);
+                pixmaps.remove(key);
+            }
             Texture texture = new Texture(pixmap);
             pixmap.dispose();
             TextureRegion region = new TextureRegion(texture);

@@ -11,7 +11,9 @@ public class Text {
         else if (ID == 4) path = "catShadowText";
         else if (ID == 5) path = "laserPointer";
         else if (ID == 6) path = "hardCassette";
-        else if (ID == 7) path = "nightmareCandy0";
+        else if (ID == 7) path = "freeScroll";
+        else if (ID == 8) path = "infiniteNight";
+        else if (ID == 9) path = "unavailable";
         else return "";
         return Gdx.files.local("text/" + path + ".txt").readString();
     }
