@@ -1,7 +1,5 @@
 package util;
 
-import core.data.Challenges;
-
 public class Hitbox extends SpriteObject {
     public float size;
 
@@ -10,16 +8,14 @@ public class Hitbox extends SpriteObject {
         this.size = size;
     }
 
-    public void setSize(float size){
-        if (Challenges.laserPointer) size *= 0.75f;
-        this.size = size;
+    public void setSize(float size, float multiplier){
+        this.size = size * multiplier;
     }
 
     public void setCoord(int x, int y){
         setX(x);
         setY(y);
-        if (x == 0 && y == 0) setSize(0);
-        else if (size == 0) setSize(100);
+        if (x == 0 && y == 0) size = 0;
     }
 
     public boolean isHovered(float mx, float my){

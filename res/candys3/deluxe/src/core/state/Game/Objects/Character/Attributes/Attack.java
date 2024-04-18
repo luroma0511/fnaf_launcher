@@ -56,7 +56,10 @@ public class Attack {
                 skip = false;
                 return true;
             }
-            if (attack) killTimer = Time.increaseTimeValue(killTimer, 2, 1);
+            if (attack) {
+                killTimer = Time.increaseTimeValue(killTimer, 2, 1);
+                attackTimer = Time.decreaseTimeValue(attackTimer, 0, 1);
+            }
             flashTime = Time.decreaseTimeValue(flashTime, 0, 1);
             return flashTime == 0 && attackTimer > 0;
         } else if (flashTime > 0 || attackTimer > 0) killTimer = Time.decreaseTimeValue(killTimer, 0, 1);
@@ -67,7 +70,6 @@ public class Attack {
         if (scared){
             float pitch = Time.increaseTimeValue(SoundManager.getPitch(audio), 2, pitchSpeed);
             SoundManager.setPitch(audio, pitch);
-            if (attack) attackTimer = Time.decreaseTimeValue(attackTimer, 0, 1);
         }
 
         if (attackTimer == 0 && moveFrame == 0){

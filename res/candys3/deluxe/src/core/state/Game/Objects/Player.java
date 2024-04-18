@@ -17,6 +17,8 @@ public class Player {
     private float overlayAlpha;
     private float overlayFade;
     private float buttonFade;
+    private float hoverLock;
+    private byte side;
 
     private float purpleAlpha;
     private float purpleSpeed;
@@ -35,12 +37,14 @@ public class Player {
         this.lookSpeed = lookSpeed;
         this.initX = initX;
         this.initY = initY;
-        shakeLimit = 3.5f;
+        shakeLimit = 4f;
     }
 
     public void reset(){
         x = initX;
         y = initY;
+        side = 1;
+        hoverLock = 0;
         freeze = false;
         bedSpot = false;
         shakeX = 0;
@@ -57,19 +61,64 @@ public class Player {
         blacknessTimes = 0;
     }
 
-    public void update(Room room){
+    public void update(Flashlight flashlight, Room room){
         if (room.getFrame() == 0 && room.getState() != 2 && !freeze) {
-            x += lookMechanic(x, Candys3Deluxe.inputManager.getX(), (float) Candys3Deluxe.width / 3, 1, room.getBoundsX(), shakeLimit);
-            y += lookMechanic(y, Candys3Deluxe.inputManager.getY(), (float) Candys3Deluxe.height / 3, 4, room.getBoundsY(), 0);
+            boolean leftHover = Candys3Deluxe.inputManager.getX() < (float) Candys3Deluxe.width * 0.1f;
+            boolean rightHover = Candys3Deluxe.inputManager.getX() > (float) Candys3Deluxe.width * 0.9f;
+            if (!attack || Challenges.freeScroll) {
+                x += lookMechanic(x, Candys3Deluxe.inputManager.getX(), (float) Candys3Deluxe.width / 3, 1, room.getBoundsX(), shakeLimit);
+                y += lookMechanic(y, Candys3Deluxe.inputManager.getY(), (float) Candys3Deluxe.height / 3, 4, room.getBoundsY(), 0);
+                if (flashlight.getX() < 1024) side = 0;
+                else if (flashlight.getX() >= 2048) side = 2;
+                else side = 1;
+            } else {
+                if (hoverLock == 0.375f) {
+                    if (leftHover && side > 0) side--;
+                    if (rightHover && side < 2) side++;
+                }
+                float targetX;
+                float targetY;
+                if (side == 0){
+                    targetX = 16;
+                    targetY = 300;
+                } else if (side == 1){
+                    targetX = initX;
+                    targetY = 232;
+                } else {
+                    targetX = 1792 - shakeLimit;
+                    targetY = 304;
+                }
+                float distanceX = Time.convertValue(targetX - x) * 4;
+                x += distanceX;
+                float distanceY = Time.convertValue(targetY - y) * 4;
+                y += distanceY;
+            }
+            if (hoverLock == 0 && (leftHover || rightHover)) hoverLock = 0.375f;
+            else hoverLock = Time.decreaseTimeValue(hoverLock, 0, 1);
         }
         overlayAlpha = Time.decreaseTimeValue(overlayAlpha, 0, 1);
-        if (scared && shakePositive) {
-            shakeX = Time.increaseTimeValue(shakeX, shakeLimit, 60);
-            if (shakeX == shakeLimit) shakePositive = false;
-        } else if (scared) {
-            shakeX = Time.decreaseTimeValue(shakeX, -shakeLimit, 60);
-            if (shakeX == -shakeLimit) shakePositive = true;
-        }  else if (shakeX != 0) shakeX = 0;
+        float distance = Time.convertValue(70);
+        float leftOver;
+        while (scared) {
+            if (shakePositive) {
+                if (shakeX + distance < shakeLimit) {
+                    shakeX += distance;
+                    break;
+                }
+                leftOver = shakeLimit - shakeX;
+                shakeX = shakeLimit;
+            } else {
+                if (shakeX - distance > -shakeLimit){
+                    shakeX -= distance;
+                    break;
+                }
+                leftOver = shakeLimit + shakeX;
+                shakeX = -shakeLimit;
+            }
+            distance -= leftOver;
+            shakePositive = !shakePositive;
+        }
+        if (!scared && shakeX != 0) shakeX = 0;
 
         if (!attack) overlayFade = Time.decreaseTimeValue(overlayFade, 0, 0.2f);
         else if (overlayFade != 1) overlayFade = 1;

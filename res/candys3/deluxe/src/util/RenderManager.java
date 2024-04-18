@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-import core.Candys3Deluxe;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class RenderManager {
@@ -39,11 +38,11 @@ public class RenderManager {
         return true;
     }
 
-    public void viewportAdjust(){
+    public void viewportAdjust(InputManager inputManager){
         Vector3 v3 = CameraManager.viewport.unproject(new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0));
-        Candys3Deluxe.inputManager.x = v3.x - CameraManager.getX();
-        Candys3Deluxe.inputManager.y = v3.y - CameraManager.getY();
-        Candys3Deluxe.inputManager.readjust();
+        inputManager.x = v3.x - CameraManager.getX();
+        inputManager.y = v3.y - CameraManager.getY();
+        inputManager.readjust();
     }
 
     public void dispose(){

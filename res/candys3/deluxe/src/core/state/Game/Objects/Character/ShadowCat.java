@@ -6,6 +6,7 @@ import core.state.Game.Objects.Player;
 import core.state.Game.Objects.Room;
 import util.*;
 
+import java.util.Arrays;
 import java.util.Random;
 
 public class ShadowCat extends SpriteObject{
@@ -52,9 +53,11 @@ public class ShadowCat extends SpriteObject{
         boolean hovered = hitbox.isHovered(mx, my);
         boolean imageHovered = this.mouseOverWithPanning(mx, my);
         if (!catPlay){
-            SoundManager.play("cat");
-            SoundManager.setVolume("cat", 0);
-            SoundManager.setLoop("cat", true);
+            for (String catValue: Arrays.asList("cat", "catLeft", "catRight")) {
+                SoundManager.play(catValue);
+                SoundManager.setVolume(catValue, 0);
+                SoundManager.setLoop(catValue, true);
+            }
             catPlay = true;
         }
         switch (roomState){
@@ -114,6 +117,8 @@ public class ShadowCat extends SpriteObject{
                     else bedSide.setPhase(3);
                     if (bedPhase == bedSide.getPhase()) change = false;
                     if (change) changePath();
+                    if (side == 0) SoundManager.setVolume("catLeft", (float) (bedSide.getFrame() - 23) / 75);
+                    else SoundManager.setVolume("catRight", (float) (bedSide.getFrame() - 23) / 75);
                 }
                 if (bedSide.isSignal()) {
                     if (side == 0) {
@@ -303,7 +308,7 @@ public class ShadowCat extends SpriteObject{
                 attack.setLimit(4);
                 attack.setPosition((byte) 0);
                 attack.setKillTimer(2);
-                attack.setAttackTimer(10);
+                attack.setAttackTimer(4.5f);
                 attack.setMoved();
                 player.setBlacknessTimes(1);
                 if (side == 0) {
@@ -341,7 +346,7 @@ public class ShadowCat extends SpriteObject{
         if (roomState == 0){
             bedSide.reset();
         } else if (roomState == 1){
-            attack.reset(0.8f, 0.025f, 5, (byte) 1, (byte) 0, 30);
+            attack.reset(0.8f, 0.025f, 2.5f, (byte) 1, (byte) 0, 30);
             changePath();
         } else if (roomState == 2){
             bed.reset(13, 1.15f);

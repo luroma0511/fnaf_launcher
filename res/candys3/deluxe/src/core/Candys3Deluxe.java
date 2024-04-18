@@ -62,7 +62,7 @@ public class Candys3Deluxe extends ApplicationAdapter {
 		fullscreen = inputManager.fullscreen(displayMode, fullscreen, width, height);
 		stateManager.update();
 		if (renderManager.requests()) inputManager.setLock();
-		renderManager.viewportAdjust();
+		renderManager.viewportAdjust(inputManager);
 		stateManager.render();
 		inputManager.reset();
 	}
