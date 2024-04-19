@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/res/candys3/deluxe/deluxe.iml" filepath="$PROJECT_DIR$/res/candys3/deluxe/deluxe.iml" />
       <module fileurl="file://$PROJECT_DIR$/res/discord/discord.iml" filepath="$PROJECT_DIR$/res/discord/discord.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/fnaf_launcher.iml" filepath="$PROJECT_DIR$/.idea/fnaf_launcher.iml" />
+      <module fileurl="file://$PROJECT_DIR$/res/utilities/utilities.iml" filepath="$PROJECT_DIR$/res/utilities/utilities.iml" />
     </modules>
   </component>
 </project>
