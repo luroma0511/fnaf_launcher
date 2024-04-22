@@ -1,5 +1,6 @@
 package state;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -16,7 +17,6 @@ public class StateManager {
     private final Game game;
     private final Menu menu;
     private final Win win;
-    private final GameData gameData;
     private int state;
     private int prevState;
 
@@ -24,19 +24,18 @@ public class StateManager {
         game = new Game();
         menu = new Menu();
         win = new Win();
-        gameData = new GameData();
         state = 0;
         prevState = -1;
     }
 
     public void update(Window window){
-        if (state == 0) menu.update(window, gameData);
-        else if (state == 1) game.update(window, gameData);
+        if (state == 0) menu.update(window);
+        else if (state == 1) game.update(window);
         else if (state == 2) win.update();
 
         if (prevState == state) return;
         if (state == 0) menu.load();
-        else if (state == 1) game.load(gameData);
+        else if (state == 1) game.load();
         else if (state == 2) win.load();
         prevState = state;
     }
@@ -55,10 +54,8 @@ public class StateManager {
             ScreenUtils.clear(0, 0, 0, 1);
             win.render(batch);
         }
-        FrameBufferManager.end(batch, screenBuffer, window.getWidth(), window.getHeight());
+        FrameBufferManager.end(batch, screenBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         FrameBufferManager.render(batch, screenBuffer, true);
-
-        VideoManager.updateRender(batch, window.getWidth(), window.getHeight());
         batch.end();
     }
 

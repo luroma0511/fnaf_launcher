@@ -2,8 +2,8 @@ package state.Game.Objects.Character;
 
 import java.util.Random;
 
-import data.Challenges;
-import state.Game.Objects.Character.Attributes.*;
+import data.GameData;
+import state.Game.Functions.*;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
 import state.Game.Objects.Room;
@@ -119,6 +119,14 @@ public class Rat extends SpriteObject {
                 player.setBlacknessSpeed(6);
                 break;
             case 1:
+                if (attack.getKillTimer() == 0){
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Rat/Jumpscare/room");
+                    return;
+                }
                 if (roomUpdate(cat, player) || !attack.isMoved()) return;
                 if (side == 0) {
                     if (attack.getPosition() == 0) hitbox.setCoord(376, 765);
@@ -133,6 +141,8 @@ public class Rat extends SpriteObject {
                     else if (attack.getPosition() == 1) hitbox.setCoord(2402, 680);
                     else hitbox.setCoord(2734, 651);
                 }
+                if (side == 0) hitbox.setSize(75, GameData.hitboxMultiplier);
+                else hitbox.setSize(100, GameData.hitboxMultiplier);
                 attack.setMoved();
                 if (attack.getFlashTime() != 0) {
                     attack.setLimit(3);
@@ -142,18 +152,46 @@ public class Rat extends SpriteObject {
                     attack.setLimit(attack.getLimit() - 1);
                     break;
                 }
+                if (random.nextInt(5) == 2) {
+                    attack.setSkip();
+                    attack.setKillTimer(attack.getKillTimer() + 0.25f);
+                    attack.setLimit(attack.getLimit() - 1);
+                    break;
+                }
                 attack.setLimit(3);
                 attack.setFlashTime(0.25f + random.nextInt(4) * 0.125f);
-//                    if (random.nextInt(5) == 2) attack.setSkip();
                 break;
             case 2:
-                if (bed.killTime()) return;
+                if (bed.killTime()) {
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Rat/Jumpscare/bed");
+                    return;
+                }
                 if (!bed.update(player, room)) return;
-                transitionRoomState((byte) 3);
-                SoundManager.play("peek");
+                if ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
+                    transitionRoomState((byte) 3);
+                    SoundManager.play("peek");
+                    break;
+                }
+                player.setBlacknessTimes(3);
+                player.setBlacknessSpeed(6);
+                player.setFreeze();
+                player.setJumpscare();
+                Jumpscare.set("game/Rat/Jumpscare/bed");
                 break;
             case 3:
-                if (!peek.update()) return;
+                if (!peek.update()) {
+                    if (!peek.isKillTime()) return;
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Rat/Jumpscare/bed");
+                    return;
+                }
                 hitbox.setCoord(0, 0);
                 transitionRoomState((byte) 4);
                 SoundManager.play("leave");
@@ -176,7 +214,7 @@ public class Rat extends SpriteObject {
     }
 
     public void changePath(){
-        hitbox.setSize(100, Challenges.hitboxMultiplier);
+        hitbox.setSize(100, GameData.hitboxMultiplier);
         if (roomState == 0) {
             if (side == 0) {
                 setPath("game/Rat/Looking Away/Left");
@@ -196,7 +234,7 @@ public class Rat extends SpriteObject {
             }
         } else if (roomState == 1){
             if (side == 0) {
-                hitbox.setSize(75, Challenges.hitboxMultiplier);
+                hitbox.setSize(75, GameData.hitboxMultiplier);
                 setPath("game/Rat/Battle/Left");
                 setX(142);
                 setY(327);

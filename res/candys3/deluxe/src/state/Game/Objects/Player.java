@@ -1,7 +1,7 @@
 package state.Game.Objects;
 
 import core.Candys3Deluxe;
-import data.Challenges;
+import data.GameData;
 import util.CameraManager;
 import util.Time;
 import util.Window;
@@ -20,6 +20,7 @@ public class Player {
     private float buttonFade;
     private float hoverLock;
     private byte side;
+    private boolean jumpscare;
 
     private float purpleAlpha;
     private float purpleSpeed;
@@ -60,13 +61,14 @@ public class Player {
         blacknessAlpha = 0;
         blacknessSpeed = 2;
         blacknessTimes = 0;
+        jumpscare = false;
     }
 
     public void update(Window window, Flashlight flashlight, Room room){
         if (room.getFrame() == 0 && room.getState() != 2 && !freeze) {
             boolean leftHover = Candys3Deluxe.inputManager.getX() < (float) window.getWidth() * 0.1f;
             boolean rightHover = Candys3Deluxe.inputManager.getX() > (float) window.getWidth() * 0.9f;
-            if (!attack || Challenges.freeScroll) {
+            if (!attack || GameData.freeScroll) {
                 x += lookMechanic(x, Candys3Deluxe.inputManager.getX(), (float) window.getWidth() / 3, 1, room.getBoundsX(), shakeLimit);
                 y += lookMechanic(y, Candys3Deluxe.inputManager.getY(), (float) window.getHeight() / 3, 4, room.getBoundsY(), 0);
                 if (flashlight.getX() < 1024) side = 0;
@@ -120,7 +122,9 @@ public class Player {
             shakePositive = !shakePositive;
         }
         if (!scared && shakeX != 0) shakeX = 0;
+    }
 
+    public void updateEffects(Room room){
         if (!attack) overlayFade = Time.decreaseTimeValue(overlayFade, 0, 0.2f);
         else if (overlayFade != 1) overlayFade = 1;
         if (overlayAlpha <= 0.5f && overlayFade > 0) overlayAlpha = 1;
@@ -135,7 +139,7 @@ public class Player {
         if (room.getFrame() == 0 && y == 0 && !freeze) buttonFade = Time.increaseTimeValue(buttonFade, 1, 4);
         else buttonFade = Time.decreaseTimeValue(buttonFade, 0, 4);
 
-        if (Challenges.hardCassette) {
+        if (GameData.hardCassette) {
             if (room.tapeMusic.isPlaying()) {
                 purpleSpeed = 0;
                 purpleAlpha = Time.decreaseTimeValue(purpleAlpha, 0, 3);
@@ -168,6 +172,10 @@ public class Player {
 
     public float getOverlayAlpha() {
         return overlayFade * overlayAlpha;
+    }
+
+    public int getBlacknessTimes() {
+        return blacknessTimes;
     }
 
     public void setBlacknessDelay(float blacknessDelay) {
@@ -240,5 +248,17 @@ public class Player {
 
     public float getButtonFade() {
         return buttonFade;
+    }
+
+    public byte getSide() {
+        return side;
+    }
+
+    public boolean isJumpscare() {
+        return jumpscare;
+    }
+
+    public void setJumpscare() {
+        jumpscare = !jumpscare;
     }
 }

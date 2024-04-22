@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import data.Challenges;
+import data.GameData;
 import state.Game.Game;
 import state.Game.Objects.Character.Characters;
 import util.*;
@@ -109,7 +109,7 @@ public class Room extends SpriteObject {
                     tapeStop = true;
                 } else if (tapeState == 0 && ImageManager.isAlpha(rewind, (int) ((mx - 763) / 1.25f), (int) ((376.25f - my) / 1.25f))){
                     SoundManager.play("tapeButton");
-                    if (tapeFrame != 0 && !Challenges.hardCassette) {
+                    if (tapeFrame != 0 && !GameData.hardCassette) {
                         SoundManager.play("tapeRewind");
                         SoundManager.setLoop("tapeRewind", true);
                     }
@@ -215,7 +215,7 @@ public class Room extends SpriteObject {
             }
         }
 
-        if (Challenges.hardCassette) tapeMusic.setVolume(0);
+        if (GameData.hardCassette) tapeMusic.setVolume(0);
         else if (tapeMusic.isPlaying()) tapeMusic.setVolume(0.065f + tapeVolume);
     }
 
@@ -232,7 +232,7 @@ public class Room extends SpriteObject {
                 region = ImageManager.get("game/Flashlight");
 
                 float multiplier = 1;
-                if (Challenges.hitboxMultiplier != 1) multiplier = 1.75f;
+                if (GameData.hitboxMultiplier != 1) multiplier = 1.75f;
 
                 float width = (float) region.getRegionWidth() / multiplier;
                 float height = (float) region.getRegionHeight() / multiplier;

@@ -37,6 +37,8 @@ public class Candys3Deluxe extends ApplicationAdapter {
         Gdx.input.setInputProcessor(inputManager);
         displayMode = Gdx.graphics.getDisplayMode();
         SoundManager.add("menu");
+        SoundManager.add("shadow_menu");
+        SoundManager.add("menu_ambience");
         SoundManager.add("thunder");
 
         FontManager.generate("candysFont");

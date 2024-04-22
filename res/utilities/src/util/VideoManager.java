@@ -1,8 +1,8 @@
 package util;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
 
@@ -16,7 +16,11 @@ public class VideoManager {
         request = path;
     }
 
-    public static void updateRender(SpriteBatch batch, int width, int height){
+    public static void reset(){
+        if (videoPlayer.isPlaying()) dispose();
+    }
+
+    public static void render(SpriteBatch batch, boolean flip, int width, int height){
         if (request != null){
             try {
                 videoPlayer.play(Gdx.files.local("assets/" + request + ".webm"));
@@ -28,8 +32,10 @@ public class VideoManager {
         }
         if (videoPlayer == null || !videoPlayer.isPlaying()) return;
         videoPlayer.update();
-        Texture video = videoPlayer.getTexture();
-        if (video != null) batch.draw(video, 0, 0, width, height);
+        if (videoPlayer.getTexture() == null) return;
+        TextureRegion video = new TextureRegion(videoPlayer.getTexture());
+        if (flip) video.flip(true, false);
+        batch.draw(video, CameraManager.getX(), CameraManager.getY(), width, height);
     }
 
     public static void dispose(){

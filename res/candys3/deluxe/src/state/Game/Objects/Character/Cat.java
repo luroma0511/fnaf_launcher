@@ -3,8 +3,8 @@ package state.Game.Objects.Character;
 import java.util.Arrays;
 import java.util.Random;
 
-import data.Challenges;
-import state.Game.Objects.Character.Attributes.*;
+import data.GameData;
+import state.Game.Functions.*;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
 import state.Game.Objects.Room;
@@ -119,6 +119,7 @@ public class Cat extends SpriteObject {
                     else SoundManager.setVolume("catRight", (float) (bedSide.getFrame() - 23) / 75);
                 }
                 if (bedSide.isSignal()) {
+                    hitbox.setSize(100, GameData.hitboxMultiplier);
                     if (side == 0) {
                         if (bedSide.getFrame() <= 23) hitbox.setCoord(192, 548);
                         else if (bedSide.getFrame() <= 42) hitbox.setCoord(186, 720);
@@ -138,6 +139,14 @@ public class Cat extends SpriteObject {
                 bedSide.setSoundLock();
                 break;
             case 1:
+                if (attack.getKillTimer() == 0){
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Rat/Jumpscare/room");
+                    return;
+                }
                 if (roomUpdate(rat, player) || !attack.isMoved()) return;
                 if (side == 0) {
                     if (attack.getPosition() == 0) hitbox.setCoord(366, 741);
@@ -152,6 +161,8 @@ public class Cat extends SpriteObject {
                     else if (attack.getPosition() == 1) hitbox.setCoord(2395, 714);
                     else hitbox.setCoord(2748, 669);
                 }
+                if (side == 0) hitbox.setSize(75, GameData.hitboxMultiplier);
+                else hitbox.setSize(100, GameData.hitboxMultiplier);
                 attack.setMoved();
                 if (attack.getFlashTime() != 0) {
                     attack.setLimit(3);
@@ -175,11 +186,22 @@ public class Cat extends SpriteObject {
             case 2:
                 if (bed.killTime()) return;
                 if (!bed.update(player, room)) return;
-                transitionRoomState((byte) 3);
-                SoundManager.play("peek");
+                if ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
+                    transitionRoomState((byte) 3);
+                    SoundManager.play("peek");
+                    break;
+                }
                 break;
             case 3:
-                if (!peek.update()) return;
+                if (!peek.update()) {
+                    if (!peek.isKillTime()) return;
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Rat/Jumpscare/bed");
+                    return;
+                }
                 hitbox.setCoord(0, 0);
                 player.setScared();
                 player.setFreeze();
@@ -202,7 +224,7 @@ public class Cat extends SpriteObject {
     }
 
     public void changePath(){
-        hitbox.setSize(100, Challenges.hitboxMultiplier);
+        hitbox.setSize(100, GameData.hitboxMultiplier);
         if (roomState == 0) {
             if (side == 0) {
                 setPath("game/Cat/Retreat/Left");
@@ -235,7 +257,7 @@ public class Cat extends SpriteObject {
             }
         } else if (roomState == 1){
             if (side == 0) {
-                hitbox.setSize(75, Challenges.hitboxMultiplier);
+                hitbox.setSize(75, GameData.hitboxMultiplier);
                 setPath("game/Cat/Battle/Left");
                 setX(171);
                 setY(322);
