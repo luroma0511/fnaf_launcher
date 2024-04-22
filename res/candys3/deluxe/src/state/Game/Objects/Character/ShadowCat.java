@@ -1,7 +1,7 @@
 package state.Game.Objects.Character;
 
-import data.Challenges;
-import state.Game.Objects.Character.Attributes.*;
+import data.GameData;
+import state.Game.Functions.*;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
 import state.Game.Objects.Room;
@@ -122,6 +122,7 @@ public class ShadowCat extends SpriteObject{
                     else SoundManager.setVolume("catRight", (float) (bedSide.getFrame() - 23) / 75);
                 }
                 if (bedSide.isSignal()) {
+                    hitbox.setSize(100, GameData.hitboxMultiplier);
                     if (side == 0) {
                         if (bedSide.getFrame() <= 23) hitbox.setCoord(192, 548);
                         else if (bedSide.getFrame() <= 42) hitbox.setCoord(186, 720);
@@ -141,6 +142,14 @@ public class ShadowCat extends SpriteObject{
                 bedSide.setSoundLock();
                 break;
             case 1:
+                if (attack.getKillTimer() == 0){
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Shadow Cat/Jumpscare", 3);
+                    return;
+                }
                 if (roomUpdate(rat, player) || !attack.isMoved()) return;
                 if (side == 0) {
                     if (attack.getPosition() == 0) hitbox.setCoord(381, 743);
@@ -158,6 +167,8 @@ public class ShadowCat extends SpriteObject{
                     else if (attack.getPosition() == 2) hitbox.setCoord(2712, 651);
                     else hitbox.setCoord(2544, 553);
                 }
+                if (side == 0) hitbox.setSize(75, GameData.hitboxMultiplier);
+                else hitbox.setSize(100, GameData.hitboxMultiplier);
                 attack.setMoved();
                 if (attack.getFlashTime() != 0) {
                     attack.setLimit(3);
@@ -168,18 +179,47 @@ public class ShadowCat extends SpriteObject{
                         attack.setLimit(attack.getLimit() - 1);
                         break;
                     }
+                    if (random.nextInt(5) == 2) {
+                        attack.setFlashTime(0.125f);
+                        attack.setKillTimer(attack.getKillTimer() + 0.275f);
+                        attack.setLimit(0);
+                        break;
+                    }
                 }
                 attack.setLimit(3);
-                attack.setFlashTime(0.175f + random.nextInt(5) * 0.05f);
+                attack.setFlashTime(0.175f + random.nextInt(4) * 0.05f);
                 break;
             case 2:
-                if (bed.killTime()) return;
+                if (bed.killTime()) {
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Shadow Cat/Jumpscare", 3);
+                    return;
+                }
                 if (!bed.update(player, room)) return;
-                transitionRoomState((byte) 3);
-                SoundManager.play("peek");
+                if ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
+                    transitionRoomState((byte) 3);
+                    SoundManager.play("peek");
+                    break;
+                }
+                player.setBlacknessTimes(3);
+                player.setBlacknessSpeed(6);
+                player.setFreeze();
+                player.setJumpscare();
+                Jumpscare.set("game/Shadow Cat/Jumpscare", 3);
                 break;
             case 3:
-                if (!peek.update()) return;
+                if (!peek.update()) {
+                    if (!peek.isKillTime()) return;
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Shadow Cat/Jumpscare", 3);
+                    return;
+                }
                 hitbox.setCoord(0, 0);
                 player.setScared();
                 player.setFreeze();
@@ -195,7 +235,7 @@ public class ShadowCat extends SpriteObject{
     }
 
     public void changePath(){
-        hitbox.setSize(100, Challenges.hitboxMultiplier);
+        hitbox.setSize(100, GameData.hitboxMultiplier);
         if (roomState == 0) {
             if (side == 0) {
                 setPath("game/Shadow Cat/Retreat/Left");
@@ -228,7 +268,7 @@ public class ShadowCat extends SpriteObject{
             }
         } else if (roomState == 1){
             if (side == 0) {
-                hitbox.setSize(75, Challenges.hitboxMultiplier);
+                hitbox.setSize(75, GameData.hitboxMultiplier);
                 setPath("game/Shadow Cat/Battle/Left");
                 setX(174);
                 setY(242);
@@ -338,7 +378,7 @@ public class ShadowCat extends SpriteObject{
             }
             return true;
         } else if (rat != null && rat.getDoor().getFrame() != 13){
-            attack.setKillTimer(Time.increaseTimeValue(attack.getKillTimer(), 2, 0.375f));
+            attack.setKillTimer(Time.increaseTimeValue(attack.getKillTimer(), 2, 0.25f));
         }
         return false;
     }

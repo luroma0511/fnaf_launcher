@@ -30,8 +30,8 @@ public class Button extends SpriteObject {
         return selected;
     }
 
-    public void setSelected(boolean selected) {
-        this.selected = selected;
+    public void setSelected() {
+        selected = !selected;
     }
 
     public boolean isHovered() {

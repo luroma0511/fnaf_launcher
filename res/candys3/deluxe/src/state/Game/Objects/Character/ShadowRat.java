@@ -1,7 +1,7 @@
 package state.Game.Objects.Character;
 
-import data.Challenges;
-import state.Game.Objects.Character.Attributes.*;
+import data.GameData;
+import state.Game.Functions.*;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
 import state.Game.Objects.Room;
@@ -116,6 +116,14 @@ public class ShadowRat extends SpriteObject {
                 player.setBlacknessSpeed(6);
                 break;
             case 1:
+                if (attack.getKillTimer() == 0){
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Shadow Rat/Jumpscare", 3);
+                    return;
+                }
                 if (roomUpdate(cat, player) || !attack.isMoved()) return;
                 if (side == 0) {
                     if (attack.getPosition() == 0) hitbox.setCoord(376, 765);
@@ -130,6 +138,8 @@ public class ShadowRat extends SpriteObject {
                     else if (attack.getPosition() == 1) hitbox.setCoord(2402, 680);
                     else hitbox.setCoord(2734, 651);
                 }
+                if (side == 0) hitbox.setSize(75, GameData.hitboxMultiplier);
+                else hitbox.setSize(100, GameData.hitboxMultiplier);
                 attack.setMoved();
                 if (attack.getFlashTime() != 0) {
                     attack.setLimit(4);
@@ -144,13 +154,36 @@ public class ShadowRat extends SpriteObject {
 //                    if (random.nextInt(5) == 2) attack.setSkip();
                 break;
             case 2:
-                if (bed.killTime()) return;
+                if (bed.killTime()) {
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Shadow Rat/Jumpscare", 3);
+                    return;
+                }
                 if (!bed.update(player, room)) return;
-                transitionRoomState((byte) 3);
-                SoundManager.play("peek");
+                if ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
+                    transitionRoomState((byte) 3);
+                    SoundManager.play("peek");
+                    break;
+                }
+                player.setBlacknessTimes(3);
+                player.setBlacknessSpeed(6);
+                player.setFreeze();
+                player.setJumpscare();
+                Jumpscare.set("game/Shadow Rat/Jumpscare", 3);
                 break;
             case 3:
-                if (!peek.update()) return;
+                if (!peek.update()) {
+                    if (!peek.isKillTime()) return;
+                    player.setBlacknessTimes(3);
+                    player.setBlacknessSpeed(6);
+                    player.setFreeze();
+                    player.setJumpscare();
+                    Jumpscare.set("game/Shadow Rat/Jumpscare", 3);
+                    return;
+                }
                 hitbox.setCoord(0, 0);
                 transitionRoomState((byte) 4);
                 SoundManager.play("leave");
@@ -173,7 +206,7 @@ public class ShadowRat extends SpriteObject {
     }
 
     public void changePath() {
-        hitbox.setSize(100, Challenges.hitboxMultiplier);
+        hitbox.setSize(100, GameData.hitboxMultiplier);
         if (roomState == 0) {
             if (side == 0) {
                 setPath("game/Shadow Rat/Looking Away/Left");
@@ -193,7 +226,7 @@ public class ShadowRat extends SpriteObject {
             }
         } else if (roomState == 1) {
             if (side == 0) {
-                hitbox.setSize(75, Challenges.hitboxMultiplier);
+                hitbox.setSize(75, GameData.hitboxMultiplier);
                 setPath("game/Shadow Rat/Battle/Left");
                 setX(142);
                 setY(327);

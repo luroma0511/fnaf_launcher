@@ -1,37 +1,17 @@
 package data;
 
 public class GameData {
-    private byte ratAI;
-    private byte catAI;
-    private byte vinnieAI;
-    private byte shadowRatAI;
-    private byte shadowCatAI;
+    public static byte ratAI;
+    public static byte catAI;
+    public static byte vinnieAI;
+    public static byte shadowRatAI;
+    public static byte shadowCatAI;
+    public static byte night;
 
-    public void writeData(byte ratAI, byte catAI, byte vinnieAI, byte shadowRatAI, byte shadowCatAI){
-        this.ratAI = ratAI;
-        this.catAI = catAI;
-        this.vinnieAI = vinnieAI;
-        this.shadowRatAI = shadowRatAI;
-        this.shadowCatAI = shadowCatAI;
-    }
-
-    public byte getRatAI() {
-        return ratAI;
-    }
-
-    public byte getCatAI() {
-        return catAI;
-    }
-
-    public byte getVinnieAI() {
-        return vinnieAI;
-    }
-
-    public byte getShadowRatAI() {
-        return shadowRatAI;
-    }
-
-    public byte getShadowCatAI() {
-        return shadowCatAI;
-    }
+    public static float hitboxMultiplier = 1;
+    public static boolean hardCassette;
+    public static boolean nightmareCandy;
+    public static boolean freeScroll;
+    public static boolean infiniteNight;
+    public static boolean hellCast;
 }

@@ -7,9 +7,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.utils.ScreenUtils;
 import core.Candys3Deluxe;
-import data.Challenges;
 import data.GameData;
+import state.Game.Functions.Jumpscare;
 import state.Game.Objects.Character.Characters;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
@@ -37,12 +38,8 @@ public class Game {
         nightTimeBuilder = new StringBuilder();
     }
 
-    public void reset(byte ratAI, byte catAI, byte vinnieAI, byte shadowRatAI, byte shadowCatAI){
-        characters = new Characters(ratAI, catAI, vinnieAI, shadowRatAI, shadowCatAI);
-    }
-
-    public void load(GameData gameData){
-        reset(gameData);
+    public void load(){
+        reset();
         characters.load();
         room.load();
         StringBuilder sb = new StringBuilder("game/");
@@ -83,9 +80,9 @@ public class Game {
         SoundManager.addAll(gameSoundData);
     }
 
-    public void update(Window window, GameData gameData){
+    public void update(Window window){
         if (nightTime != 0 && Candys3Deluxe.inputManager.keyTyped(Input.Keys.R)) {
-            reset(gameData);
+            reset();
             SoundManager.stopAllSounds();
         }
 
@@ -96,12 +93,17 @@ public class Game {
             return;
         }
 
-        player.update(window, flashlight, room);
-        if (player.getY() == 0) room.input(Candys3Deluxe.inputManager.getX(), Candys3Deluxe.inputManager.getY(), player, Candys3Deluxe.inputManager.isPressed());
-        room.update(player);
-        characters.update(player, room, flashlight);
+        if (!player.isJumpscare()) {
+            player.update(window, flashlight, room);
+            if (player.getY() == 0)
+                room.input(Candys3Deluxe.inputManager.getX(), Candys3Deluxe.inputManager.getY(), player, Candys3Deluxe.inputManager.isPressed());
+            room.update(player);
+            characters.update(player, room, flashlight);
+        }
 
-        if (!Challenges.infiniteNight && !Challenges.hardCassette && room.isMusicPlaying()) nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 2);
+        player.updateEffects(room);
+
+        if (!GameData.infiniteNight && !GameData.hardCassette && room.isMusicPlaying()) nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 2);
         else nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 1);
         if (nightTime != nightTimeLength) return;
         Candys3Deluxe.stateManager.setState((byte) 2);
@@ -109,14 +111,11 @@ public class Game {
         SoundManager.stopAllSounds();
     }
 
-    public void reset(GameData gameData){
-        reset(gameData.getRatAI(),
-                gameData.getCatAI(),
-                gameData.getVinnieAI(),
-                gameData.getShadowRatAI(),
-                gameData.getShadowCatAI());
+    public void reset(){
+        characters = new Characters(GameData.ratAI, GameData.catAI, GameData.vinnieAI, GameData.shadowRatAI, GameData.shadowCatAI);
         player.reset();
         room.reset();
+        Jumpscare.reset();
         nightTime = 0;
     }
 
@@ -141,6 +140,12 @@ public class Game {
             batch.setColor(1, 1, 1, 1);
             batch.flush();
             batch.setBlendFunction(srcFunc, dstFunc);
+        }
+
+        if (player.isJumpscare() && player.getBlacknessTimes() == 0){
+            ScreenUtils.clear(0, 0, 0, 1);
+            if (room.isMusicPlaying()) room.stopMusic();
+            Jumpscare.render(batch);
         }
 
         RenderManager.shapeDrawer.setColor(0, 0, 0, 1 - player.getBlacknessAlpha());
@@ -175,7 +180,7 @@ public class Game {
         GlyphLayout layout = FontManager.layout;
         Candys3Deluxe.candysFont.setColor(1, 1, 1, 1);
         nightTimeBuilder.delete(0, nightTimeBuilder.length());
-        if (Challenges.infiniteNight) {
+        if (GameData.infiniteNight) {
             int hour = (int) nightTime / 60;
             nightTimeBuilder.append(hour).append(":");
             int tempTime = (int) (nightTime % 60);

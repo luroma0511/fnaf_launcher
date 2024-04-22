@@ -3,6 +3,7 @@ package state.Game.Objects.Character;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import data.GameData;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
 import state.Game.Objects.Room;
@@ -17,11 +18,15 @@ public class Characters {
     private boolean twitchLock;
 
     public Characters(byte ratAI, byte catAI, byte vinnieAI, byte shadowRatAI, byte shadowCatAI) {
-        if (ratAI != 0) rat = new Rat(ratAI);
-        if (catAI != 0) cat = new Cat(catAI);
-        if (vinnieAI != 0) vinnie = new Vinnie(vinnieAI);
-        if (shadowRatAI != 0) shadowRat = new ShadowRat(shadowRatAI);
-        if (shadowCatAI != 0) shadowCat = new ShadowCat(shadowCatAI);
+        if (GameData.night == 0) {
+            if (ratAI != 0) rat = new Rat(ratAI);
+            if (catAI != 0) cat = new Cat(catAI);
+        }
+        if (GameData.night == 1){
+            if (shadowRatAI != 0) shadowRat = new ShadowRat(shadowRatAI);
+            if (shadowCatAI != 0) shadowCat = new ShadowCat(shadowCatAI);
+        }
+        if (GameData.night == 2 && vinnieAI != 0) vinnie = new Vinnie(vinnieAI);
     }
 
     public void load(){
@@ -199,31 +204,7 @@ public class Characters {
 //                    characters.getCat().getHitbox().size);
         }
 
-//        if (shadowRat != null) {
-//            RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
-//            RenderManager.shapeDrawer.filledRectangle(
-//                    (float) core.core.Candys3Deluxe.width / 4 + CameraManager.getX(),
-//                    650 + CameraManager.getY(),
-//                    640,
-//                    50);
-//
-//            RenderManager.shapeDrawer.setColor(0.75f, 0, 0, 1);
-//            float value = Math.min(1, shadowRat.getAttackHealth());
-//            RenderManager.shapeDrawer.filledRectangle(
-//                    (float) core.core.Candys3Deluxe.width / 4 + CameraManager.getX(),
-//                    650 + CameraManager.getY(),
-//                    (int) (value * 640),
-//                    50);
-//
-////            color = new Color(0.75f, 0.5f, 0.5f, 0.5f);
-////            RenderManager.shapeDrawer.setColor(color);
-////            RenderManager.shapeDrawer.filledCircle(
-////                    characters.getShadowRat().getHitbox().getX(),
-////                    characters.getShadowRat().getHitbox().getY(),
-////                    characters.getShadowRat().getHitbox().size);
-//        }
-
-        if (shadowCat != null) {
+        if (shadowRat != null) {
             RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
             RenderManager.shapeDrawer.filledRectangle(
                     (float) window.getWidth() / 4 + CameraManager.getX(),
@@ -232,20 +213,44 @@ public class Characters {
                     50);
 
             RenderManager.shapeDrawer.setColor(0.5f, 0, 0.5f, 1);
-            float value = Math.min(1, shadowCat.getAttackHealth());
+            float value = Math.min(1, shadowRat.getAttackHealth());
             RenderManager.shapeDrawer.filledRectangle(
                     (float) window.getWidth() / 4 + CameraManager.getX(),
                     650 + CameraManager.getY(),
                     (int) (value * 640),
                     50);
 
-            if (shadowCat.getRoomState() == 0) {
-                RenderManager.shapeDrawer.setColor(0.75f, 0, 0.75f, 0.5f);
-                RenderManager.shapeDrawer.filledCircle(
-                        shadowCat.getHitbox().getX(),
-                        shadowCat.getHitbox().getY(),
-                        shadowCat.getHitbox().size);
-            }
+//            color = new Color(0.75f, 0.5f, 0.5f, 0.5f);
+//            RenderManager.shapeDrawer.setColor(color);
+//            RenderManager.shapeDrawer.filledCircle(
+//                    characters.getShadowRat().getHitbox().getX(),
+//                    characters.getShadowRat().getHitbox().getY(),
+//                    characters.getShadowRat().getHitbox().size);
         }
+
+//        if (shadowCat != null) {
+//            RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
+//            RenderManager.shapeDrawer.filledRectangle(
+//                    (float) window.getWidth() / 4 + CameraManager.getX(),
+//                    650 + CameraManager.getY(),
+//                    640,
+//                    50);
+//
+//            RenderManager.shapeDrawer.setColor(0.5f, 0, 0.5f, 1);
+//            float value = Math.min(1, shadowCat.getAttackHealth());
+//            RenderManager.shapeDrawer.filledRectangle(
+//                    (float) window.getWidth() / 4 + CameraManager.getX(),
+//                    650 + CameraManager.getY(),
+//                    (int) (value * 640),
+//                    50);
+//
+//            if (shadowCat.getRoomState() == 0) {
+//                RenderManager.shapeDrawer.setColor(0.75f, 0, 0.75f, 0.5f);
+//                RenderManager.shapeDrawer.filledCircle(
+//                        shadowCat.getHitbox().getX(),
+//                        shadowCat.getHitbox().getY(),
+//                        shadowCat.getHitbox().size);
+//            }
+//        }
     }
 }
