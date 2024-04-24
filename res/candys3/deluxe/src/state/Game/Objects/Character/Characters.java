@@ -3,7 +3,8 @@ package state.Game.Objects.Character;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import data.GameData;
+import deluxe.Paths;
+import deluxe.GameData;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
 import state.Game.Objects.Room;
@@ -30,10 +31,22 @@ public class Characters {
     }
 
     public void load(){
-        if (rat != null) rat.load();
-        if (cat != null) cat.load();
-        if (shadowRat != null) shadowRat.load();
-        if (shadowCat != null) shadowCat.load();
+        if (rat != null) {
+            ImageManager.addImages("game/Rat/", Paths.dataPath1 + "game/textures/characters/common.txt");
+            ImageManager.addImages("game/Rat/", Paths.dataPath1 + "game/textures/characters/rat.txt");
+        }
+        if (cat != null) {
+            ImageManager.addImages("game/Cat/", Paths.dataPath1 + "game/textures/characters/common.txt");
+            ImageManager.addImages("game/Cat/", Paths.dataPath1 + "game/textures/characters/cat.txt");
+        }
+        if (shadowRat != null) {
+            ImageManager.addImages("game/Shadow Rat/", Paths.dataPath1 + "game/textures/characters/common.txt");
+            ImageManager.addImages("game/Shadow Rat/", Paths.dataPath1 + "game/textures/characters/rat.txt");
+        }
+        if (shadowCat != null) {
+            ImageManager.addImages("game/Shadow Cat/", Paths.dataPath1 + "game/textures/characters/common.txt");
+            ImageManager.addImages("game/Shadow Cat/", Paths.dataPath1 + "game/textures/characters/shadowCat.txt");
+        }
     }
 
     public void update(Player player, Room room, Flashlight flashlight){
@@ -124,12 +137,18 @@ public class Characters {
         if (shadowCat != null){
             TextureRegion region = null;
             switch (shadowCat.getRoomState()){
-//                case 0:
-//                    if (shadowCat.getPath().isEmpty() || room.getState() != 0 || room.getFrame() != 0) break;
-//                    if (shadowCat.getBedSide().getPhase() == 1) region = ImageManager.getRegion(shadowCat.getPath(), (int) shadowCat.getWidth(), shadowCat.getBedSide().getFrame());
-//                    else if (shadowCat.getBedSide().getPhase() == 2) region = ImageManager.getRegion(shadowCat.getPath(), (int) shadowCat.getWidth(), shadowCat.getBedSide().getFrame() - 24);
-//                    else region = ImageManager.getRegion(shadowCat.getPath(), (int) shadowCat.getWidth(), shadowCat.getBedSide().getFrame() - 43);
-//                    break;
+                case 0:
+                    if (shadowCat.getBedSide().getFrame() == 0 || room.getFrame() != 0 || room.getState() != 0) break;
+                    int limit = (shadowCat.getBedSide().getPhase() - 2) * 12;
+                    if (shadowCat.getBedSide().getFrame() < 8) region = ImageManager.getRegion(shadowCat.getPath(), (int) shadowCat.getWidth(), shadowCat.getBedSide().getFrame());
+                    else {
+                        StringBuilder path = new StringBuilder(shadowCat.getPath());
+                        if (shadowCat.getTwitch().getFrame() == 1) path.append("Twitching/");
+                        path.append(shadowCat.getBedSide().getPhase() - 1);
+                        region = ImageManager.getRegion(path.toString(), (int) shadowCat.getWidth(), shadowCat.getBedSide().getFrame() - 8 - limit);
+                    }
+                    batch.draw(region, shadowCat.getX(), shadowCat.getY());
+                    break;
                 case 1:
                     if (room.getState() != 0 || room.getFrame() != 0) break;
                     region = ImageManager.getRegion(shadowCat.getPath(), (int) shadowCat.getWidth(), shadowCat.getAttack().getRegion(shadowCat.getTwitch()));
@@ -151,11 +170,13 @@ public class Characters {
 
     public void renderForward(SpriteBatch batch, Room room){
         TextureRegion region;
-        if (cat != null && cat.getRoomState() == 0 && !cat.getPath().isEmpty() && room.getFrame() == 0 && room.getState() == 0){
-            if (cat.getBedSide().getPhase() == 1) region = ImageManager.getRegion(cat.getPath(), (int) cat.getWidth(), cat.getBedSide().getFrame());
-            else if (cat.getBedSide().getPhase() == 2) region = ImageManager.getRegion(cat.getPath(), (int) cat.getWidth(), cat.getBedSide().getFrame() - 24);
-            else region = ImageManager.getRegion(cat.getPath(), (int) cat.getWidth(), cat.getBedSide().getFrame() - 43);
-            batch.draw(region, cat.getX(), cat.getY());
+        if (room.getFrame() == 0 && room.getState() == 0){
+            if (cat != null && cat.getRoomState() == 0 && !cat.getPath().isEmpty()){
+                if (cat.getBedSide().getPhase() == 1) region = ImageManager.getRegion(cat.getPath(), (int) cat.getWidth(), cat.getBedSide().getFrame());
+                else if (cat.getBedSide().getPhase() == 2) region = ImageManager.getRegion(cat.getPath(), (int) cat.getWidth(), cat.getBedSide().getFrame() - 24);
+                else region = ImageManager.getRegion(cat.getPath(), (int) cat.getWidth(), cat.getBedSide().getFrame() - 43);
+                batch.draw(region, cat.getX(), cat.getY());
+            }
         }
     }
 
@@ -204,31 +225,7 @@ public class Characters {
 //                    characters.getCat().getHitbox().size);
         }
 
-        if (shadowRat != null) {
-            RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
-            RenderManager.shapeDrawer.filledRectangle(
-                    (float) window.getWidth() / 4 + CameraManager.getX(),
-                    650 + CameraManager.getY(),
-                    640,
-                    50);
-
-            RenderManager.shapeDrawer.setColor(0.5f, 0, 0.5f, 1);
-            float value = Math.min(1, shadowRat.getAttackHealth());
-            RenderManager.shapeDrawer.filledRectangle(
-                    (float) window.getWidth() / 4 + CameraManager.getX(),
-                    650 + CameraManager.getY(),
-                    (int) (value * 640),
-                    50);
-
-//            color = new Color(0.75f, 0.5f, 0.5f, 0.5f);
-//            RenderManager.shapeDrawer.setColor(color);
-//            RenderManager.shapeDrawer.filledCircle(
-//                    characters.getShadowRat().getHitbox().getX(),
-//                    characters.getShadowRat().getHitbox().getY(),
-//                    characters.getShadowRat().getHitbox().size);
-        }
-
-//        if (shadowCat != null) {
+//        if (shadowRat != null) {
 //            RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
 //            RenderManager.shapeDrawer.filledRectangle(
 //                    (float) window.getWidth() / 4 + CameraManager.getX(),
@@ -237,20 +234,44 @@ public class Characters {
 //                    50);
 //
 //            RenderManager.shapeDrawer.setColor(0.5f, 0, 0.5f, 1);
-//            float value = Math.min(1, shadowCat.getAttackHealth());
+//            float value = Math.min(1, shadowRat.getAttackHealth());
 //            RenderManager.shapeDrawer.filledRectangle(
 //                    (float) window.getWidth() / 4 + CameraManager.getX(),
 //                    650 + CameraManager.getY(),
 //                    (int) (value * 640),
 //                    50);
-//
-//            if (shadowCat.getRoomState() == 0) {
-//                RenderManager.shapeDrawer.setColor(0.75f, 0, 0.75f, 0.5f);
-//                RenderManager.shapeDrawer.filledCircle(
-//                        shadowCat.getHitbox().getX(),
-//                        shadowCat.getHitbox().getY(),
-//                        shadowCat.getHitbox().size);
-//            }
+
+//            color = new Color(0.75f, 0.5f, 0.5f, 0.5f);
+//            RenderManager.shapeDrawer.setColor(color);
+//            RenderManager.shapeDrawer.filledCircle(
+//                    characters.getShadowRat().getHitbox().getX(),
+//                    characters.getShadowRat().getHitbox().getY(),
+//                    characters.getShadowRat().getHitbox().size);
 //        }
+
+        if (shadowCat != null) {
+            RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
+            RenderManager.shapeDrawer.filledRectangle(
+                    (float) window.getWidth() / 4 + CameraManager.getX(),
+                    650 + CameraManager.getY(),
+                    640,
+                    50);
+
+            RenderManager.shapeDrawer.setColor(0.5f, 0, 0.5f, 1);
+            float value = Math.min(1, shadowCat.getAttackHealth());
+            RenderManager.shapeDrawer.filledRectangle(
+                    (float) window.getWidth() / 4 + CameraManager.getX(),
+                    650 + CameraManager.getY(),
+                    (int) (value * 640),
+                    50);
+
+            if (shadowCat.getRoomState() == 0) {
+                RenderManager.shapeDrawer.setColor(0.75f, 0, 0.75f, 0.5f);
+                RenderManager.shapeDrawer.filledCircle(
+                        shadowCat.getHitbox().getX(),
+                        shadowCat.getHitbox().getY(),
+                        shadowCat.getHitbox().size);
+            }
+        }
     }
 }

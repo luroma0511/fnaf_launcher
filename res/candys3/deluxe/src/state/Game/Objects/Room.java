@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import data.GameData;
+import deluxe.GameData;
 import state.Game.Game;
 import state.Game.Objects.Character.Characters;
 import util.*;
@@ -62,7 +62,11 @@ public class Room extends SpriteObject {
     }
 
     public void load(){
-        initializePixmap();
+        if (button1 == null) button1 = ImageManager.loadImageBuffer("game/Buttons/TapePlayer");
+        if (button2 == null) button2 = ImageManager.loadImageBuffer("game/Buttons/UnderBed");
+        if (play == null) play = ImageManager.loadImageBuffer("game/Tape/PlayButton");
+        if (stop == null) stop = ImageManager.loadImageBuffer("game/Tape/StopButton");
+        if (rewind == null) rewind = ImageManager.loadImageBuffer("game/Tape/RewindButton");
     }
 
     public void input(float mx, float my, Player player, boolean clicked){
@@ -131,14 +135,6 @@ public class Room extends SpriteObject {
                 hoverButton = false;
             }
         }
-    }
-
-    private void initializePixmap(){
-        if (button1 == null) button1 = ImageManager.loadImageBuffer("game/Buttons/TapePlayer");
-        if (button2 == null) button2 = ImageManager.loadImageBuffer("game/Buttons/UnderBed");
-        if (play == null) play = ImageManager.loadImageBuffer("game/Tape/Buttons/PlayButton");
-        if (stop == null) stop = ImageManager.loadImageBuffer("game/Tape/Buttons/StopButton");
-        if (rewind == null) rewind = ImageManager.loadImageBuffer("game/Tape/Buttons/RewindButton");
     }
 
     public void update(Player player){
@@ -262,17 +258,15 @@ public class Room extends SpriteObject {
             batch.draw(region, CameraManager.getX(), CameraManager.getY());
             if ((int) frame == 0) {
                 int spriteRegion = getTapeRegion();
-                region = ImageManager.getRegion("game/Tape/Buttons/Buttons", 394, spriteRegion);
+                region = ImageManager.getRegion("game/Tape/Buttons", 394, spriteRegion);
                 batch.draw(region, CameraManager.getX() + 416, CameraManager.getY() + 126);
             }
         }
         characters.render(batch, room);
-
         if (state == 0 && (int) frame == 0) {
             region = ImageManager.getRegion("game/room/Room", 3072, 1);
             batch.draw(region, 0, 0);
         }
-
         characters.renderForward(batch, room);
 
         FrameBufferManager.end(batch, Game.roomBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());

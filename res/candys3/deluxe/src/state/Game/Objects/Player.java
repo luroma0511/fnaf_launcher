@@ -1,7 +1,7 @@
 package state.Game.Objects;
 
 import core.Candys3Deluxe;
-import data.GameData;
+import deluxe.GameData;
 import util.CameraManager;
 import util.Time;
 import util.Window;
@@ -66,19 +66,14 @@ public class Player {
 
     public void update(Window window, Flashlight flashlight, Room room){
         if (room.getFrame() == 0 && room.getState() != 2 && !freeze) {
-            boolean leftHover = Candys3Deluxe.inputManager.getX() < (float) window.getWidth() * 0.1f;
-            boolean rightHover = Candys3Deluxe.inputManager.getX() > (float) window.getWidth() * 0.9f;
             if (!attack || GameData.freeScroll) {
+                hoverLock = 0.75f;
                 x += lookMechanic(x, Candys3Deluxe.inputManager.getX(), (float) window.getWidth() / 3, 1, room.getBoundsX(), shakeLimit);
                 y += lookMechanic(y, Candys3Deluxe.inputManager.getY(), (float) window.getHeight() / 3, 4, room.getBoundsY(), 0);
                 if (flashlight.getX() < 1024) side = 0;
                 else if (flashlight.getX() >= 2048) side = 2;
                 else side = 1;
             } else {
-                if (hoverLock == 0.375f) {
-                    if (leftHover && side > 0) side--;
-                    if (rightHover && side < 2) side++;
-                }
                 float targetX;
                 float targetY;
                 if (side == 0){
@@ -96,8 +91,16 @@ public class Player {
                 float distanceY = Time.convertValue(targetY - y) * 4;
                 y += distanceY;
             }
-            if (hoverLock == 0 && (leftHover || rightHover)) hoverLock = 0.375f;
-            else hoverLock = Time.decreaseTimeValue(hoverLock, 0, 1);
+            if (hoverLock == 0) {
+                if (Candys3Deluxe.inputManager.getX() < (float) window.getWidth() * 0.2f && side != 0) {
+                    side--;
+                    hoverLock = 0.75f;
+                }
+                else if (Candys3Deluxe.inputManager.getX() > (float) window.getWidth() * 0.8f && side != 2) {
+                    side++;
+                    hoverLock = 0.75f;
+                }
+            } else hoverLock = Time.decreaseTimeValue(hoverLock, 0, 1);
         }
         overlayAlpha = Time.decreaseTimeValue(overlayAlpha, 0, 1);
         float distance = Time.convertValue(70);
@@ -140,7 +143,7 @@ public class Player {
         else buttonFade = Time.decreaseTimeValue(buttonFade, 0, 4);
 
         if (GameData.hardCassette) {
-            if (room.tapeMusic.isPlaying()) {
+            if (room.tapeMusic.isPlaying() || (jumpscare && blacknessTimes == 0)) {
                 purpleSpeed = 0;
                 purpleAlpha = Time.decreaseTimeValue(purpleAlpha, 0, 3);
             } else if (!freeze) {

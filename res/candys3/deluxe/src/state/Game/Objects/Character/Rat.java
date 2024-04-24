@@ -2,7 +2,7 @@ package state.Game.Objects.Character;
 
 import java.util.Random;
 
-import data.GameData;
+import deluxe.GameData;
 import state.Game.Functions.*;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
@@ -148,18 +148,20 @@ public class Rat extends SpriteObject {
                     attack.setLimit(3);
                     break;
                 }
-                if (attack.getLimit() != 0 && random.nextInt(5) == 2) {
-                    attack.setLimit(attack.getLimit() - 1);
-                    break;
+                if (attack.getLimit() != 0){
+                    if (random.nextInt(5) == 2) {
+                        attack.setLimit(attack.getLimit() - 1);
+                        break;
+                    }
+                    if (random.nextInt(5) == 2) {
+                        attack.setSkip();
+                        attack.setKillTimer(attack.getKillTimer() + 0.275f);
+                        attack.setLimit(0);
+                        break;
+                    }
                 }
-                if (random.nextInt(5) == 2) {
-                    attack.setSkip();
-                    attack.setKillTimer(attack.getKillTimer() + 0.25f);
-                    attack.setLimit(attack.getLimit() - 1);
-                    break;
-                }
-                attack.setLimit(3);
-                attack.setFlashTime(0.25f + random.nextInt(4) * 0.125f);
+                if (attack.getLimit() < 3) attack.setLimit(attack.getLimit() + 1);
+                attack.setFlashTime(0.25f + random.nextInt(5) * 0.125f);
                 break;
             case 2:
                 if (bed.killTime()) {
@@ -171,7 +173,7 @@ public class Rat extends SpriteObject {
                     return;
                 }
                 if (!bed.update(player, room)) return;
-                if ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
+                if (room.getState() == 0 && ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0))) {
                     transitionRoomState((byte) 3);
                     SoundManager.play("peek");
                     break;
@@ -349,30 +351,6 @@ public class Rat extends SpriteObject {
             leave.reset();
             changePath();
         }
-    }
-
-    public void jumpscare(){
-        VideoManager.setRequest("game/Rat/Jumpscare/room");
-    }
-
-    private final String[] textures = new String[]{
-            "Battle/Left",
-            "Battle/Middle",
-            "Battle/Right",
-            "Bed/LeftUnder",
-            "Bed/RightUnder",
-            "Bed/LeftPeek",
-            "Bed/RightPeek",
-            "Leaving/Left",
-            "Leaving/Right",
-            "Tape/Tape",
-            "Looking Away/Left",
-            "Looking Away/Middle",
-            "Looking Away/Right"
-    };
-
-    public void load(){
-        for (String file: textures) ImageManager.add("game/Rat/" + file);
     }
 
     public byte getRoomState() {

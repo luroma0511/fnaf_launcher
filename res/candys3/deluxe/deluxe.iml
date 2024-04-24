@@ -16,7 +16,7 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="utilities" />
     <orderEntry type="module" module-name="discord" />
+    <orderEntry type="module" module-name="utils" />
   </component>
 </module>

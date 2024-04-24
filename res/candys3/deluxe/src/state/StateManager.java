@@ -4,14 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.ScreenUtils;
-import data.GameData;
+import core.Candys3Deluxe;
 import state.Game.Game;
 import state.Win.Win;
 import state.Menu.Menu;
-import util.FrameBufferManager;
-import util.RenderManager;
-import util.VideoManager;
-import util.Window;
+import util.*;
 
 public class StateManager {
     private final Game game;
@@ -28,21 +25,20 @@ public class StateManager {
         prevState = -1;
     }
 
-    public void update(Window window){
-        if (state == 0) menu.update(window);
-        else if (state == 1) game.update(window);
-        else if (state == 2) win.update();
+    public void update(Window window, InputManager inputManager){
+        if (state == 0) menu.update(window, inputManager);
+        else if (state == 1) game.update(window, inputManager);
+        else win.update();
 
         if (prevState == state) return;
         if (state == 0) menu.load();
         else if (state == 1) game.load();
-        else if (state == 2) win.load();
+        else win.load();
         prevState = state;
     }
 
-    public void render(Window window){
+    public void render(SpriteBatch batch, Window window, InputManager inputManager){
         ScreenUtils.clear(0, 0, 0, 1);
-        SpriteBatch batch = RenderManager.batch;
         FrameBuffer screenBuffer = RenderManager.screenBuffer;
 
         if (state == 0){
@@ -54,9 +50,22 @@ public class StateManager {
             ScreenUtils.clear(0, 0, 0, 1);
             win.render(batch);
         }
+        debug(batch, inputManager);
         FrameBufferManager.end(batch, screenBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         FrameBufferManager.render(batch, screenBuffer, true);
         batch.end();
+    }
+
+    private void debug(SpriteBatch batch, InputManager inputManager){
+        Candys3Deluxe.debugFont.draw(batch,
+                "Mouse: " + (int) inputManager.getX() + " | " + (int) inputManager.getY(),
+                24, 696);
+        Candys3Deluxe.debugFont.draw(batch,
+                "Java path: " + JavaInfo.home,
+                24, 666);
+        Candys3Deluxe.debugFont.draw(batch,
+                "Java version: " + JavaInfo.jre,
+                24, 636);
     }
 
     public void dispose(){
