@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="discord">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/res/discord/out/artifacts/discord_jar/discord.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

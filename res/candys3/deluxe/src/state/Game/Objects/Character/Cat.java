@@ -3,7 +3,7 @@ package state.Game.Objects.Character;
 import java.util.Arrays;
 import java.util.Random;
 
-import data.GameData;
+import deluxe.GameData;
 import state.Game.Functions.*;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
@@ -64,7 +64,7 @@ public class Cat extends SpriteObject {
                     float catVolume = Time.increaseTimeValue(SoundManager.getVolume("cat"), 0.15f, 0.25f);
                     SoundManager.setVolume("cat", catVolume);
                 }
-                if (!player.isFreeze() && bedSide.input(hitbox, room, mx, my)){
+                if (room.getFrame() == 0 && room.getState() == 0 && !player.isFreeze() && bedSide.input(hovered, true)){
                     if (!bedSide.getSoundLock()){
                         SoundManager.play("catPulse");
                         SoundManager.setLoop("catPulse", true);
@@ -105,7 +105,7 @@ public class Cat extends SpriteObject {
         }
         switch (roomState){
             case 0:
-                side = (byte) bedSide.update(random, side);
+                side = (byte) bedSide.update(random, side, true);
                 if (bedSide.getFrame() != 23 && bedSide.getFrame() != 42 && bedSide.getFrame() != 57) hitbox.setCoord(0, 0);
                 if (bedSide.getFrame() > 0){
                     boolean change = true;
@@ -186,7 +186,7 @@ public class Cat extends SpriteObject {
             case 2:
                 if (bed.killTime()) return;
                 if (!bed.update(player, room)) return;
-                if ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
+                if (room.getState() == 0 && (player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
                     transitionRoomState((byte) 3);
                     SoundManager.play("peek");
                     break;
@@ -365,34 +365,6 @@ public class Cat extends SpriteObject {
             leave.reset();
             changePath();
         }
-    }
-
-    public void jumpscare(){
-        VideoManager.setRequest("game/Cat/Jumpscare/room");
-    }
-
-    private final String[] textures = new String[]{
-            "Battle/Left",
-            "Battle/Middle",
-            "Battle/Right",
-            "Bed/LeftUnder",
-            "Bed/RightUnder",
-            "Bed/LeftPeek",
-            "Bed/RightPeek",
-            "Leaving/Left",
-            "Leaving/Middle",
-            "Leaving/Right",
-            "Tape/Tape",
-            "Retreat/Left1",
-            "Retreat/Left2",
-            "Retreat/Left3",
-            "Retreat/Right1",
-            "Retreat/Right2",
-            "Retreat/Right3"
-    };
-
-    public void load(){
-        for (String file: textures) ImageManager.add("game/Cat/" + file);
     }
 
     public byte getRoomState() {

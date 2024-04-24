@@ -8,8 +8,8 @@ public class Button extends SpriteObject {
     private boolean selected;
     private boolean hovered;
 
-    public Button(String path, int x, int y, int width, int height, float alpha) {
-        super(path, x, y, width, height, alpha);
+    public Button(String path, int x, int y, int width, int height) {
+        super(path, x, y, width, height, 0);
     }
 
     public void update(InputManager inputManager, boolean alphaConfig){

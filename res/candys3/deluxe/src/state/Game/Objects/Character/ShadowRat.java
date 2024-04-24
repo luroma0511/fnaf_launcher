@@ -1,6 +1,6 @@
 package state.Game.Objects.Character;
 
-import data.GameData;
+import deluxe.GameData;
 import state.Game.Functions.*;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
@@ -116,7 +116,7 @@ public class ShadowRat extends SpriteObject {
                 player.setBlacknessSpeed(6);
                 break;
             case 1:
-                if (attack.getKillTimer() == 0){
+                if (attack.getKillTimer() == 0 || (cat != null && cat.getRoomState() == 1 && cat.getSide() == side)){
                     player.setBlacknessTimes(3);
                     player.setBlacknessSpeed(6);
                     player.setFreeze();
@@ -150,8 +150,8 @@ public class ShadowRat extends SpriteObject {
                     break;
                 }
                 attack.setLimit(4);
-                attack.setFlashTime(0.19f + random.nextInt(5) * 0.065f);
-//                    if (random.nextInt(5) == 2) attack.setSkip();
+                attack.setFlashTime(0.175f + random.nextInt(5) * 0.065f);
+                    if (random.nextInt(10) == 2) attack.setSkip();
                 break;
             case 2:
                 if (bed.killTime()) {
@@ -163,7 +163,7 @@ public class ShadowRat extends SpriteObject {
                     return;
                 }
                 if (!bed.update(player, room)) return;
-                if ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
+                if (room.getState() == 0 && ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0))) {
                     transitionRoomState((byte) 3);
                     SoundManager.play("peek");
                     break;
@@ -364,30 +364,6 @@ public class ShadowRat extends SpriteObject {
             leave.reset();
             changePath();
         }
-    }
-
-    public void jumpscare() {
-        VideoManager.setRequest("game/Shadow Rat/Jumpscare");
-    }
-
-    private final String[] textures = new String[]{
-            "Battle/Left",
-            "Battle/Middle",
-            "Battle/Right",
-            "Bed/LeftUnder",
-            "Bed/RightUnder",
-            "Bed/LeftPeek",
-            "Bed/RightPeek",
-            "Leaving/Left",
-            "Leaving/Right",
-            "Tape/Tape",
-            "Looking Away/Left",
-            "Looking Away/Middle",
-            "Looking Away/Right"
-    };
-
-    public void load() {
-        for (String file : textures) ImageManager.add("game/Shadow Rat/" + file);
     }
 
     public byte getRoomState() {

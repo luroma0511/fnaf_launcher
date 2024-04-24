@@ -44,7 +44,7 @@ public class Attack {
         boolean looking = room.getFrame() == 0 && room.getState() == 0;
         if (!attack && attackTimer > 0 && looking && imageHovered){
             if (!player.isScared()) player.setScared();
-            player.setAttack();
+            if (!player.isAttack()) player.setAttack();
             playAudio(audioID);
             killTimer = 1;
             attack = true;
@@ -62,7 +62,7 @@ public class Attack {
             }
             flashTime = Time.decreaseTimeValue(flashTime, 0, 1);
             return flashTime == 0 && attackTimer > 0;
-        } else if (flashTime > 0 || attackTimer > 0) killTimer = Time.decreaseTimeValue(killTimer, 0, 1);
+        } else if ((flashTime > 0 || attackTimer > 0) && (int) moveFrame == 0) killTimer = Time.decreaseTimeValue(killTimer, 0, 1);
         return false;
     }
 

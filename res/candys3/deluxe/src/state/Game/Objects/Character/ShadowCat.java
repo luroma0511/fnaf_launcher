@@ -1,6 +1,6 @@
 package state.Game.Objects.Character;
 
-import data.GameData;
+import deluxe.GameData;
 import state.Game.Functions.*;
 import state.Game.Objects.Flashlight;
 import state.Game.Objects.Player;
@@ -67,15 +67,12 @@ public class ShadowCat extends SpriteObject{
                     float catVolume = Time.increaseTimeValue(SoundManager.getVolume("cat"), 0.15f, 0.25f);
                     SoundManager.setVolume("cat", catVolume);
                 }
-                if (!player.isFreeze() && bedSide.input(hitbox, room, mx, my)){
-                    if (!bedSide.getSoundLock()){
-                        SoundManager.play("catPulse");
-                        SoundManager.setLoop("catPulse", true);
-                        bedSide.setSoundLock();
-                    }
-                } else if (bedSide.getSoundLock()) {
-                    SoundManager.stop("catPulse");
-                    bedSide.setSoundLock();
+                if (room.getFrame() == 0 && room.getState() == 0 && !player.isFreeze()) {
+                    bedSide.input(hovered, false);
+                    twitch.update(hovered);
+                    if (hovered && !player.isScared()) player.setScared();
+                    else if (!hovered && !player.isAttack() && player.isScared()) player.setScared();
+                    if (twitch.isTwitching()) twitching = true;
                 }
                 break;
             case 1:
@@ -108,30 +105,134 @@ public class ShadowCat extends SpriteObject{
         }
         switch (roomState){
             case 0:
-                side = (byte) bedSide.update(random, side);
-                if (bedSide.getFrame() != 23 && bedSide.getFrame() != 42 && bedSide.getFrame() != 57) hitbox.setCoord(0, 0);
+                side = (byte) bedSide.update(random, side, false);
                 if (bedSide.getFrame() > 0){
+                    System.out.println(hitbox.getX() + " | " + hitbox.getY());
                     boolean change = true;
                     float bedPhase = bedSide.getPhase();
-                    if (bedSide.getFrame() <= 23) bedSide.setPhase(1);
-                    else if (bedSide.getFrame() <= 42) bedSide.setPhase(2);
-                    else bedSide.setPhase(3);
+                    if (bedSide.getFrame() < 8) bedSide.setPhase(1);
+                    else if (bedSide.getFrame() < 20) bedSide.setPhase(2);
+                    else if (bedSide.getFrame() < 32) bedSide.setPhase(3);
+                    else bedSide.setPhase(4);
                     if (bedPhase == bedSide.getPhase()) change = false;
                     if (change) changePath();
-                    if (side == 0) SoundManager.setVolume("catLeft", (float) (bedSide.getFrame() - 23) / 75);
-                    else SoundManager.setVolume("catRight", (float) (bedSide.getFrame() - 23) / 75);
+                    if (side == 0) SoundManager.setVolume("catLeft", (float) (bedSide.getFrame() - 8) / 75);
+                    else SoundManager.setVolume("catRight", (float) (bedSide.getFrame() - 8) / 75);
                 }
-                if (bedSide.isSignal()) {
-                    hitbox.setSize(100, GameData.hitboxMultiplier);
-                    if (side == 0) {
-                        if (bedSide.getFrame() <= 23) hitbox.setCoord(192, 548);
-                        else if (bedSide.getFrame() <= 42) hitbox.setCoord(186, 720);
-                        else hitbox.setCoord(187, 660);
-                    } else {
-                        if (bedSide.getFrame() <= 23) hitbox.setCoord(2910, 448);
-                        else if (bedSide.getFrame() <= 42) hitbox.setCoord(2838, 547);
-                        else hitbox.setCoord(2805, 619);
-                    }
+                hitbox.setSize(100, GameData.hitboxMultiplier);
+                int hitboxPosition = bedSide.getFrame() - 7;
+                switch (hitboxPosition){
+                    case 1:
+                        if (side == 2) hitbox.setCoord(2857, 512);
+                        break;
+                    case 2:
+                        if (side == 2) hitbox.setCoord(2857, 513);
+                        break;
+                    case 3:
+                        if (side == 2) hitbox.setCoord(2856, 514);
+                        break;
+                    case 4:
+                        if (side == 2) hitbox.setCoord(2855, 515);
+                        break;
+                    case 5:
+                        if (side == 2) hitbox.setCoord(2854, 516);
+                        break;
+                    case 6:
+                        if (side == 2) hitbox.setCoord(2852, 518);
+                        break;
+                    case 7:
+                        if (side == 2) hitbox.setCoord(2850, 521);
+                        break;
+                    case 8:
+                        if (side == 2) hitbox.setCoord(2847, 525);
+                        break;
+                    case 9:
+                        if (side == 2) hitbox.setCoord(2844, 529);
+                        break;
+                    case 10:
+                        if (side == 2) hitbox.setCoord(2841, 533);
+                        break;
+                    case 11:
+                        if (side == 2) hitbox.setCoord(2838, 537);
+                        break;
+                    case 12:
+                        if (side == 2) hitbox.setCoord(2834, 541);
+                        break;
+                    case 13:
+                        if (side == 2) hitbox.setCoord(2830, 546);
+                        break;
+                    case 14:
+                        if (side == 2) hitbox.setCoord(2826, 552);
+                        break;
+                    case 15:
+                        if (side == 2) hitbox.setCoord(2822, 557);
+                        break;
+                    case 16:
+                        if (side == 2) hitbox.setCoord(2818, 561);
+                        break;
+                    case 17:
+                        if (side == 2) hitbox.setCoord(2815, 564);
+                        break;
+                    case 18:
+                        if (side == 2) hitbox.setCoord(2811, 567);
+                        break;
+                    case 19:
+                        if (side == 2) hitbox.setCoord(2808, 570);
+                        break;
+                    case 20:
+                        if (side == 2) hitbox.setCoord(2804, 573);
+                        break;
+                    case 21:
+                        if (side == 2) hitbox.setCoord(2802, 575);
+                        break;
+                    case 22:
+                        if (side == 2) hitbox.setCoord(2801, 576);
+                        break;
+                    case 23:
+                        if (side == 2) hitbox.setCoord(2798, 578);
+                        break;
+                    case 24:
+                        if (side == 2) hitbox.setCoord(2796, 580);
+                        break;
+                    case 25:
+                        if (side == 2) hitbox.setCoord(2794, 583);
+                        break;
+                    case 26:
+                        if (side == 2) hitbox.setCoord(2791, 585);
+                        break;
+                    case 27:
+                        if (side == 2) hitbox.setCoord(2789, 588);
+                        break;
+                    case 28:
+                        if (side == 2) hitbox.setCoord(2786, 591);
+                        break;
+                    case 29:
+                        if (side == 2) hitbox.setCoord(2783, 594);
+                        break;
+                    case 30:
+                        if (side == 2) hitbox.setCoord(2780, 596);
+                        break;
+                    case 31:
+                        if (side == 2) hitbox.setCoord(2778, 599);
+                        break;
+                    case 32:
+                        if (side == 2) hitbox.setCoord(2775, 601);
+                        break;
+                    case 33:
+                        if (side == 2) hitbox.setCoord(2772, 603);
+                        break;
+                    case 34:
+                        if (side == 2) hitbox.setCoord(2769, 605);
+                        break;
+                    case 35:
+                        if (side == 2) hitbox.setCoord(2766, 607);
+                        break;
+                    case 36:
+                        if (side == 2) hitbox.setCoord(2763, 609);
+                        break;
+                    default:
+                        hitbox.setCoord(0, 0);
+                        break;
                 }
                 if (!bedSide.endState()) return;
                 if (rat == null || rat.getRoomState() != 2) side = (byte) (random.nextInt(2) * 2);
@@ -180,8 +281,7 @@ public class ShadowCat extends SpriteObject{
                         break;
                     }
                     if (random.nextInt(5) == 2) {
-                        attack.setFlashTime(0.125f);
-                        attack.setKillTimer(attack.getKillTimer() + 0.275f);
+                        attack.setFlashTime(0.1f);
                         attack.setLimit(0);
                         break;
                     }
@@ -199,7 +299,7 @@ public class ShadowCat extends SpriteObject{
                     return;
                 }
                 if (!bed.update(player, room)) return;
-                if ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0)) {
+                if (room.getState() == 0 && ((player.getSide() == 0 && side == 2) || (player.getSide() == 2 && side == 0))) {
                     transitionRoomState((byte) 3);
                     SoundManager.play("peek");
                     break;
@@ -241,9 +341,9 @@ public class ShadowCat extends SpriteObject{
                 setPath("game/Shadow Cat/Retreat/Left");
                 append(String.valueOf(bedSide.getPhase()));
                 setX(0);
-                if (bedSide.getPhase() == 1){
-                    setY(339);
-                    setWidth(371);
+                if (bedSide.getFrame() < 8){
+                    setY(218);
+                    setWidth(390);
                 } else if (bedSide.getPhase() == 2){
                     setY(274);
                     setWidth(400);
@@ -252,18 +352,15 @@ public class ShadowCat extends SpriteObject{
                     setWidth(378);
                 }
             } else {
-                setPath("game/Shadow Cat/Retreat/Right");
-                append(String.valueOf(bedSide.getPhase()));
+                setPath("game/Shadow Cat/Retreat/Right/");
                 setY(218);
-                if (bedSide.getPhase() == 1){
-                    setX(2761);
-                    setWidth(274);
-                } else if (bedSide.getPhase() == 2){
-                    setX(2603);
-                    setWidth(433);
+                if (bedSide.getFrame() < 8){
+                    append(String.valueOf(0));
+                    setX(2648);
+                    setWidth(390);
                 } else {
-                    setX(2537);
-                    setWidth(497);
+                    setX(2483);
+                    setWidth(555);
                 }
             }
         } else if (roomState == 1){
@@ -349,7 +446,7 @@ public class ShadowCat extends SpriteObject{
                 attack.setFlashTime(0.8f);
                 attack.setLimit(4);
                 attack.setPosition((byte) 0);
-                attack.setKillTimer(2);
+                attack.setKillTimer(1.5f);
                 attack.setAttackTimer(4.5f);
                 attack.setMoved();
                 player.setBlacknessTimes(1);
@@ -360,7 +457,9 @@ public class ShadowCat extends SpriteObject{
                     side = 1;
                     SoundManager.play("dodgeLeft");
                 } else {
-                    side = (byte) (random.nextInt(2) * 2);
+                    if (rat == null || rat.getRoomState() != 0 || rat.getDoor().getFrame() == 13 || rat.getSide() == 1) side = (byte) (random.nextInt(2) * 2);
+                    else if (rat.getSide() == 0) side = 0;
+                    else side = 2;
                     if (side == 0) SoundManager.play("dodgeLeft");
                     else SoundManager.play("dodgeRight");
                 }
@@ -400,34 +499,6 @@ public class ShadowCat extends SpriteObject{
             leave.reset();
             changePath();
         }
-    }
-
-    public void jumpscare(){
-        VideoManager.setRequest("game/Shadow Cat/Jumpscare/room");
-    }
-
-    private final String[] textures = new String[]{
-            "Battle/Left",
-            "Battle/Middle",
-            "Battle/Right",
-            "Bed/LeftUnder",
-            "Bed/RightUnder",
-            "Bed/LeftPeek",
-            "Bed/RightPeek",
-//            "Leaving/Left",
-//            "Leaving/Middle",
-            "Leaving/Right",
-//            "Tape/Tape",
-//            "Retreat/Left1",
-//            "Retreat/Left2",
-//            "Retreat/Left3",
-//            "Retreat/Right1",
-//            "Retreat/Right2",
-//            "Retreat/Right3"
-    };
-
-    public void load(){
-        for (String file: textures) ImageManager.add("game/Shadow Cat/" + file);
     }
 
     public byte getRoomState() {

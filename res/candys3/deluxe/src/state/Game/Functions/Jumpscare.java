@@ -27,12 +27,13 @@ public class Jumpscare {
         set(jumpscare, 0);
     }
 
-    public static void render(SpriteBatch batch){
+    public static boolean render(SpriteBatch batch){
         if (!begin) {
             SoundManager.stopAllSounds();
             begin = true;
         }
-        if (play == 0) VideoManager.render(batch, false, 1280, 720);
+        if (play == 0) return VideoManager.render(batch, false, 1280, 720);
         else play = Time.decreaseTimeValue(play, 0, 1);
+        return true;
     }
 }

@@ -10,7 +10,7 @@ def __execute__(version):
 
     # Check if the directory has been changed
     path = "versions"
-    command = ["java\\jre1.8.0_351\\bin\\java.exe", "-jar", f"{path}/{version}"]
+    command = ["/jre1.8.0_411/bin/java", "-jar", f"{path}/{version}"]
     try:
         subprocess.run(command, check=True, creationflags=subprocess.CREATE_NO_WINDOW)
     except subprocess.CalledProcessError as e:

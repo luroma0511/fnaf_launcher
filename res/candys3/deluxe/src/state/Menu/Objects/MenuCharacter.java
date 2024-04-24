@@ -1,10 +1,9 @@
 package state.Menu.Objects;
 
-import com.badlogic.gdx.graphics.Color;
-
+import deluxe.GameData;
 import util.InputManager;
+import util.RenderManager;
 import util.SpriteObject;
-import space.earlygrey.shapedrawer.ShapeDrawer;
 import util.Window;
 
 public class MenuCharacter extends SpriteObject {
@@ -12,8 +11,8 @@ public class MenuCharacter extends SpriteObject {
     private final int initX;
     private final int initY;
 
-    public MenuCharacter(String path, int x, int y, int width, int height, float alpha) {
-        super(path, x, y, width, height, alpha);
+    public MenuCharacter(int x, int y, int width, int height) {
+        super(null, x, y, width, height, 0);
         initX = x;
         initY = y;
         setX(x);
@@ -35,10 +34,10 @@ public class MenuCharacter extends SpriteObject {
         if (ai > 20) ai = 20;
     }
 
-    public void debugRender(ShapeDrawer shapeDrawer){
-        Color color = new Color(1, 0, 0, 0.5f);
-        shapeDrawer.setColor(color);
-        shapeDrawer.filledRectangle(
+    public void debugRender(){
+        if (GameData.night == 0) RenderManager.shapeDrawer.setColor(1, 0, 0, 0.5f);
+        else RenderManager.shapeDrawer.setColor(0.5f, 0, 1, 0.5f);
+        RenderManager.shapeDrawer.filledRectangle(
                 getX() + getWidth() / 4, getY() + getHeight(),
                 (int) (getWidth() / 2), (int) (getHeight() / 1.5f));
     }
