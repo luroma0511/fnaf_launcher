@@ -388,15 +388,15 @@ public class ShadowCat extends SpriteObject{
             if (side == 0) {
                 setPath("game/Shadow Cat/Bed/LeftUnder");
                 setX(0);
-                setY(170);
-                setWidth(784);
-                setHeight(509);
+                setY(214);
+                setWidth(890);
+                setHeight(446);
             } else {
                 setPath("game/Shadow Cat/Bed/RightUnder");
-                setX(1100);
-                setY(141);
-                setWidth(948);
-                setHeight(538);
+                setX(1408);
+                setY(204);
+                setWidth(640);
+                setHeight(420);
             }
         } else if (roomState == 3){
             if (side == 0) {
