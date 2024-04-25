@@ -1,0 +1,8 @@
+Battle/Left
+Battle/Middle
+Battle/Right
+Bed/LeftUnder
+Bed/RightUnder
+Bed/LeftPeek
+Bed/RightPeek
+Leaving/Right

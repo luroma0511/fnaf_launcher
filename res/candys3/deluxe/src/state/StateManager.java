@@ -59,13 +59,13 @@ public class StateManager {
     private void debug(SpriteBatch batch, InputManager inputManager){
         Candys3Deluxe.debugFont.draw(batch,
                 "Mouse: " + (int) inputManager.getX() + " | " + (int) inputManager.getY(),
-                24, 696);
+                CameraManager.getX() + 24, CameraManager.getY() + 696);
         Candys3Deluxe.debugFont.draw(batch,
                 "Java path: " + JavaInfo.home,
-                24, 666);
+                CameraManager.getX() + 24, CameraManager.getY() + 666);
         Candys3Deluxe.debugFont.draw(batch,
                 "Java version: " + JavaInfo.jre,
-                24, 636);
+                CameraManager.getX() + 24, CameraManager.getY() + 636);
     }
 
     public void dispose(){

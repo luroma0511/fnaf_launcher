@@ -1,0 +1,5 @@
+Leaving/Left
+Tape/Tape
+Looking Away/Left
+Looking Away/Middle
+Looking Away/Right
