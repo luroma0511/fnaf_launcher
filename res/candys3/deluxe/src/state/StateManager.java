@@ -28,12 +28,12 @@ public class StateManager {
     public void update(Window window, InputManager inputManager){
         if (state == 0) menu.update(window, inputManager);
         else if (state == 1) game.update(window, inputManager);
-        else win.update();
+        else if (state == 2) win.update();
 
         if (prevState == state) return;
         if (state == 0) menu.load();
         else if (state == 1) game.load();
-        else win.load();
+        else if (state == 2) win.load();
         prevState = state;
     }
 
@@ -41,31 +41,28 @@ public class StateManager {
         ScreenUtils.clear(0, 0, 0, 1);
         FrameBuffer screenBuffer = RenderManager.screenBuffer;
 
-        if (state == 0){
-            screenBuffer.begin();
-            menu.render(batch, window);
-        } else if (state == 1) game.render(batch, window);
+        if (state == 0) menu.render(batch, window);
+        else if (state == 1) game.render(batch, window);
         else {
             screenBuffer.begin();
             ScreenUtils.clear(0, 0, 0, 1);
             win.render(batch);
         }
-        debug(batch, inputManager);
+//        debug(batch, inputManager);
+        RenderManager.shapeDrawer.setColor(0, 0, 0, 1 - RenderManager.screenAlpha);
+        RenderManager.shapeDrawer.filledRectangle(CameraManager.getX(), CameraManager.getY(), 1280, 720);
         FrameBufferManager.end(batch, screenBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         FrameBufferManager.render(batch, screenBuffer, true);
         batch.end();
     }
 
     private void debug(SpriteBatch batch, InputManager inputManager){
-        Candys3Deluxe.debugFont.draw(batch,
-                "Mouse: " + (int) inputManager.getX() + " | " + (int) inputManager.getY(),
-                CameraManager.getX() + 24, CameraManager.getY() + 696);
-        Candys3Deluxe.debugFont.draw(batch,
-                "Java path: " + JavaInfo.home,
-                CameraManager.getX() + 24, CameraManager.getY() + 666);
-        Candys3Deluxe.debugFont.draw(batch,
-                "Java version: " + JavaInfo.jre,
-                CameraManager.getX() + 24, CameraManager.getY() + 636);
+        FontManager.setFont(Candys3Deluxe.captionFont);
+        FontManager.setSize(18);
+        FontManager.setText("Mouse: " + (int) inputManager.getX() + " | " + (int) inputManager.getY());
+        FontManager.render(batch, CameraManager.getX() + 16, CameraManager.getY() + 704);
+        FontManager.setText("Java version: " + Constants.jre);
+        FontManager.render(batch, CameraManager.getX() + 16, CameraManager.getY() + 679);
     }
 
     public void dispose(){

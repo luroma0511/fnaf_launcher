@@ -10,30 +10,29 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class RenderManager {
-    public static SpriteBatch batch;
-    public static ShapeDrawer shapeDrawer;
-    public static FrameBuffer screenBuffer;
+    public static final SpriteBatch batch = new SpriteBatch();
+    public static final ShapeDrawer shapeDrawer;
+    public static final FrameBuffer screenBuffer = FrameBufferManager.newFrameBuffer();
     public static boolean lock = true;
+    public static float screenAlpha;
 
-    public static void init(){
-        batch = new SpriteBatch();
+    static {
         FrameBuffer fbo = FrameBufferManager.newFrameBuffer();
         fbo.begin();
         ScreenUtils.clear(1, 1, 1, 1);
         FrameBufferManager.end(batch, fbo, 1280, 720);
         TextureRegion region = new TextureRegion(fbo.getColorBufferTexture());
         shapeDrawer = new ShapeDrawer(batch, region);
-        screenBuffer = FrameBufferManager.newFrameBuffer();
     }
 
     public static boolean requests(){
-        lock = !(ImageManager.queue.isEmpty() && SoundManager.queue.isEmpty());
+        lock = !ImageManager.queue.isEmpty() || !SoundManager.queue.isEmpty();
         if (!lock) return false;
         Time.lock = true;
         long time = System.currentTimeMillis();
         ImageManager.dispose();
-        SoundManager.loadSounds();
-        ImageManager.loadImages();
+        SoundManager.load();
+        ImageManager.load();
         System.out.println(System.currentTimeMillis() - time + "ms");
         return true;
     }

@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
 Main-Class: core.DesktopLauncher
-Class-Path: ../../../dependencies/dependencies.jar ../../../utils/utils.jar
+Class-Path: ../../../dependencies/dependencies.jar ../../../utils/util.jar

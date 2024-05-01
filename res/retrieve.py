@@ -4,7 +4,7 @@ class Jars():
 
     def __init__(self):
         self.files = []
-        self.list_files("res/versions", '')
+        self.list_files("res/candys3/versions/deluxe", '')
     
     def list_files(self, directory, path):
         files = os.listdir(directory)

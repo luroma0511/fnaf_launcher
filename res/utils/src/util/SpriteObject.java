@@ -24,8 +24,8 @@ public abstract class SpriteObject {
     }
 
     public boolean mouseOver(InputManager inputManager, boolean smaller){
-        if (smaller) return inputManager.mouseOver(x + width / 4, y + height / 4,
-                width / 2, height / 1.5f);
+        if (smaller) return inputManager.mouseOver(x + width / 4.75f, y + height / 4,
+                width / 1.75f, height / 1.5f);
         return inputManager.mouseOver(x, y, width, height);
     }
 

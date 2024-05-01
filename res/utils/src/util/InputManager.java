@@ -8,17 +8,11 @@ public class InputManager extends InputAdapter {
     float x;
     float y;
     float scroll;
-    boolean pressed;
     boolean lock;
-
-    public void update(){
-        pressed = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT);
-        lock = false;
-    }
 
     public void fullscreen(Window window){
         if (!keyTyped(Input.Keys.F11) || lock) return;
-        if (Gdx.graphics.isFullscreen()) Gdx.graphics.setWindowedMode(window.getWidth(), window.getHeight());
+        if (Gdx.graphics.isFullscreen()) Gdx.graphics.setWindowedMode(window.width(), window.height());
         else Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
     }
 
@@ -26,8 +20,21 @@ public class InputManager extends InputAdapter {
         return Gdx.input.isKeyJustPressed(key);
     }
 
+    private boolean buttonType(int button){
+        return Gdx.input.isButtonJustPressed(button);
+    }
+
+    public boolean isLeftPressed(){
+        return buttonType(Input.Buttons.LEFT);
+    }
+
+    public boolean isRightPressed(){
+        return buttonType(Input.Buttons.RIGHT);
+    }
+
     public void reset(){
         scroll = 0;
+        lock = false;
     }
 
     public void setLock(){
@@ -57,10 +64,6 @@ public class InputManager extends InputAdapter {
 
     public float getScrolled() {
         return scroll;
-    }
-
-    public boolean isPressed() {
-        return pressed;
     }
 
     public float getX() {

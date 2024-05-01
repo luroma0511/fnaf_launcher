@@ -1,4 +1,3 @@
-Leaving/Left
 Leaving/Middle
 Retreat/Left1
 Retreat/Left2

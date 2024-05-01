@@ -10,7 +10,7 @@ public class CameraManager {
     private static float y;
 
     public static void createCamera(int width, int height){
-        final OrthographicCamera camera = new OrthographicCamera(width, height);
+        OrthographicCamera camera = new OrthographicCamera(width, height);
         camera.setToOrtho(false);
         viewport = new FitViewport(width, height, camera);
         viewport.getCamera().update();
@@ -18,8 +18,7 @@ public class CameraManager {
     }
 
     public static void move(float x, float y){
-        if (x == CameraManager.x && y == CameraManager.y) return;
-        translate(x - CameraManager.x, y - CameraManager.y);
+        if (x != CameraManager.x || y != CameraManager.y) translate(x - CameraManager.x, y - CameraManager.y);
     }
 
     public static void translate(float x, float y){

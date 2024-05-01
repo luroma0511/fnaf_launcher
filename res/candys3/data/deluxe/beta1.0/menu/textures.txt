@@ -2,6 +2,8 @@ button
 window
 option
 arrow
+star
+starHitbox
 rat
 cat
 shadowRat

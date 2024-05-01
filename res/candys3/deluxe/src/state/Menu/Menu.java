@@ -1,40 +1,49 @@
 package state.Menu;
 
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import core.Candys3Deluxe;
 import deluxe.Paths;
 import deluxe.GameData;
-import state.Menu.Objects.Arrows;
-import state.Menu.Objects.Button;
-import state.Menu.Objects.Caption;
-import state.Menu.Objects.MenuCharacter;
+import deluxe.UserData;
+import state.Menu.Objects.*;
 import util.*;
 
 public class Menu {
+    private final FrameBuffer captionFBO;
+
     private final MenuCharacter rat;
     private final MenuCharacter cat;
     private final MenuCharacter shadowRat;
     private final MenuCharacter shadowCat;
     private final Button optionButton;
     private final Button playButton;
-    private final Button laserPointerButton;
-    private final Button hardCassetteButton;
-    private final Button nightmareCandyButton;
-    private final Button shadowChallengeButton;
-    private final Button allChallengesButton;
-    private final Button freeScrollButton;
-    private final Button infiniteNightButton;
+    private Button laserPointerButton;
+    private Button hardCassetteButton;
+    private Button shadowChallengeButton;
+    private Button allChallengesButton;
+    private Button flashDebugButton;
+    private Button hitboxDebugButton;
+    private Button noJumpscaresButton;
+    private Button freeScrollButton;
+    private Button infiniteNightButton;
+    private Button restartOnJumpscareButton;
     private final Arrows arrows;
     private final Caption caption;
+    private final Star star;
+    private final Star laserStar;
+    private final Star hardCassetteStar;
+    private final Star allChallengesStar;
 
     private boolean shadow;
-    private float thunderAlpha;
+    private float whiteAlpha;
     private float staticFrame;
     private float optionWindowAlpha;
+    private float windowX;
     private byte section;
 
     private boolean playMenu;
@@ -43,105 +52,146 @@ public class Menu {
     private float loadTime;
 
     public Menu(){
-        rat = new MenuCharacter(40, 44, 632, 632);
-        cat = new MenuCharacter(692, 44, 428, 632);
-        shadowRat = new MenuCharacter(40, 44, 632, 632);
-        shadowCat = new MenuCharacter(692, 44, 428, 632);
-        optionButton = new Button("OPTIONS", 365, 24, 200, 100);
-        playButton = new Button("PLAY", 715, 24, 200, 100);
-        laserPointerButton = new Button("Laser Pointer", 220, 470, 84, 84);
-        hardCassetteButton = new Button("Hard Cassette", 220, 372, 84, 84);
-        nightmareCandyButton = new Button("Nightmare Candy", 220, 274, 84, 84);
-        shadowChallengeButton = new Button("The Shadow Cast", 220, 176, 84, 84);
-        allChallengesButton = new Button("All Challenges", 670, 176, 84, 84);
-        freeScrollButton = new Button("Free Scroll", 670, 470, 84, 84);
-        infiniteNightButton = new Button("Infinite Night", 670, 372, 84, 84);
+        rat = new MenuCharacter(40, 44, 632, 632, false, 1);
+        cat = new MenuCharacter(692, 44, 428, 632, false, 2);
+        shadowRat = new MenuCharacter(40, 44, 632, 632, false, 3);
+        shadowCat = new MenuCharacter(692, 44, 428, 632, false, 4);
+        optionButton = new Button("OPTIONS", 365, 24, 200, 100, 0);
+        playButton = new Button("PLAY", 715, 24, 200, 100, 0);
         arrows = new Arrows();
         caption = new Caption();
+
+        captionFBO = FrameBufferManager.newFrameBuffer();
+
+        int size = 40;
+        int xPos = (int) (640 - (float) size / 2);
+        star = new Star(xPos - 56, 128, size, size, 13);
+        laserStar = new Star(xPos, 128, size, size, 14);
+        hardCassetteStar = new Star(xPos + 56, 128, size, size, 15);
+        size = 96;
+        xPos = (int) (640 - (float) size / 2);
+        allChallengesStar = new Star(xPos, 164, size, size, 16);
     }
 
     public void load(){
         ImageManager.add("Static/Static");
         ImageManager.addImages("menu/", Paths.dataPath1 + "menu/textures.txt");
-        SoundManager.addSounds(Paths.dataPath1 + "menu/sounds.txt");
+        SoundManager.addAll(Paths.dataPath1 + "menu/sounds.txt");
+        RenderManager.screenAlpha = 0;
     }
 
     public void update(Window window, InputManager inputManager) {
-        if (!RenderManager.lock && !playMenu) {
+        if (RenderManager.lock) return;
+        if (windowX == 0) {
+            windowX = (float) window.width() / 2 - (float) ImageManager.get("menu/window").getRegionWidth() / 2;
+            laserPointerButton = new Button("Laser Pointer", (int) (windowX + 32), 470, 84, 84, 5);
+            hardCassetteButton = new Button("Hard Cassette", (int) (windowX + 32), 372, 84, 84, 6);
+            shadowChallengeButton = new Button("The Shadow Cast", (int) (windowX + 32), 274, 84, 84, 0);
+            allChallengesButton = new Button("All Challenges", (int) (windowX + 32), 176, 84, 84, 0);
+            flashDebugButton = new Button("Flash Debug", (int) (windowX + 32), 470, 84, 84, 7);
+            hitboxDebugButton = new Button("Hitbox Debug", (int) (windowX + 32), 372, 84, 84, 8);
+            noJumpscaresButton = new Button("No Jumpscares", (int) (windowX + 32), 274, 84, 84, 9);
+            freeScrollButton = new Button("Free Scroll", (int) (windowX + 32), 470, 84, 84, 10);
+            infiniteNightButton = new Button("Infinite Night", (int) (windowX + 32), 372, 84, 84, 11);
+            restartOnJumpscareButton = new Button("Restart on Jumpscare", (int) (windowX + 32), 274, 84, 84, 12);
+        }
+        if (!playMenu) {
             SoundManager.play("deluxeMenu");
-            SoundManager.setLoop("deluxeMenu", true);
-            SoundManager.setVolume("deluxeMenu",0.5f);
+            SoundManager.setSoundEffect(SoundManager.LOOP, "deluxeMenu", 1);
+            SoundManager.setSoundEffect(SoundManager.VOLUME, "deluxeMenu",0.5f);
             SoundManager.play("menuAmbience");
-            SoundManager.setLoop("menuAmbience", true);
-            SoundManager.setVolume("menuAmbience",0.075f);
+            SoundManager.setSoundEffect(SoundManager.LOOP, "menuAmbience", 1);
+            SoundManager.setSoundEffect(SoundManager.VOLUME, "menuAmbience",0.075f);
             playMenu = true;
         }
-        if (shadow) SoundManager.setPitch("deluxeMenu", 0.75f);
-        else SoundManager.setPitch("deluxeMenu", 1);
+        if (shadow) SoundManager.setSoundEffect(SoundManager.PITCH, "deluxeMenu", 0.75f);
+        else SoundManager.setSoundEffect(SoundManager.PITCH, "deluxeMenu", 1);
 
         if (!loadGame) {
-            thunderAlpha = Time.decreaseTimeValue(thunderAlpha, 0, 4);
+            RenderManager.screenAlpha = Time.increaseTimeValue(RenderManager.screenAlpha, 1, 4);
+            whiteAlpha = Time.decreaseTimeValue(whiteAlpha, 0, 3);
             staticFrame = Time.increaseTimeValue(staticFrame, 8192, 30);
             if (staticFrame == 8192) staticFrame = 0;
 
             boolean focus = !optionButton.isSelected() && !playButton.isSelected();
             caption.setActive(false);
             if (shadow) {
-                shadowRat.update(caption, inputManager, window, focus, (short) 3);
-                shadowCat.update(caption, inputManager, window, focus, (short) 4);
+                shadowRat.update(caption, inputManager, window, focus);
+                shadowCat.update(caption, inputManager, window, focus);
             } else {
-                rat.update(caption, inputManager, window, focus, (short) 1);
-                cat.update(caption, inputManager, window, focus, (short) 2);
+                rat.update(caption, inputManager, window, focus);
+                cat.update(caption, inputManager, window, focus);
             }
 
-            optionButton.update(inputManager, true);
+            optionButton.update(caption, inputManager, true);
             if (optionButton.isSelected()) {
                 optionWindowAlpha = Time.increaseTimeValue(optionWindowAlpha, 1, 4);
-                laserPointerButton.update(caption, inputManager, false, (short) 5);
-                GameData.hitboxMultiplier = laserPointerButton.isSelected() ? 0.75f : 1;
-                hardCassetteButton.update(caption, inputManager, false, (short) 6);
-                GameData.hardCassette = hardCassetteButton.isSelected();
-                nightmareCandyButton.update(caption, inputManager, false, (short) 9);
-//            Challenges.nightmareCandy = nightmareCandyButton.isSelected();
-                shadowChallengeButton.update(inputManager, false);
-                allChallengesButton.update(inputManager, false);
-                if (allChallengesButton.isSelected()) {
-                    if (laserPointerButton.isSelected() && hardCassetteButton.isSelected()) {
-                        laserPointerButton.setSelected();
-                        hardCassetteButton.setSelected();
-                    } else {
-                        if (!laserPointerButton.isSelected()) laserPointerButton.setSelected();
-                        if (!hardCassetteButton.isSelected()) hardCassetteButton.setSelected();
+                if (section == 0) {
+                    laserPointerButton.update(caption, inputManager, false);
+                    GameData.hitboxMultiplier = laserPointerButton.isSelected() ? 0.75f : 1;
+                    hardCassetteButton.update(caption, inputManager, false);
+                    GameData.hardCassette = hardCassetteButton.isSelected();
+                    shadowChallengeButton.update(caption, inputManager, false);
+                    allChallengesButton.update(caption, inputManager, false);
+                    if (allChallengesButton.isSelected()) {
+                        if (laserPointerButton.isSelected() && hardCassetteButton.isSelected()) {
+                            laserPointerButton.setSelected();
+                            hardCassetteButton.setSelected();
+                        } else {
+                            if (!laserPointerButton.isSelected()) laserPointerButton.setSelected();
+                            if (!hardCassetteButton.isSelected()) hardCassetteButton.setSelected();
+                        }
+                        allChallengesButton.setSelected();
                     }
-                    allChallengesButton.setSelected();
+                } else if (section == 1){
+                    flashDebugButton.update(caption, inputManager, false);
+                    GameData.flashDebug = flashDebugButton.isSelected();
+                    hitboxDebugButton.update(caption, inputManager, false);
+                    GameData.hitboxDebug = hitboxDebugButton.isSelected();
+                    noJumpscaresButton.update(caption, inputManager, false);
+                    GameData.noJumpscares = noJumpscaresButton.isSelected();
+                } else {
+                    freeScrollButton.update(caption, inputManager, false);
+                    GameData.freeScroll = freeScrollButton.isSelected();
+                    infiniteNightButton.update(caption, inputManager, false);
+                    GameData.infiniteNight = infiniteNightButton.isSelected();
+                    restartOnJumpscareButton.update(caption, inputManager, false);
+                    GameData.restartOnJumpscare = restartOnJumpscareButton.isSelected();
                 }
-//            freeScrollButton.update(caption, inputManager, false, (short) 7);
-//            GameData.freeScroll = freeScrollButton.isSelected();
-//            infiniteNightButton.update(caption, inputManager, false, (short) 8);
-//            GameData.infiniteNight = infiniteNightButton.isSelected();
-//            hellCastButton.update(caption, inputManager, false, (short) 9);
-
                 arrows.update(inputManager, section);
-                if (inputManager.isPressed() && arrows.getHovered() == 1) section--;
-                else if (inputManager.isPressed() && arrows.getHovered() == 2) section++;
+                if (inputManager.isLeftPressed() && arrows.getHovered() == 1) section--;
+                else if (inputManager.isLeftPressed() && arrows.getHovered() == 2) section++;
             } else if ((shadowChallengeButton.isSelected() && !shadow) || (!shadowChallengeButton.isSelected() && shadow)) {
                 shadow = !shadow;
                 optionWindowAlpha = 0;
-                thunderAlpha = 1;
+                whiteAlpha = 1;
                 if (shadow) {
                     GameData.night = 1;
                     shadowRat.setAi(rat.getAi());
                     shadowCat.setAi(cat.getAi());
+                    star.setCaptionID(17);
+                    laserStar.setCaptionID(18);
+                    hardCassetteStar.setCaptionID(19);
+                    allChallengesStar.setCaptionID(20);
                 } else {
                     GameData.night = 0;
                     rat.setAi(shadowRat.getAi());
                     cat.setAi(shadowCat.getAi());
+                    star.setCaptionID(13);
+                    laserStar.setCaptionID(14);
+                    hardCassetteStar.setCaptionID(15);
+                    allChallengesStar.setCaptionID(16);
                 }
                 SoundManager.play("thunder");
-            } else optionWindowAlpha = Time.decreaseTimeValue(optionWindowAlpha, 0, 4);
-
-            caption.update();
-            playButton.update(inputManager, true);
+            } else {
+                star.update(caption, inputManager);
+                laserStar.update(caption, inputManager);
+                hardCassetteStar.update(caption, inputManager);
+                allChallengesStar.update(caption, inputManager);
+                optionWindowAlpha = Time.decreaseTimeValue(optionWindowAlpha, 0, 4);
+            }
+            caption.update(Candys3Deluxe.captionFont);
+            playButton.update(caption, inputManager, true);
             if (!playButton.isSelected()) return;
             if (optionWindowAlpha > 0) {
                 playButton.setSelected();
@@ -149,14 +199,12 @@ public class Menu {
             }
             SoundManager.stopAllSounds();
             SoundManager.play("thunder");
-            thunderAlpha = 1;
+            whiteAlpha = 1;
             loadGame = true;
+            RenderManager.screenAlpha = 1;
         } else {
-            if (playButton.isSelected()) {
-                playButton.setSelected();
-                return;
-            }
-            if (loadTime == 1) {
+            if (playButton.isSelected()) playButton.setSelected();
+            else if (loadTime == 1) {
                 GameData.ratAI = rat.getAi();
                 GameData.catAI = cat.getAi();
                 GameData.shadowRatAI = shadowRat.getAi();
@@ -168,7 +216,7 @@ public class Menu {
                 loadTime = 0;
                 return;
             }
-            thunderAlpha = Time.decreaseTimeValue(thunderAlpha, 0, 2);
+            whiteAlpha = Time.decreaseTimeValue(whiteAlpha, 0, 2);
             loadTime = Time.increaseTimeValue(loadTime, 1, 1.5f);
         }
     }
@@ -182,29 +230,34 @@ public class Menu {
         if (!loadGame) renderNightMenu(batch, window);
         else renderLoading(batch, window);
 
-        RenderManager.shapeDrawer.setColor(1, 1, 1, thunderAlpha);
+        RenderManager.shapeDrawer.setColor(1, 1, 1, whiteAlpha);
         RenderManager.shapeDrawer.filledRectangle(0, 0, 1280, 720);
-
-//        debugRender();
     }
 
     private void renderLoading(SpriteBatch batch, Window window){
+        RenderManager.screenBuffer.begin();
         RenderManager.shapeDrawer.setColor(0, 0, 0, 1);
         RenderManager.shapeDrawer.filledRectangle(0, 0, 1280, 720);
 
-        GlyphLayout layout = FontManager.layout;
-        Candys3Deluxe.fontAlpha(Candys3Deluxe.loadFont, 1, true);
-        if (!shadow) layout.setText(Candys3Deluxe.loadFont, "The Main Cast");
-        else layout.setText(Candys3Deluxe.loadFont, "The Shadow Cast");
-        Candys3Deluxe.loadFont.draw(batch, layout,
-                (float) window.getWidth() / 2 - layout.width / 2,
-                (float) window.getHeight() / 2 + layout.height / 2);
+        FontManager.setFont(Candys3Deluxe.candysFont);
+        Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, 1, true);
+        if (!shadow) FontManager.setText("The Main Cast");
+        else FontManager.setText("The Shadow Cast");
+        FontManager.setSize(54);
+        FontManager.render(batch, true, true,
+                (float) window.width() / 2,
+                (float) window.height() / 2);
     }
 
     private void renderNightMenu(SpriteBatch batch, Window window){
-        GlyphLayout layout = FontManager.layout;
+        FontManager.setFont(Candys3Deluxe.captionFont);
+        FontManager.setSize(15);
+        caption.prepare(batch, captionFBO, Candys3Deluxe.captionFont);
+
+        RenderManager.screenBuffer.begin();
+
         TextureRegion region = ImageManager.getRegion("Static/Static", 1024, (int) staticFrame % 8);
-        Candys3Deluxe.nightSetColor(batch, 2);
+        Candys3Deluxe.setNightColor(batch, 2);
         batch.draw(region, 0, 0, 1280, 720);
         batch.setColor(1, 1, 1, 1);
 
@@ -214,6 +267,7 @@ public class Menu {
 
         batch.setColor(0.8f, 0.8f, 0.8f, 1);
         if (shadow) {
+            batch.setColor(0.8f, 0.8f, 0.8f, 1);
             batch.draw(ImageManager.get("menu/shadowRat"), shadowRat.getX(), shadowRat.getY());
             batch.draw(ImageManager.get("menu/shadowCat"), shadowCat.getX(), shadowCat.getY());
         } else {
@@ -224,7 +278,23 @@ public class Menu {
         batch.flush();
         batch.setBlendFunction(srcFunc, dstFunc);
 
-        Candys3Deluxe.fontAlpha(Candys3Deluxe.aiFont, 1, true);
+        byte[] modeStars;
+        if (GameData.night == 0) modeStars = UserData.mainCastStar;
+        else modeStars = UserData.shadowCastStar;
+
+        region = ImageManager.get("menu/star");
+        region.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+        Star star;
+        for (byte i = 0; i <= 3; i++){
+            starColor(batch, modeStars, i);
+            if (i == 0) star = this.star;
+            else if (i == 1) star = laserStar;
+            else if (i == 2) star = hardCassetteStar;
+            else star = allChallengesStar;
+            batch.draw(region, star.getX(), star.getY(), star.getWidth(), star.getHeight());
+        }
+        batch.setColor(1, 1, 1, 1);
+
         MenuCharacter rat;
         MenuCharacter cat;
         if (!shadow){
@@ -234,22 +304,26 @@ public class Menu {
             rat = shadowRat;
             cat = shadowCat;
         }
-        layout.setText(Candys3Deluxe.aiFont, "AI: " + rat.getAi());
-        Candys3Deluxe.aiFont.draw(batch, layout,
-                rat.getX() + rat.getWidth() / 2 - layout.width / 2,
-                rat.getY() + rat.getHeight() / 2 - layout.height / 2);
 
-        Candys3Deluxe.fontAlpha(Candys3Deluxe.aiFont, 1, true);
-        layout.setText(Candys3Deluxe.aiFont, "AI: " + cat.getAi());
-        Candys3Deluxe.aiFont.draw(batch, layout,
-                cat.getX() + cat.getWidth() / 2 - layout.width / 2,
-                cat.getY() + cat.getHeight() / 2 - layout.height / 2);
+        FontManager.setFont(Candys3Deluxe.candysFont);
+        FontManager.setSize(72);
+        Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, 1, true);
+        FontManager.setText(!rat.isAiCustom() ? "AI: " + (rat.getAi() == 0 ? "Off": "On"): "AI: " + rat.getAi());
+        FontManager.render(batch, true, true,
+                rat.getX() + rat.getWidth() / 2,
+                rat.getY() + rat.getHeight() / 2.5f);
 
         Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, 1, true);
-        if (!shadow) layout.setText(Candys3Deluxe.candysFont, "The Main Cast");
-        else layout.setText(Candys3Deluxe.candysFont, "The Shadow Cast");
-        Candys3Deluxe.candysFont.draw(batch, layout,
-                (float) window.getWidth() / 2 - layout.width / 2, 696);
+        FontManager.setText(!cat.isAiCustom() ? "AI: " + (cat.getAi() == 0 ? "Off": "On"): "AI: " + cat.getAi());
+        FontManager.render(batch, true, true,
+                cat.getX() + cat.getWidth() / 2,
+                cat.getY() + cat.getHeight() / 2.5f);
+
+        Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, 1, true);
+        FontManager.setSize(40);
+        if (!shadow) FontManager.setText("The Main Cast");
+        else FontManager.setText("The Shadow Cast");
+        FontManager.render(batch, true, false, (float) window.width() / 2, 696);
 
         region = ImageManager.get("menu/button");
         for (byte i = 0; i < 2; i++) {
@@ -257,87 +331,81 @@ public class Menu {
             if (i == 0) button = optionButton;
             else button = playButton;
 
-            Candys3Deluxe.nightSetColor(batch, 2 - button.getAlpha());
+            Candys3Deluxe.setNightColor(batch, 2 - button.getAlpha());
             batch.draw(region, button.getX(), button.getY());
             Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, button.getAlpha(), true);
-            layout.setText(Candys3Deluxe.candysFont, button.getPath());
-            Candys3Deluxe.candysFont.draw(batch, layout,
-                    button.getX() + button.getWidth() / 2 - layout.width / 2,
-                    90);
+            FontManager.setText(button.getPath());
+            FontManager.render(batch, true, false, button.getX() + button.getWidth() / 2, 90);
         }
 
         if (optionWindowAlpha > 0) {
             region = ImageManager.get("menu/window");
-            Candys3Deluxe.nightSetColor(batch, 1.5f, optionWindowAlpha);
-            batch.draw(region, 190, 144);
+            Candys3Deluxe.setNightColor(batch, 1.5f, optionWindowAlpha);
+            batch.draw(region, windowX, 144);
             batch.setColor(1, 1, 1, 1);
 
             Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, optionWindowAlpha, false);
-            if (section == 0) layout.setText(Candys3Deluxe.candysFont, "Challenges");
-            else if (section == 1) layout.setText(Candys3Deluxe.candysFont, "Cheats");
-            else if (section == 2) layout.setText(Candys3Deluxe.candysFont, "Settings");
+            if (section == 0) FontManager.setText("Challenges");
+            else if (section == 1) FontManager.setText("Cheats");
+            else FontManager.setText("Settings");
 
-            float sectionX = (float) window.getWidth() / 2 - layout.width / 2;
-            Candys3Deluxe.candysFont.draw(batch, layout, sectionX, 627);
+            FontManager.setOutline(0.35f);
+            if (GameData.night == 0) FontManager.setColor(0.2f, 0, 0, optionWindowAlpha);
+            else FontManager.setColor(0.1f, 0, 0.2f, optionWindowAlpha);
+            FontManager.render(batch, true, false, (float) window.width() / 2, 627);
+            FontManager.setOutline(0.5f);
+            FontManager.setColor(0, 0, 0, 1);
 
+            Candys3Deluxe.setNightColor(batch, 1, optionWindowAlpha);
             region = ImageManager.get("menu/arrow");
             region.flip(true, false);
             if (section != 0) batch.draw(region, 488, 594);
             region.flip(true, false);
             if (section != 2) batch.draw(region, 752, 594);
+            batch.setColor(1, 1, 1, 1);
 
             if (section == 0){
-                //laser pointer
-                if (laserPointerButton.isSelected()) region = ImageManager.getRegion("menu/option", 84, 1);
-                else region = ImageManager.getRegion("menu/option", 84, 0);
-                challengeButtonColor(batch, laserPointerButton.isHovered(), laserPointerButton.isSelected(), optionWindowAlpha);
-                batch.draw(region, laserPointerButton.getX(), laserPointerButton.getY());
-                layout.setText(Candys3Deluxe.candysFont, laserPointerButton.getPath());
-                Candys3Deluxe.candysFont.draw(batch, layout, laserPointerButton.getX() + 100, laserPointerButton.getY() + 55);
-
-                //hard Cassette
-                if (hardCassetteButton.isSelected()) region = ImageManager.getRegion("menu/option", 84, 1);
-                else region = ImageManager.getRegion("menu/option", 84, 0);
-                challengeButtonColor(batch, hardCassetteButton.isHovered(), hardCassetteButton.isSelected(), optionWindowAlpha);
-                batch.draw(region, hardCassetteButton.getX(), hardCassetteButton.getY());
-                layout.setText(Candys3Deluxe.candysFont, hardCassetteButton.getPath());
-                Candys3Deluxe.candysFont.draw(batch, layout, hardCassetteButton.getX() + 100, hardCassetteButton.getY() + 55);
-
-                //nightmare candy
-                Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, optionWindowAlpha / 2, false);
-                region = ImageManager.getRegion("menu/option", 84, 0);
-                challengeButtonColor(batch, false, false, optionWindowAlpha / 2);
-                batch.draw(region, nightmareCandyButton.getX(), nightmareCandyButton.getY());
-                layout.setText(Candys3Deluxe.candysFont, nightmareCandyButton.getPath());
-                Candys3Deluxe.candysFont.draw(batch, layout, nightmareCandyButton.getX() + 100, nightmareCandyButton.getY() + 55);
-
-                //shadow cast
-                Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, optionWindowAlpha, false);
-                if (shadowChallengeButton.isSelected()) region = ImageManager.getRegion("menu/option", 84, 1);
-                else region = ImageManager.getRegion("menu/option", 84, 0);
-                challengeButtonColor(batch, shadowChallengeButton.isHovered(), shadowChallengeButton.isSelected(), optionWindowAlpha);
-                batch.draw(region, shadowChallengeButton.getX(), shadowChallengeButton.getY());
-                layout.setText(Candys3Deluxe.candysFont, shadowChallengeButton.getPath());
-                Candys3Deluxe.candysFont.draw(batch, layout, shadowChallengeButton.getX() + 100, shadowChallengeButton.getY() + 55);
-
-                //all challenges
-                boolean allChallenges = laserPointerButton.isSelected() && hardCassetteButton.isSelected();
-                if (allChallenges) region = ImageManager.getRegion("menu/option", 84, 1);
-                else region = ImageManager.getRegion("menu/option", 84, 0);
-                challengeButtonColor(batch, allChallengesButton.isHovered(), allChallenges, optionWindowAlpha);
-                batch.draw(region, allChallengesButton.getX(), allChallengesButton.getY());
-                layout.setText(Candys3Deluxe.candysFont, allChallengesButton.getPath());
-                Candys3Deluxe.candysFont.draw(batch, layout, allChallengesButton.getX() + 100, allChallengesButton.getY() + 55);
-
+                buttonRender(batch, laserPointerButton);
+                buttonRender(batch, hardCassetteButton);
+                buttonRender(batch, shadowChallengeButton);
+                boolean allChallenges = allChallengesButton.isSelected();
+                allChallengesButton.setSelected(laserPointerButton.isSelected() && hardCassetteButton.isSelected());
+                buttonRender(batch, allChallengesButton);
+                allChallengesButton.setSelected(allChallenges);
+            } else if (section == 1){
+                buttonRender(batch, flashDebugButton);
+                buttonRender(batch, hitboxDebugButton);
+                buttonRender(batch, noJumpscaresButton);
+            } else {
+                buttonRender(batch, freeScrollButton);
+                buttonRender(batch, infiniteNightButton);
+                buttonRender(batch, restartOnJumpscareButton);
             }
         }
-        caption.render(batch, window);
+        FontManager.setFont(Candys3Deluxe.captionFont);
+        caption.render(batch, Candys3Deluxe.inputManager, captionFBO, window);
         batch.setColor(1, 1, 1, 1);
+
+//        rat.debugRender();
+//        cat.debugRender();
     }
 
-    private void debugRender(){
-        rat.debugRender();
-        cat.debugRender();
+    private void starColor(SpriteBatch batch, byte[] modeStars, byte index){
+        if (modeStars[index] == 0) batch.setColor(0.5f, 0.5f, 0.5f, 0.5f);
+        else if (index == 0) batch.setColor(1, 0, 0, 1);
+        else if (index != 3) batch.setColor(1, 0.25f, 1, 1);
+        else batch.setColor(1, 1, 0, 1);
+    }
+
+    private void buttonRender(SpriteBatch batch, Button button){
+        Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, optionWindowAlpha, false);
+        TextureRegion region;
+        if (button.isSelected()) region = ImageManager.getRegion("menu/option", 84, 1);
+        else region = ImageManager.getRegion("menu/option", 84, 0);
+        challengeButtonColor(batch, button.isHovered(), button.isSelected(), optionWindowAlpha);
+        batch.draw(region, button.getX(), button.getY());
+        FontManager.setText(button.getPath());
+        FontManager.render(batch, button.getX() + 100, button.getY() + 55);
     }
 
     private void challengeButtonColor(SpriteBatch batch, boolean hover, boolean select, float alpha){

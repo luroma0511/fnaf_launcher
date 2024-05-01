@@ -115,7 +115,7 @@ public class Room extends SpriteObject {
                     SoundManager.play("tapeButton");
                     if (tapeFrame != 0 && !GameData.hardCassette) {
                         SoundManager.play("tapeRewind");
-                        SoundManager.setLoop("tapeRewind", true);
+                        SoundManager.setSoundEffect(SoundManager.LOOP, "tapeRewind", 1);
                     }
                     tapeState = 2;
                     stopFrame = 0;
@@ -253,6 +253,7 @@ public class Room extends SpriteObject {
 
         if (Game.roomBuffer == null) Game.roomBuffer = FrameBufferManager.newFrameBuffer();
         Game.roomBuffer.begin();
+        if (GameData.night == 2) batch.setColor(1, 0, 0, 1);
         if (state != 2) batch.draw(region, 0, 0);
         else {
             batch.draw(region, CameraManager.getX(), CameraManager.getY());
@@ -269,6 +270,7 @@ public class Room extends SpriteObject {
         }
         characters.renderForward(batch, room);
 
+        batch.setColor(1, 1, 1, 1);
         FrameBufferManager.end(batch, Game.roomBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         RenderManager.screenBuffer.begin();
@@ -326,10 +328,6 @@ public class Room extends SpriteObject {
 
     public int getFrame() {
         return (int) frame;
-    }
-
-    public void setFrame(float frame) {
-        this.frame = frame;
     }
 
     public int getBoundsX() {

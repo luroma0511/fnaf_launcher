@@ -14,6 +14,7 @@ public class Attack {
     private boolean moved;
     private float flashTime;
     private boolean skip;
+    private boolean skipFlash;
     private float delayMovement;
     private float initialDelayMovement;
     private float attackTimer;
@@ -34,6 +35,8 @@ public class Attack {
         this.position = position;
         prevPosition = position;
         this.moveSpeed = moveSpeed;
+        skip = false;
+        skipFlash = false;
         moveFrame = 0;
         moved = true;
         audio = null;
@@ -55,6 +58,8 @@ public class Attack {
                 flashTime = 0;
                 skip = false;
                 return true;
+            } else if (flashTime > 0){
+                skipFlash = false;
             }
             if (attack) {
                 killTimer = Time.increaseTimeValue(killTimer, 2, 1);
@@ -68,8 +73,8 @@ public class Attack {
 
     public boolean update(Random random, byte id, boolean scared, float pitchSpeed){
         if (scared){
-            float pitch = Time.increaseTimeValue(SoundManager.getPitch(audio), 2, pitchSpeed);
-            SoundManager.setPitch(audio, pitch);
+            float pitch = Time.increaseTimeValue(SoundManager.getSoundEffect(SoundManager.PITCH, audio), 2, pitchSpeed);
+            SoundManager.setSoundEffect(SoundManager.PITCH, audio, pitch);
         }
 
         if (attackTimer == 0 && moveFrame == 0){
@@ -91,6 +96,9 @@ public class Attack {
             delayMovement = initialDelayMovement;
             SoundManager.stop("twitch");
             SoundManager.play("dodge");
+            if (skip) limit = 1;
+            else if (skipFlash) limit--;
+            else if (limit < 3) limit++;
             movePosition(random, id);
         }
         return false;
@@ -102,7 +110,7 @@ public class Attack {
 
         if (audio == null) return;
         SoundManager.play(audio);
-        SoundManager.setLoop(audio, true);
+        SoundManager.setSoundEffect(SoundManager.LOOP, audio, 1);
     }
 
     private void stopAudio(){
@@ -126,8 +134,8 @@ public class Attack {
         this.killTimer = killTimer;
     }
 
-    public boolean isMoved() {
-        return moved;
+    public boolean notMoved() {
+        return !moved;
     }
 
     public void setMoved() {
@@ -150,6 +158,10 @@ public class Attack {
         skip = !skip;
     }
 
+    public void setSkipFlash(boolean skipFlash) {
+        this.skipFlash = skipFlash;
+    }
+
     public int getLimit(){
         return limit;
     }
@@ -158,22 +170,29 @@ public class Attack {
         this.limit = limit;
     }
 
+    public boolean isAttack() {
+        return attack;
+    }
+
     public void setPosition(byte position){
         this.position = position;
         prevPosition = position;
     }
 
     private void movePosition(Random random, byte id) {
-        byte chance = (byte) random.nextInt(2);
         if (id == 0){
-            if (position == 0) position = (byte) (chance + 1);
-            else if (position == 1) position = (byte) (chance * 2);
-            else position = chance;
+            if (position == 0) position = (byte) (random.nextInt(2) + 1);
+            else if (position == 1) position = (byte) (random.nextInt(2) * 2);
+            else position = (byte) (random.nextInt(2));
         } else {
-            if (position == 0 || position == 3) position = (byte) (chance + 1);
-            else if (random.nextInt(2) == 1) position = 3;
-            else if (position == 1) position = (byte) (chance * 2);
-            else position = chance;
+            if (position == 0 || position == 3) position = (byte) (random.nextInt(2) + 1);
+            else if (position == 1) {
+                position = (byte) (random.nextInt(3) * 2);
+                if (position == 4) position = 3;
+            } else {
+                position = (byte) random.nextInt(3);
+                if (position == 2) position = 3;
+            }
         }
     }
 
@@ -199,7 +218,12 @@ public class Attack {
         return number;
     }
 
+    public float getAttackTimer(){
+        return attackTimer;
+    }
+
     public void setAttackTimer(float attackTimer) {
         this.attackTimer = attackTimer;
+        if (this.attackTimer < 0) this.attackTimer = 0;
     }
 }
