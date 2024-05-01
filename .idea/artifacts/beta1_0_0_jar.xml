@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="beta1.0.0:jar">
-    <output-path>$PROJECT_DIR$/res/candys3/versions/deluxe</output-path>
-    <root id="archive" name="beta1.0.0.jar">
-      <element id="module-output" name="deluxe" />
-    </root>
-  </artifact>
-</component>
