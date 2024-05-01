@@ -2,4 +2,5 @@ res/java
 res/logs
 __pycache__
 res/__pycache__
+py_env
 out
