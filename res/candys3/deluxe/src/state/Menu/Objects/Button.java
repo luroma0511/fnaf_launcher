@@ -7,18 +7,16 @@ import util.Time;
 public class Button extends SpriteObject {
     private boolean selected;
     private boolean hovered;
+    private final short captionID;
 
-    public Button(String path, int x, int y, int width, int height) {
+    public Button(String path, int x, int y, int width, int height, int captionID) {
         super(path, x, y, width, height, 0);
+        this.captionID = (short) captionID;
     }
 
-    public void update(InputManager inputManager, boolean alphaConfig){
-        update(null, inputManager, alphaConfig, (short) 0);
-    }
-
-    public void update(Caption caption, InputManager inputManager, boolean alphaConfig, short captionID){
+    public void update(Caption caption, InputManager inputManager, boolean alphaConfig){
         hovered = mouseOver(inputManager, false);
-        if (hovered && inputManager.isPressed()) selected = !selected;
+        if (hovered && inputManager.isLeftPressed()) selected = !selected;
         if (alphaConfig && (hovered || selected)) setAlpha(Time.increaseTimeValue(getAlpha(), 1, 8));
         else setAlpha(Time.decreaseTimeValue(getAlpha(), 0, 8));
         if (!hovered || captionID == 0) return;
@@ -32,6 +30,10 @@ public class Button extends SpriteObject {
 
     public void setSelected() {
         selected = !selected;
+    }
+
+    public void setSelected(boolean cond){
+        selected = cond;
     }
 
     public boolean isHovered() {

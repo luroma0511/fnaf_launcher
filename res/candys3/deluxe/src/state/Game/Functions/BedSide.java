@@ -40,7 +40,7 @@ public class BedSide {
             limit = 8;
             flashTime = Time.increaseTimeValue(flashTime, 1.25f, 1);
             if (!cat && frame > 8) {
-                delay = Time.increaseTimeValue(delay, 6, 1);
+                delay = Time.increaseTimeValue(delay, 6, 2);
                 float difference = moveTime - Time.convertValue(24);
                 while (difference <= 0) {
                     difference += 1;

@@ -1,0 +1,1 @@
+This option will allow the player to restart while being jumpscared.

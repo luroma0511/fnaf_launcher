@@ -127,7 +127,7 @@ public class Rat extends SpriteObject {
                     Jumpscare.set("game/Rat/Jumpscare/room");
                     return;
                 }
-                if (roomUpdate(cat, player) || !attack.isMoved()) return;
+                if (roomUpdate(cat, player) || attack.notMoved()) return;
                 if (side == 0) {
                     if (attack.getPosition() == 0) hitbox.setCoord(376, 765);
                     else if (attack.getPosition() == 1) hitbox.setCoord(289, 621);
@@ -144,23 +144,19 @@ public class Rat extends SpriteObject {
                 if (side == 0) hitbox.setSize(75, GameData.hitboxMultiplier);
                 else hitbox.setSize(100, GameData.hitboxMultiplier);
                 attack.setMoved();
+                attack.setSkipFlash(true);
                 if (attack.getFlashTime() != 0) {
                     attack.setLimit(3);
                     break;
                 }
-                if (attack.getLimit() != 0){
-                    if (random.nextInt(5) == 2) {
-                        attack.setLimit(attack.getLimit() - 1);
-                        break;
-                    }
+                if (attack.getLimit() > 0){
+                    if (random.nextInt(5) == 2) break;
                     if (random.nextInt(5) == 2) {
                         attack.setSkip();
-                        attack.setKillTimer(attack.getKillTimer() + 0.275f);
-                        attack.setLimit(0);
+                        attack.setAttackTimer(attack.getAttackTimer() - 0.25f);
                         break;
                     }
                 }
-                if (attack.getLimit() < 3) attack.setLimit(attack.getLimit() + 1);
                 attack.setFlashTime(0.25f + random.nextInt(5) * 0.125f);
                 break;
             case 2:

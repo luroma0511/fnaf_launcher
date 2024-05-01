@@ -26,7 +26,7 @@ public class Win {
         cooldown = Time.decreaseTimeValue(cooldown, 0, 1);
         if (cooldown == 0) {
             alpha = Time.decreaseTimeValue(alpha, 0, 1.5f);
-            SoundManager.setVolume("win", alpha);
+            SoundManager.setSoundEffect(SoundManager.VOLUME, "win", alpha);
             if (alpha != 0) return;
             Candys3Deluxe.stateManager.setState((byte) 0);
             SoundManager.stop("win");

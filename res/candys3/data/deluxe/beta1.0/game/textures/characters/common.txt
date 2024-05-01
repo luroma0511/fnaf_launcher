@@ -6,3 +6,4 @@ Bed/RightUnder
 Bed/LeftPeek
 Bed/RightPeek
 Leaving/Right
+Leaving/Left

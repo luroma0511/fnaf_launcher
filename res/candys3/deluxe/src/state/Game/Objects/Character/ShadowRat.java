@@ -80,7 +80,11 @@ public class ShadowRat extends SpriteObject {
                 door.update(side, player);
                 boolean catInRoom = cat != null && (cat.getRoomState() == 1 || cat.getRoomState() == 4);
                 if (door.isSignal()) {
-                    if (catInRoom && cat.getAttack().getTeleports() == 0) door.pause();
+                    if (catInRoom && cat.getAttack().getTeleports() == 0) {
+                        door.pause();
+                        hitbox.setCoord(0, 0);
+                        return;
+                    }
                     if (door.getSameSide() == 3) {
                         door.setSameSide((byte) 0);
                         int rand = random.nextInt(2);
@@ -124,7 +128,7 @@ public class ShadowRat extends SpriteObject {
                     Jumpscare.set("game/Shadow Rat/Jumpscare", 3);
                     return;
                 }
-                if (roomUpdate(cat, player) || !attack.isMoved()) return;
+                if (roomUpdate(cat, player) || attack.notMoved()) return;
                 if (side == 0) {
                     if (attack.getPosition() == 0) hitbox.setCoord(376, 765);
                     else if (attack.getPosition() == 1) hitbox.setCoord(289, 621);
@@ -145,13 +149,15 @@ public class ShadowRat extends SpriteObject {
                     attack.setLimit(4);
                     break;
                 }
-                if (attack.getLimit() != 0 && random.nextInt(5) == 2) {
-                    attack.setLimit(attack.getLimit() - 1);
-                    break;
+                if (attack.getLimit() != 0){
+                    if (random.nextInt(5) == 2) break;
+                    if (random.nextInt(5) == 2) {
+                        attack.setFlashTime(0.1f);
+                        attack.setAttackTimer(attack.getAttackTimer() - 0.1f);
+                        break;
+                    }
                 }
-                attack.setLimit(4);
                 attack.setFlashTime(0.175f + random.nextInt(5) * 0.065f);
-                    if (random.nextInt(10) == 2) attack.setSkip();
                 break;
             case 2:
                 if (bed.killTime()) {
@@ -298,6 +304,7 @@ public class ShadowRat extends SpriteObject {
             transitionCooldown = Time.decreaseTimeValue(transitionCooldown, 0, 1);
             if (transitionCooldown <= 0.75f && player.isScared()) {
                 SoundManager.play("crawl");
+                hitbox.setCoord(0, 0);
                 player.setScared();
                 player.setAttack();
             }
@@ -320,7 +327,7 @@ public class ShadowRat extends SpriteObject {
                 attack.setLimit(4);
                 attack.setPosition((byte) 0);
                 attack.setKillTimer(2);
-                attack.setAttackTimer(4);
+                attack.setAttackTimer(3.75f);
                 attack.setMoved();
                 player.setBlacknessTimes(1);
                 if (side == 0){
@@ -352,7 +359,7 @@ public class ShadowRat extends SpriteObject {
         if (roomState == 0) {
             door.reset(5);
         } else if (roomState == 1) {
-            attack.reset(0.8f, 0.025f, 4, (byte) 2, (byte) 0, 30);
+            attack.reset(0.8f, 0.025f, 3.75f, (byte) 2, (byte) 0, 30);
             changePath();
         } else if (roomState == 2) {
             bed.reset(10, 1.15f);

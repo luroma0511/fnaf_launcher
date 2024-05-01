@@ -32,7 +32,7 @@ public class Cat extends SpriteObject {
         random = new Random();
         twitch = new Twitch();
         hitbox = new Hitbox(100);
-        bedSide = new BedSide(10);
+        bedSide = new BedSide(15);
         bedSide.reset();
         attack = new Attack();
         bed = new Bed();
@@ -53,21 +53,21 @@ public class Cat extends SpriteObject {
         if (!catPlay){
             for (String catValue: Arrays.asList("cat", "catLeft", "catRight")) {
                 SoundManager.play(catValue);
-                SoundManager.setVolume(catValue, 0);
-                SoundManager.setLoop(catValue, true);
+                SoundManager.setSoundEffect(SoundManager.VOLUME, catValue, 0);
+                SoundManager.setSoundEffect(SoundManager.LOOP, catValue, 1);
             }
             catPlay = true;
         }
         switch (roomState){
             case 0:
                 if (bedSide.getFrame() > 0){
-                    float catVolume = Time.increaseTimeValue(SoundManager.getVolume("cat"), 0.15f, 0.25f);
-                    SoundManager.setVolume("cat", catVolume);
+                    float catVolume = Time.increaseTimeValue(SoundManager.getSoundEffect(SoundManager.VOLUME, "cat"), 0.15f, 0.25f);
+                    SoundManager.setSoundEffect(SoundManager.VOLUME, "cat", catVolume);
                 }
                 if (room.getFrame() == 0 && room.getState() == 0 && !player.isFreeze() && bedSide.input(hovered, true)){
                     if (!bedSide.getSoundLock()){
                         SoundManager.play("catPulse");
-                        SoundManager.setLoop("catPulse", true);
+                        SoundManager.setSoundEffect(SoundManager.LOOP, "catPulse", 1);
                         bedSide.setSoundLock();
                     }
                 } else if (bedSide.getSoundLock()) {
@@ -98,10 +98,10 @@ public class Cat extends SpriteObject {
 
     private void update(Rat rat, Player player, Room room){
         if (roomState != 0 && roomState != 4){
-            float catVolume = Time.increaseTimeValue(SoundManager.getVolume("cat"), 0.65f, 0.5f);
-            SoundManager.setVolume("cat", catVolume);
-            float catPitch = Time.increaseTimeValue(SoundManager.getPitch("cat"), 2, 0.0075f);
-            SoundManager.setPitch("cat", catPitch);
+            float catVolume = Time.increaseTimeValue(SoundManager.getSoundEffect(SoundManager.VOLUME, "cat"), 0.65f, 0.5f);
+            SoundManager.setSoundEffect(SoundManager.VOLUME, "cat", catVolume);
+            float catPitch = Time.increaseTimeValue(SoundManager.getSoundEffect(SoundManager.PITCH, "cat"), 2, 0.0075f);
+            SoundManager.setSoundEffect(SoundManager.PITCH, "cat", catPitch);
         }
         switch (roomState){
             case 0:
@@ -115,8 +115,8 @@ public class Cat extends SpriteObject {
                     else bedSide.setPhase(3);
                     if (bedPhase == bedSide.getPhase()) change = false;
                     if (change) changePath();
-                    if (side == 0) SoundManager.setVolume("catLeft", (float) (bedSide.getFrame() - 23) / 75);
-                    else SoundManager.setVolume("catRight", (float) (bedSide.getFrame() - 23) / 75);
+                    if (side == 0) SoundManager.setSoundEffect(SoundManager.VOLUME, "catLeft", (float) (bedSide.getFrame() - 23) / 75);
+                    else SoundManager.setSoundEffect(SoundManager.VOLUME, "catRight", (float) (bedSide.getFrame() - 23) / 75);
                 }
                 if (bedSide.isSignal()) {
                     hitbox.setSize(100, GameData.hitboxMultiplier);
@@ -147,7 +147,7 @@ public class Cat extends SpriteObject {
                     Jumpscare.set("game/Rat/Jumpscare/room");
                     return;
                 }
-                if (roomUpdate(rat, player) || !attack.isMoved()) return;
+                if (roomUpdate(rat, player) || attack.notMoved()) return;
                 if (side == 0) {
                     if (attack.getPosition() == 0) hitbox.setCoord(366, 741);
                     else if (attack.getPosition() == 1) hitbox.setCoord(290, 632);
@@ -164,23 +164,19 @@ public class Cat extends SpriteObject {
                 if (side == 0) hitbox.setSize(75, GameData.hitboxMultiplier);
                 else hitbox.setSize(100, GameData.hitboxMultiplier);
                 attack.setMoved();
+                attack.setSkipFlash(true);
                 if (attack.getFlashTime() != 0) {
                     attack.setLimit(3);
                     break;
                 }
-                if (attack.getLimit() != 0) {
-                    int chance = random.nextInt(10);
-                    if (chance == 7) {
+                if (attack.getLimit() > 0){
+                    if (random.nextInt(5) == 2) break;
+                    if (random.nextInt(5) == 2) {
                         attack.setSkip();
-                        attack.setLimit(0);
-                        attack.setKillTimer(attack.getKillTimer() + 0.375f);
-                        break;
-                    } else if (chance == 3) {
-                        attack.setLimit(attack.getLimit() - 1);
+                        attack.setAttackTimer(attack.getAttackTimer() - 0.25f);
                         break;
                     }
                 }
-                attack.setLimit(3);
                 attack.setFlashTime(0.25f + random.nextInt(4) * 0.125f);
                 break;
             case 2:
@@ -335,15 +331,15 @@ public class Cat extends SpriteObject {
             transitionRoomState((byte) 4);
             player.setBlacknessSpeed(6);
             player.setBlacknessTimes(2);
-            SoundManager.setVolume("cat", 0);
-            SoundManager.setPitch("cat", 1);
+            SoundManager.setSoundEffect(SoundManager.VOLUME, "cat", 0);
+            SoundManager.setSoundEffect(SoundManager.PITCH, "cat", 1);
             SoundManager.play("thunder");
             if (side != 1) SoundManager.play("leave");
             player.setScared();
             player.setAttack();
             return true;
         } else if (rat != null && rat.getDoor().getFrame() != 13){
-//            attack.setKillTimer(Time.increaseTimeValue(attack.getKillTimer(), 2, 0.375f));
+            attack.setKillTimer(Time.increaseTimeValue(attack.getKillTimer(), 2, 0.25f));
         }
         return false;
     }

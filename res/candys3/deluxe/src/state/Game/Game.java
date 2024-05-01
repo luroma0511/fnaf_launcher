@@ -2,7 +2,6 @@ package state.Game;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
@@ -10,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import core.Candys3Deluxe;
 import deluxe.Paths;
 import deluxe.GameData;
+import deluxe.UserData;
 import state.Game.Functions.Jumpscare;
 import state.Game.Objects.Character.Characters;
 import state.Game.Objects.Flashlight;
@@ -56,37 +56,48 @@ public class Game {
             ImageManager.add("game/Moving/Turn Around/Moving" + i);
             ImageManager.add("game/Moving/Under Bed/Moving" + i);
         }
-        SoundManager.addSounds(Paths.dataPath1 + "game/sounds.txt");
+        SoundManager.addAll(Paths.dataPath1 + "game/sounds.txt");
     }
 
     public void update(Window window, InputManager inputManager){
-        if ((gameOver && gameOverAlpha == 0 && retry) || (!gameOver && nightTime != 0 && inputManager.keyTyped(Input.Keys.R))) {
+        boolean cond1 = gameOver && gameOverAlpha == 0;
+        boolean cond2 = !gameOver && nightTime != 0;
+        boolean cond3 = !player.isJumpscare() || GameData.restartOnJumpscare;
+        if ((cond1 && retry)
+                || (cond2 && cond3 && inputManager.keyTyped(Input.Keys.R))) {
             reset();
-            SoundManager.stopAllSounds();
-        }
-        if ((gameOver && gameOverAlpha == 0 && menu) || (!gameOver && nightTime != 0 && inputManager.keyTyped(Input.Keys.F2))) {
+        } else if ((cond1 && menu)
+                || (cond2 && cond3 && inputManager.keyTyped(Input.Keys.F2))) {
             Candys3Deluxe.stateManager.setState((byte) 0);
             Jumpscare.reset();
             room.stopMusic();
             SoundManager.stopAllSounds();
             return;
         }
+        if (nightTime == 0) SoundManager.stopAllSounds();
         if (!gameOver) {
+            RenderManager.screenAlpha = Time.increaseTimeValue(RenderManager.screenAlpha, 1, 2);
             if (!player.isJumpscare()) {
                 player.update(window, flashlight, room);
-                if (player.getY() == 0)
-                    room.input(inputManager.getX(), inputManager.getY(), player, inputManager.isPressed());
+                if (player.getY() == 0) room.input(inputManager.getX(), inputManager.getY(), player, inputManager.isLeftPressed());
                 room.update(player);
                 characters.update(player, room, flashlight);
             }
-            player.updateEffects(room);
-            if (!GameData.infiniteNight && !GameData.hardCassette && room.isMusicPlaying())
-                nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 2);
-            else nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 1);
-            if (nightTime != nightTimeLength) return;
-            Candys3Deluxe.stateManager.setState((byte) 2);
-            room.stopMusic();
-            SoundManager.stopAllSounds();
+            player.updateEffects(room, flashlight.getY());
+            if (!GameData.infiniteNight && !GameData.hardCassette && room.isMusicPlaying()) nightTime = Time.increaseTimeValue(nightTime, nightTimeLength, 2);
+            else nightTime = Time.increaseTimeValue(nightTime, Short.MAX_VALUE, 1);
+            if (nightTime < nightTimeLength) return;
+            if (!GameData.infiniteNight) {
+                Candys3Deluxe.stateManager.setState((byte) 2);
+                room.stopMusic();
+                SoundManager.stopAllSounds();
+            }
+            if (GameData.flashDebug || GameData.hitboxDebug || GameData.noJumpscares) return;
+            byte[] modeStars = GameData.night == 0 ? UserData.mainCastStar : UserData.shadowCastStar;
+            if (characters.checkMode()) modeStars[0] = 1;
+            if (GameData.hitboxMultiplier < 1) modeStars[1] = 1;
+            if (GameData.hardCassette) modeStars[2] = 1;
+            if (GameData.hitboxMultiplier < 1 && GameData.hardCassette) modeStars[3] = 1;
         } else {
             whiteAlpha = Time.decreaseTimeValue(whiteAlpha, 0, 2);
             staticFrame = Time.increaseTimeValue(staticFrame, 8192, 30);
@@ -101,7 +112,9 @@ public class Game {
         room.reset();
         Jumpscare.reset();
         nightTime = 0;
+        RenderManager.screenAlpha = 0;
         gameOver = false;
+//        SoundManager.setAllMuffle(1);
     }
 
     private void renderGame(SpriteBatch batch, Window window){
@@ -167,7 +180,8 @@ public class Game {
             batch.setColor(1, 1, 1, 1);
         }
 
-        GlyphLayout layout = FontManager.layout;
+        FontManager.setFont(Candys3Deluxe.candysFont);
+        FontManager.setSize(40);
         Candys3Deluxe.candysFont.setColor(1, 1, 1, 1);
         nightTimeBuilder.delete(0, nightTimeBuilder.length());
         if (GameData.infiniteNight) {
@@ -181,10 +195,12 @@ public class Game {
             if (hour == 0) hour = 12;
             nightTimeBuilder.append(hour).append(" AM");
         }
-        layout.setText(Candys3Deluxe.candysFont, nightTimeBuilder.toString());
-        Candys3Deluxe.candysFont.draw(batch, layout,
-                CameraManager.getX() + window.getWidth() - layout.width - 20,
-                CameraManager.getY() + window.getHeight() - layout.height + 8);
+        FontManager.setText(nightTimeBuilder.toString());
+        FontManager.setOutline(0.35f);
+        FontManager.render(batch,
+                CameraManager.getX() + window.width() - FontManager.getLayout().width - 20,
+                CameraManager.getY() + window.height() - FontManager.getLayout().height + 8);
+        FontManager.setOutline(0.5f);
     }
 
     private void renderGameOver(SpriteBatch batch, Window window){
@@ -198,18 +214,19 @@ public class Game {
         RenderManager.shapeDrawer.setColor(0, 0, 0, 1);
         RenderManager.shapeDrawer.filledRectangle(0, 0, 1280, 720);
 
-        GlyphLayout layout = FontManager.layout;
-        Candys3Deluxe.fontAlpha(Candys3Deluxe.loadFont, 1, true);
-        layout.setText(Candys3Deluxe.loadFont, "GAME OVER");
+        FontManager.setFont(Candys3Deluxe.candysFont);
+        Candys3Deluxe.fontAlpha(Candys3Deluxe.candysFont, 1, true);
+        FontManager.setText("GAME OVER");
 
         TextureRegion region = ImageManager.getRegion("Static/Static", 1024, (int) staticFrame % 8);
-        Candys3Deluxe.nightSetColor(batch, 2);
+        Candys3Deluxe.setNightColor(batch, 2);
         batch.draw(region, 0, 0, 1280, 720);
         batch.setColor(1, 1, 1, 1);
 
-        Candys3Deluxe.loadFont.draw(batch, layout,
-                (float) window.getWidth() / 2 - layout.width / 2,
-                (float) window.getHeight() / 2 + layout.height / 2);
+        FontManager.setSize(54);
+        FontManager.render(batch, true, true,
+                (float) window.width() / 2,
+                (float) window.height() / 2);
 
         RenderManager.shapeDrawer.setColor(1, 1, 1, whiteAlpha);
         RenderManager.shapeDrawer.filledRectangle(0, 0, 1280, 720);
@@ -221,11 +238,7 @@ public class Game {
     public void render(SpriteBatch batch, Window window){
         if (!gameOver) renderGame(batch, window);
         else renderGameOver(batch, window);
-        debugRender(batch, window);
-    }
-
-    private void debugRender(SpriteBatch batch, Window window){
-        characters.debug(batch, window);
+        if (GameData.hitboxDebug || GameData.flashDebug) characters.debug(batch, window, player, room);
     }
 
     public void dispose(){

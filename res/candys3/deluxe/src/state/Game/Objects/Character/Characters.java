@@ -3,6 +3,7 @@ package state.Game.Objects.Character;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import core.Candys3Deluxe;
 import deluxe.Paths;
 import deluxe.GameData;
 import state.Game.Objects.Flashlight;
@@ -57,7 +58,7 @@ public class Characters {
         if (shadowCat != null) twitch = shadowCat.execute(player, shadowRat, room, flashlight, twitch);
         if (twitch && !twitchLock){
             SoundManager.play("twitch");
-            SoundManager.setLoop("twitch", true);
+            SoundManager.setSoundEffect(SoundManager.LOOP, "twitch", 1);
         } else if (!twitch && twitchLock) SoundManager.stop("twitch");
         if (player.isFreeze()) SoundManager.stop("twitch");
         twitchLock = twitch;
@@ -180,98 +181,61 @@ public class Characters {
         }
     }
 
-    public void debug(SpriteBatch batch, Window window) {
-        if (rat != null) {
-            if (rat.getRoomState() == 1) {
-                RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
-                RenderManager.shapeDrawer.filledRectangle(
-                        (float) window.getWidth() / 4 + CameraManager.getX(),
-                        50 + CameraManager.getY(),
-                        640,
-                        50);
+    private void flashDebug(Window window, float attackHealth, boolean shadow){
+        if (!GameData.flashDebug) return;
+        RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
+        RenderManager.shapeDrawer.filledRectangle(
+                (float) window.width() / 4 + CameraManager.getX(),
+                150 + CameraManager.getY() * 0.75f,
+                640,
+                50);
+        if (!shadow) RenderManager.shapeDrawer.setColor(0.75f, 0, 0, 1);
+        else RenderManager.shapeDrawer.setColor(0.5f, 0, 0.5f, 1);
+        float value = Math.min(1, attackHealth);
+        RenderManager.shapeDrawer.filledRectangle(
+                (float) window.width() / 4 + CameraManager.getX(),
+                150 + CameraManager.getY() * 0.75f,
+                (int) (value * 640),
+                50);
+    }
 
-                RenderManager.shapeDrawer.setColor(0.75f, 0, 0, 1);
-                float value = Math.min(1, rat.getAttackHealth());
-                RenderManager.shapeDrawer.filledRectangle(
-                        (float) window.getWidth() / 4 + CameraManager.getX(),
-                        50 + CameraManager.getY(),
-                        (int) (value * 640),
-                        50);
-            }
+    private void hitboxDebug(Hitbox hitbox, boolean shadow){
+        if (!GameData.hitboxDebug || hitbox.size == 0) return;
+        if (!shadow) RenderManager.shapeDrawer.setColor(0.75f, 0.5f, 0.5f, 0.5f);
+        else RenderManager.shapeDrawer.setColor(0.75f, 0, 0.75f, 0.5f);
+        RenderManager.shapeDrawer.filledCircle(
+                hitbox.getX(),
+                hitbox.getY(),
+                hitbox.size);
+    }
+
+    public void debug(SpriteBatch batch, Window window, Player player, Room room) {
+        if (rat != null) {
+            if (player.getSide() == rat.getSide() && room.getState() == 0 && room.getFrame() == 0) hitboxDebug(rat.getHitbox(), false);
+            if (rat.getAttack().isAttack()) flashDebug(window, rat.getAttackHealth(), false);
+            FontManager.setFont(Candys3Deluxe.captionFont);
+            FontManager.setSize(18);
+            FontManager.setText("Limit: " + rat.getAttack().getLimit());
+            FontManager.render(batch, CameraManager.getX() + 16, CameraManager.getY() + 654);
         }
 
         if (cat != null) {
-            if (cat.getRoomState() == 1) {
-                RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
-                RenderManager.shapeDrawer.filledRectangle(
-                        (float) window.getWidth() / 4 + CameraManager.getX(),
-                        150 + CameraManager.getY(),
-                        640,
-                        50);
-
-                RenderManager.shapeDrawer.setColor(0.75f, 0, 0, 1);
-                float value = Math.min(1, cat.getAttackHealth());
-                RenderManager.shapeDrawer.filledRectangle(
-                        (float) window.getWidth() / 4 + CameraManager.getX(),
-                        150 + CameraManager.getY(),
-                        (int) (value * 640),
-                        50);
-            }
-
-//            RenderManager.shapeDrawer.setColor(0.75f, 0.5f, 0.5f, 0.5f);
-//            RenderManager.shapeDrawer.filledCircle(
-//                    characters.getCat().getHitbox().getX(),
-//                    characters.getCat().getHitbox().getY(),
-//                    characters.getCat().getHitbox().size);
+            if (player.getSide() == cat.getSide() && room.getState() == 0 && room.getFrame() == 0) hitboxDebug(cat.getHitbox(), false);
+            if (cat.getAttack().isAttack()) flashDebug(window, cat.getAttackHealth(), false);
         }
 
-//        if (shadowRat != null) {
-//            RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
-//            RenderManager.shapeDrawer.filledRectangle(
-//                    (float) window.getWidth() / 4 + CameraManager.getX(),
-//                    650 + CameraManager.getY(),
-//                    640,
-//                    50);
-//
-//            RenderManager.shapeDrawer.setColor(0.5f, 0, 0.5f, 1);
-//            float value = Math.min(1, shadowRat.getAttackHealth());
-//            RenderManager.shapeDrawer.filledRectangle(
-//                    (float) window.getWidth() / 4 + CameraManager.getX(),
-//                    650 + CameraManager.getY(),
-//                    (int) (value * 640),
-//                    50);
-
-//            color = new Color(0.75f, 0.5f, 0.5f, 0.5f);
-//            RenderManager.shapeDrawer.setColor(color);
-//            RenderManager.shapeDrawer.filledCircle(
-//                    characters.getShadowRat().getHitbox().getX(),
-//                    characters.getShadowRat().getHitbox().getY(),
-//                    characters.getShadowRat().getHitbox().size);
-//        }
+        if (shadowRat != null) {
+            if (player.getSide() == shadowRat.getSide() && room.getState() == 0 && room.getFrame() == 0) hitboxDebug(shadowRat.getHitbox(), true);
+            if (shadowRat.getAttack().isAttack()) flashDebug(window, shadowRat.getAttackHealth(), true);
+        }
 
         if (shadowCat != null) {
-            RenderManager.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
-            RenderManager.shapeDrawer.filledRectangle(
-                    (float) window.getWidth() / 4 + CameraManager.getX(),
-                    650 + CameraManager.getY(),
-                    640,
-                    50);
-
-            RenderManager.shapeDrawer.setColor(0.5f, 0, 0.5f, 1);
-            float value = Math.min(1, shadowCat.getAttackHealth());
-            RenderManager.shapeDrawer.filledRectangle(
-                    (float) window.getWidth() / 4 + CameraManager.getX(),
-                    650 + CameraManager.getY(),
-                    (int) (value * 640),
-                    50);
-
-            if (shadowCat.getRoomState() == 0) {
-                RenderManager.shapeDrawer.setColor(0.75f, 0, 0.75f, 0.5f);
-                RenderManager.shapeDrawer.filledCircle(
-                        shadowCat.getHitbox().getX(),
-                        shadowCat.getHitbox().getY(),
-                        shadowCat.getHitbox().size);
-            }
+            if (player.getSide() == shadowCat.getSide() && room.getState() == 0 && room.getFrame() == 0) hitboxDebug(shadowCat.getHitbox(), true);
+            if (shadowCat.getAttack().isAttack()) flashDebug(window, shadowCat.getAttackHealth(), true);
         }
+    }
+
+    public boolean checkMode(){
+        return (GameData.night == 0 && rat != null && cat != null) || (GameData.night == 1 && shadowRat != null && shadowCat != null);
     }
 }

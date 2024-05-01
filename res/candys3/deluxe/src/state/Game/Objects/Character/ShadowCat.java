@@ -53,26 +53,20 @@ public class ShadowCat extends SpriteObject{
     private boolean input(Player player, Room room, float mx, float my, boolean twitching){
         boolean hovered = hitbox.isHovered(mx, my);
         boolean imageHovered = this.mouseOverWithPanning(mx, my);
-        if (!catPlay){
-            for (String catValue: Arrays.asList("cat", "catLeft", "catRight")) {
-                SoundManager.play(catValue);
-                SoundManager.setVolume(catValue, 0);
-                SoundManager.setLoop(catValue, true);
-            }
-            catPlay = true;
-        }
         switch (roomState){
             case 0:
                 if (bedSide.getFrame() > 0){
-                    float catVolume = Time.increaseTimeValue(SoundManager.getVolume("cat"), 0.15f, 0.25f);
-                    SoundManager.setVolume("cat", catVolume);
+                    float catVolume = Time.increaseTimeValue(SoundManager.getSoundEffect(SoundManager.VOLUME, "cat"), 0.15f, 0.25f);
+                    SoundManager.setSoundEffect(SoundManager.VOLUME, "cat", catVolume);
                 }
-                if (room.getFrame() == 0 && room.getState() == 0 && !player.isFreeze()) {
-                    bedSide.input(hovered, false);
-                    twitch.update(hovered);
-                    if (hovered && !player.isScared()) player.setScared();
-                    else if (!hovered && !player.isAttack() && player.isScared()) player.setScared();
-                    if (twitch.isTwitching()) twitching = true;
+                if (!player.isFreeze()) {
+                    bedSide.input(hovered && room.getFrame() == 0 && room.getState() == 0, false);
+                    if (room.getFrame() == 0 && room.getState() == 0) {
+                        twitch.update(hovered);
+                        if (hovered && !player.isScared()) player.setScared();
+                        else if (!twitching && !hovered && !player.isAttack() && player.isScared()) player.setScared();
+                        if (twitch.isTwitching()) twitching = true;
+                    }
                 }
                 break;
             case 1:
@@ -97,11 +91,19 @@ public class ShadowCat extends SpriteObject{
     }
 
     private void update(ShadowRat rat, Player player, Room room){
+        if (!catPlay){
+            for (String catValue: Arrays.asList("cat", "catLeft", "catRight")) {
+                SoundManager.play(catValue);
+                SoundManager.setSoundEffect(SoundManager.VOLUME, catValue, 0);
+                SoundManager.setSoundEffect(SoundManager.LOOP, catValue, 1);
+            }
+            catPlay = true;
+        }
         if (roomState != 0 && roomState != 4){
-            float catVolume = Time.increaseTimeValue(SoundManager.getVolume("cat"), 0.65f, 0.5f);
-            SoundManager.setVolume("cat", catVolume);
-            float catPitch = Time.increaseTimeValue(SoundManager.getPitch("cat"), 2, 0.0075f);
-            SoundManager.setPitch("cat", catPitch);
+            float catVolume = Time.increaseTimeValue(SoundManager.getSoundEffect(SoundManager.VOLUME, "cat"), 0.65f, 0.5f);
+            SoundManager.setSoundEffect(SoundManager.VOLUME, "cat", catVolume);
+            float catPitch = Time.increaseTimeValue(SoundManager.getSoundEffect(SoundManager.PITCH, "cat"), 2, 0.0075f);
+            SoundManager.setSoundEffect(SoundManager.PITCH, "cat", catPitch);
         }
         switch (roomState){
             case 0:
@@ -116,8 +118,8 @@ public class ShadowCat extends SpriteObject{
                     else bedSide.setPhase(4);
                     if (bedPhase == bedSide.getPhase()) change = false;
                     if (change) changePath();
-                    if (side == 0) SoundManager.setVolume("catLeft", (float) (bedSide.getFrame() - 8) / 75);
-                    else SoundManager.setVolume("catRight", (float) (bedSide.getFrame() - 8) / 75);
+                    if (side == 0) SoundManager.setSoundEffect(SoundManager.VOLUME, "catLeft", (float) (bedSide.getFrame() - 8) / 75);
+                    else SoundManager.setSoundEffect(SoundManager.VOLUME, "catRight", (float) (bedSide.getFrame() - 8) / 75);
                 }
                 hitbox.setSize(100, GameData.hitboxMultiplier);
                 int hitboxPosition = bedSide.getFrame() - 7;
@@ -251,7 +253,7 @@ public class ShadowCat extends SpriteObject{
                     Jumpscare.set("game/Shadow Cat/Jumpscare", 3);
                     return;
                 }
-                if (roomUpdate(rat, player) || !attack.isMoved()) return;
+                if (roomUpdate(rat, player) || attack.notMoved()) return;
                 if (side == 0) {
                     if (attack.getPosition() == 0) hitbox.setCoord(381, 743);
                     else if (attack.getPosition() == 1) hitbox.setCoord(305, 630);
@@ -276,17 +278,13 @@ public class ShadowCat extends SpriteObject{
                     break;
                 }
                 if (attack.getLimit() != 0) {
-                    if (random.nextInt(10) == 3) {
-                        attack.setLimit(attack.getLimit() - 1);
-                        break;
-                    }
+                    if (random.nextInt(10) == 3) break;
                     if (random.nextInt(5) == 2) {
                         attack.setFlashTime(0.1f);
-                        attack.setLimit(0);
+                        attack.setAttackTimer(attack.getAttackTimer() - 0.1f);
                         break;
                     }
                 }
-                attack.setLimit(3);
                 attack.setFlashTime(0.175f + random.nextInt(4) * 0.05f);
                 break;
             case 2:
@@ -418,10 +416,10 @@ public class ShadowCat extends SpriteObject{
             hitbox.setCoord(0, 0);
             if (side == 0){
                 setPath("game/Shadow Cat/Leaving/Left");
-                setX(104);
-                setY(323);
-                setWidth(386);
-                setHeight(459);
+                setX(109);
+                setY(337);
+                setWidth(378);
+                setHeight(445);
             } else if (side == 2){
                 setPath("game/Shadow Cat/Leaving/Right");
                 setX(2494);
@@ -446,8 +444,8 @@ public class ShadowCat extends SpriteObject{
                 attack.setFlashTime(0.8f);
                 attack.setLimit(4);
                 attack.setPosition((byte) 0);
-                attack.setKillTimer(1.5f);
-                attack.setAttackTimer(4.5f);
+                attack.setKillTimer(2);
+                attack.setAttackTimer(4);
                 attack.setMoved();
                 player.setBlacknessTimes(1);
                 if (side == 0) {
@@ -468,8 +466,8 @@ public class ShadowCat extends SpriteObject{
                 transitionRoomState((byte) 4);
                 player.setBlacknessSpeed(6);
                 player.setBlacknessTimes(2);
-                SoundManager.setVolume("cat", 0);
-                SoundManager.setPitch("cat", 1);
+                SoundManager.setSoundEffect(SoundManager.VOLUME, "cat", 0);
+                SoundManager.setSoundEffect(SoundManager.PITCH, "cat", 1);
                 SoundManager.play("thunder");
                 if (side != 1) SoundManager.play("leave");
                 player.setScared();
@@ -487,10 +485,10 @@ public class ShadowCat extends SpriteObject{
         if (roomState == 0){
             bedSide.reset();
         } else if (roomState == 1){
-            attack.reset(0.8f, 0.025f, 2.5f, (byte) 1, (byte) 0, 30);
+            attack.reset(0.8f, 0.025f, 2f, (byte) 1, (byte) 0, 30);
             changePath();
         } else if (roomState == 2){
-            bed.reset(13, 1.15f);
+            bed.reset(12, 1.15f);
             changePath();
         } else if (roomState == 3){
             peek.reset(3, 2.5f, 0.75f);
