@@ -1,7 +1,5 @@
-res/java
-res/logs
+game/java
 __pycache__
-res/__pycache__
-py_env
+python/__pycache__
 out
 .idea
