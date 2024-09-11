@@ -1,0 +1,4 @@
+Tape/Tape
+Door/Left
+Door/Middle
+Door/Right

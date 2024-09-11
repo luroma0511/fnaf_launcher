@@ -1,1 +1,0 @@
-This option will remove the snap-lock mechanic for room attacks.

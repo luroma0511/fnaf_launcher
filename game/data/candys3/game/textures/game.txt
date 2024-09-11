@@ -1,0 +1,11 @@
+Buttons/TapePlayer
+Buttons/TapePlayerBack
+Buttons/UnderBed
+Buttons/UnderBedBack
+room/Room
+room/FullRoomEffect
+room/UnderBed
+room/UnderBedEffect
+Tape/Tape
+Tape/Buttons
+Flashlight

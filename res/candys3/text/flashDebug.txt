@@ -1,1 +1,0 @@
-This cheat displays the health bar for a room attack.

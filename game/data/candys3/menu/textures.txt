@@ -1,0 +1,11 @@
+button
+window
+checkbox
+arrow
+rainbow
+littleStar
+star
+rat
+cat
+shadowRat
+shadowCat

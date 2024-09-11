@@ -1,0 +1,15 @@
+Leaving/Middle
+Retreat/Right/0
+Retreat/Right/1
+Retreat/Right/2
+Retreat/Right/3
+Retreat/Right/Twitching/1
+Retreat/Right/Twitching/2
+Retreat/Right/Twitching/3
+Retreat/Left/0
+Retreat/Left/1
+Retreat/Left/2
+Retreat/Left/3
+Retreat/Left/Twitching/1
+Retreat/Left/Twitching/2
+Retreat/Left/Twitching/3
