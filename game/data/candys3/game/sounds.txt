@@ -30,3 +30,4 @@ movebed2
 flashlight
 lookbed1
 lookbed2
+shadowJumpscare

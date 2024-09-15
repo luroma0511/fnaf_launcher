@@ -13,3 +13,4 @@ Retreat/Left/3
 Retreat/Left/Twitching/1
 Retreat/Left/Twitching/2
 Retreat/Left/Twitching/3
+Classic/Jumpscare

@@ -1,22 +1,19 @@
-import os
-import subprocess
 import platform
+import subprocess
 
+def __execute__(game, is_guest):
+    if is_guest:
+        arg = "Guest"
+    else:
+        l = []
+        with open("game/user/account.txt", "r") as file:
+            l = file.readlines()
+        arg = f"{l[0][:-1]}, {l[1][:-1]}, {l[2]}"
 
-def __execute__(game):
-    with open("res/user/account.txt", "r") as file:
-        account_list = file.readlines()
-
-    current_path = os.getcwd()
-    new_directory = f"{current_path}/res"
-    os.chdir(new_directory)
-
-    command = ["../java/openjdk-22/bin/java",
-               "-jar",
-               "../game/game.jar",
-               account_list[0][:-1],
-               account_list[1][:-1],
-               account_list[2],
+    command = ["game/java/openjdk-22/bin/java", 
+               "-jar", 
+               f"game/game/game.jar", 
+               arg, 
                game]
     try:
         if platform.system() == "Windows":
@@ -25,5 +22,3 @@ def __execute__(game):
             subprocess.run(command, check=True, shell=False)
     except subprocess.CalledProcessError as e:
         print("Error:", e)
-
-    os.chdir(current_path)
