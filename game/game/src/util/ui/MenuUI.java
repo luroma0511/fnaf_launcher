@@ -6,26 +6,27 @@ import util.TextureHandler;
 
 public class MenuUI {
     public final TextureRegion arrow;
-    public final TextureRegion button;
+    public final TextureRegion play;
+    public final TextureRegion options;
     public final TextureRegion checkbox;
 
     public MenuUI(TextureHandler textureHandler){
-        var pixmap = textureHandler.loadImageBuffer("assets/ui", "arrow");
+        arrow = loadUI(textureHandler, "arrow");
+        play = loadUI(textureHandler, "play");
+        options = loadUI(textureHandler, "options");
+        checkbox = loadUI(textureHandler, "checkbox");
+    }
+
+    private TextureRegion loadUI(TextureHandler textureHandler, String path){
+        var pixmap = textureHandler.loadImageBuffer("assets/ui", path);
         var texture = new Texture(pixmap);
-        arrow = new TextureRegion(texture);
-
-        pixmap = textureHandler.loadImageBuffer("assets/ui", "button");
-        texture = new Texture(pixmap);
-        button = new TextureRegion(texture);
-
-        pixmap = textureHandler.loadImageBuffer("assets/ui", "checkbox");
-        texture = new Texture(pixmap);
-        checkbox = new TextureRegion(texture);
+        return new TextureRegion(texture);
     }
 
     public void dispose(){
         arrow.getTexture().dispose();
-        button.getTexture().dispose();
+        play.getTexture().dispose();
+        options.getTexture().dispose();
         checkbox.getTexture().dispose();
     }
 }

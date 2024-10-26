@@ -52,23 +52,24 @@ public class Menu {
         rainbowFrameBuffer = FrameBufferManager.newFrameBuffer();
 
         rat = new MenuCharacter(-45, 44, 632, 632, false, "rat.txt");
-        cat = new MenuCharacter(781, 44, 428, 632, false, "cat.txt");
+        cat = new MenuCharacter(790, 44, 428, 632, false, "cat.txt");
         vinnie = new MenuCharacter(436, 36, 391, 657, false, "vinnie.txt");
-        optionButton = new Button("OPTIONS", 365, 20, 200, 84, null);
-        playButton = new Button("PLAY", 715, 20, 200, 84, null);
+
+        optionButton = new Button("", 20, 20, 82, 82, null);
+        playButton = new Button("", 1196, 20, 64, 76, null);
         arrows = new Arrows();
         caption = new Caption();
         setNight = 0;
 
         int size = 40;
         int xPos = (int) (640 - (float) size / 2);
-        star = new Star("littleStar", xPos - 84, 116, size, size, "");
-        laserVisionStar = new Star("littleStar", xPos - 28, 116, size, size, " w/ Laser Vision");
-        laserPointerStar = new Star("littleStar", xPos + 28, 116, size, size, " w/ Laser Pointer");
-        hardCassetteStar = new Star("littleStar", xPos + 84, 116, size, size, " w/ Hard Cassette");
+        star = new Star("littleStar", xPos - 84, 40, size, size, "");
+        laserVisionStar = new Star("littleStar", xPos - 28, 40, size, size, " w/ Laser Vision");
+        laserPointerStar = new Star("littleStar", xPos + 28, 40, size, size, " w/ Laser Pointer");
+        hardCassetteStar = new Star("littleStar", xPos + 84, 40, size, size, " w/ Hard Cassette");
         size = 96;
         xPos = (int) (640 - (float) size / 2);
-        allChallengesStar = new Star("star", xPos, 156, size, size, " All Challenges");
+        allChallengesStar = new Star("star", xPos, 80, size, size, " All Challenges");
     }
 
     public void load(Engine engine){
@@ -490,19 +491,15 @@ public class Menu {
         }
         else VideoManager.stop();
 
-        region = engine.appHandler.getMenuUI().button;
+        region = engine.appHandler.getMenuUI().play;
         textureHandler.setFilter(region.getTexture());
-        for (byte i = 0; i < 2; i++) {
-            Button button;
-            if (i == 0) button = optionButton;
-            else button = playButton;
-            engine.candys3Deluxe.setNightColor(engine, 2 - button.getAlpha());
-            batch.draw(region, button.getX(), button.getY());
-            engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, button.getAlpha(), true);
-            fontManager.setText(button.getPath());
-            fontManager.setPosition(true, false, button.getX() + button.getWidth() / 2, 75);
-            fontManager.render(batch);
-        }
+        engine.candys3Deluxe.setNightColor(engine, 2 - playButton.getAlpha());
+        batch.draw(region, playButton.getX(), playButton.getY());
+
+        region = engine.appHandler.getMenuUI().options;
+        textureHandler.setFilter(region.getTexture());
+        engine.candys3Deluxe.setNightColor(engine, 2 - optionButton.getAlpha());
+        batch.draw(region, optionButton.getX(), optionButton.getY());
 
         options.render(engine);
 
@@ -525,18 +522,22 @@ public class Menu {
             fontManager.render(batch);
         }
 
+        float position = 672;
         fontManager.setSize(15);
         fontManager.setText("F11 - Fullscreen");
-        fontManager.setRelativePosition(20, 100);
+        fontManager.setRelativePosition(20, position);
         fontManager.render(batch);
+        position -= 22;
         fontManager.setText("F2 - Return to Menu");
-        fontManager.setRelativePosition(20, 78);
+        fontManager.setRelativePosition(20, position);
         fontManager.render(batch);
+        position -= 22;
         fontManager.setText("R - Restart Night");
-        fontManager.setRelativePosition(20, 56);
+        fontManager.setRelativePosition(20, position);
         fontManager.render(batch);
+        position -= 22;
         fontManager.setText("Patch " + engine.version);
-        fontManager.setRelativePosition(20, 34);
+        fontManager.setRelativePosition(20, position);
         fontManager.render(batch);
 
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1 - renderHandler.screenAlpha);

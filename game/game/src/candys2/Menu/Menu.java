@@ -68,8 +68,8 @@ public class Menu {
         cat = new MenuCharacter(792, 36, 429, 664, true, "cat.txt");
 //        vinnie = new MenuCharacter();
 
-        optionButton = new Button("OPTIONS", 365, 20, 200, 84, null);
-        playButton = new Button("PLAY", 715, 20, 200, 84, null);
+        optionButton = new Button("", 20, 20, 82, 82, null);
+        playButton = new Button("", 1196, 20, 64, 76, null);
         caption = new Caption();
 
         int size = 40;
@@ -98,6 +98,9 @@ public class Menu {
 
 //        textureHandler.add("font/stripeEffect");
         textureHandler.add("menu/star");
+        textureHandler.add("menu/laserPointer");
+        textureHandler.add("menu/faultyBattery");
+        textureHandler.add("menu/faultyPhones");
 
         if (options == null) {
             options = new Options(engine.appHandler.getTextureHandler(), engine.appHandler.window);
@@ -419,21 +422,17 @@ public class Menu {
         fontManager.setCurrentFont(font1);
         fontManager.setSize(32);
 
-        region = engine.appHandler.getMenuUI().button;
+        region = engine.appHandler.getMenuUI().play;
         textureHandler.setFilter(region.getTexture());
-        for (byte i = 0; i < 2; i++) {
-            Button button;
-            if (i == 0) button = optionButton;
-            else button = playButton;
-            float divider = 2 - button.getAlpha();
-            batch.setColor(0.8f / divider, 0.8f / divider, 1 / divider, renderHandler.screenAlpha);
-            batch.draw(region, button.getX(), button.getY());
-            float alpha = 0.5f + button.getAlpha() / 2;
-            font1.setColor(0.8f, 0.8f, 1, alpha * renderHandler.screenAlpha);
-            fontManager.setText(button.getPath());
-            fontManager.setPosition(true, false, button.getX() + button.getWidth() / 2, 75);
-            fontManager.render(batch);
-        }
+        float divider = 2 - playButton.getAlpha();
+        batch.setColor(0.8f / divider, 0.8f / divider, 1 / divider, renderHandler.screenAlpha);
+        batch.draw(region, playButton.getX(), playButton.getY());
+
+        region = engine.appHandler.getMenuUI().options;
+        textureHandler.setFilter(region.getTexture());
+        divider = 2 - optionButton.getAlpha();
+        batch.setColor(0.8f / divider, 0.8f / divider, 1 / divider, renderHandler.screenAlpha);
+        batch.draw(region, optionButton.getX(), optionButton.getY());
 
         options.render(engine);
 
