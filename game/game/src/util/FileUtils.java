@@ -1,5 +1,10 @@
 package util;
 
+import com.google.gson.Gson;
+import util.deluxe.CandysJSONHandler;
+import util.deluxe.CandysUser;
+import util.deluxe.DeluxeGuestStoreTable;
+
 import java.io.*;
 
 public class FileUtils {
@@ -39,11 +44,21 @@ public class FileUtils {
         return true;
     }
 
-    public static <T> void write(JSONHandler jsonHandler, T data, int id){
-        File file = getFile(id);
+    public static void writeUser(CandysJSONHandler jsonHandler, CandysUser user){
+        File file = getFile(0);
         fileExists(file);
-        String value = jsonHandler.write(data);
-        System.out.println(value);
+        String value = jsonHandler.writeCandysUser(user);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))){
+            writer.write(value);
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void writeTable(CandysJSONHandler jsonHandler, DeluxeGuestStoreTable guestStoreTable){
+        File file = getFile(1);
+        fileExists(file);
+        String value = jsonHandler.writeGuestTable(guestStoreTable);
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))){
             writer.write(value);
         } catch (IOException e){

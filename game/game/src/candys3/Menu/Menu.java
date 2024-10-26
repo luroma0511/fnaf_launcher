@@ -4,19 +4,19 @@ import candys3.GameData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import core.Engine;
 import util.deluxe.Candys3Data;
-import util.deluxe.Paths;
-import candys3.Menu.Objects.*;
 import util.*;
+import util.deluxe.StarData;
+import util.ui.*;
+
+import java.util.List;
 
 public class Menu {
     private final FrameBuffer captionFBO;
-    private final FrameBuffer windowFrameBuffer;
     private final FrameBuffer rainbowFrameBuffer;
 
     private final MenuCharacter rat;
@@ -24,24 +24,15 @@ public class Menu {
     private final MenuCharacter vinnie;
     private final Button optionButton;
     private final Button playButton;
-    private Button laserPointerButton;
-    private Button hardCassetteButton;
-    private Button freeScrollButton;
-    private Button allChallengesButton;
-    private Button flashDebugButton;
-    private Button hitboxDebugButton;
-    private Button noJumpscaresButton;
-    private Button expandedPointerButton;
-    private Button perspectiveButton;
-    private Button infiniteNightButton;
-    private Button restartOnJumpscareButton;
-    private Button classicJumpscaresButton;
+
+    private Options options;
+
     private final Arrows arrows;
     private final Caption caption;
     private final Star star;
-    private final Star laserStar;
+    private final Star laserVisionStar;
+    private final Star laserPointerStar;
     private final Star hardCassetteStar;
-    private final Star freeScrollStar;
     private final Star allChallengesStar;
 
     private int setNight;
@@ -49,10 +40,6 @@ public class Menu {
     private int hellTrigger;
     private float whiteAlpha;
     private float staticFrame;
-    private float optionWindowAlpha;
-    private float windowX;
-    private byte section;
-    private byte prevSection;
     private float rainbowPos;
     private String modeName = "";
 
@@ -61,7 +48,6 @@ public class Menu {
     private float loadTime;
 
     public Menu(){
-        windowFrameBuffer = FrameBufferManager.newFrameBuffer();
         captionFBO = FrameBufferManager.newFrameBuffer();
         rainbowFrameBuffer = FrameBufferManager.newFrameBuffer();
 
@@ -77,20 +63,37 @@ public class Menu {
         int size = 40;
         int xPos = (int) (640 - (float) size / 2);
         star = new Star("littleStar", xPos - 84, 116, size, size, "");
-        laserStar = new Star("littleStar", xPos - 28, 116, size, size, " w/ Laser Pointer");
-        hardCassetteStar = new Star("littleStar", xPos + 28, 116, size, size, " w/ Hard Cassette");
-        freeScrollStar = new Star("littleStar", xPos + 84, 116, size, size, " w/ Free Scroll");
+        laserVisionStar = new Star("littleStar", xPos - 28, 116, size, size, " w/ Laser Vision");
+        laserPointerStar = new Star("littleStar", xPos + 28, 116, size, size, " w/ Laser Pointer");
+        hardCassetteStar = new Star("littleStar", xPos + 84, 116, size, size, " w/ Hard Cassette");
         size = 96;
         xPos = (int) (640 - (float) size / 2);
         allChallengesStar = new Star("star", xPos, 156, size, size, " All Challenges");
     }
 
     public void load(Engine engine){
-        engine.appHandler.soundHandler.addAll(Paths.dataPath + "candys3/menu/sounds.txt");
+        engine.appHandler.soundHandler.addAll("res/data/candys3/menu/sounds.txt");
         engine.appHandler.getTextureHandler().add("Static/Static");
-        engine.appHandler.getTextureHandler().addImages("menu/", Paths.dataPath + "candys3/menu/textures.txt");
+        engine.appHandler.getTextureHandler().addImages("menu/", "candys3/menu/textures.txt");
+
         engine.appHandler.getRenderHandler().screenAlpha = 0;
-        optionWindowAlpha = 0;
+
+        if (options == null) {
+            options = new Options(engine.appHandler.getTextureHandler(), engine.appHandler.window);
+            options.add(1, "Laser Vision", "laserVision");
+            options.add(1, "Laser Pointer", "laserPointer");
+            options.add(1, "Hard Cassette", "hardCassette");
+            options.add(1, "All Challenges", null);
+            options.add(2, "Flash Debug", "flashDebug");
+            options.add(2, "Hitbox Debug", "hitboxDebug");
+            options.add(2, "No Jumpscares", "noJumpscares");
+            options.add(2, "Expanded Vision", "expandedVision");
+            options.add(3, "Free Scroll", "freeScroll");
+            options.add(3, "Infinite Night", "infiniteNight");
+            options.add(3, "Perspective Effect", "perspective");
+            options.add(3, "Classic Jumpscares", "classicJumpscares");
+        }
+
         optionButton.setAlpha(0);
         playButton.setAlpha(0);
         caption.setAlpha(0);
@@ -120,23 +123,6 @@ public class Menu {
                 soundHandler.setSoundEffect(soundHandler.VOLUME, "menuAmbience",0.075f);
                 playMenu = true;
             }
-            
-            if (windowX == 0) {
-                windowX = (float) window.width() / 2 - (float) textureHandler.get("menu/window").getRegionWidth() / 2;
-                int xPos = (int) (windowX + 32);
-                laserPointerButton = new Button("Laser Pointer", xPos, 470, 84, "laserPointer");
-                hardCassetteButton = new Button("Hard Cassette", xPos, 372, 84, "hardCassette");
-                freeScrollButton = new Button("Free Scroll", xPos, 274, 84, "freeScroll");
-                allChallengesButton = new Button("All Challenges", xPos, 176, 84, null);
-                flashDebugButton = new Button("Flash Debug", xPos, 470, 84, "flashDebug");
-                hitboxDebugButton = new Button("Hitbox Debug", xPos, 372, 84, "hitboxDebug");
-                noJumpscaresButton = new Button("No Jumpscares", xPos, 274, 84, "noJumpscares");
-                expandedPointerButton = new Button("Expanded Pointer", xPos, 176, 84, "expandedPointer");
-                perspectiveButton = new Button("Perspective Effect", xPos, 470, 84, "perspective");
-                infiniteNightButton = new Button("Infinite Night", xPos, 372, 84, "infiniteNight");
-                restartOnJumpscareButton = new Button("Restart on Jumpscare", xPos, 274, 84, "restartOnJumpscare");
-                classicJumpscaresButton = new Button("Classic Jumpscares", xPos, 176, 84, "classicJumpscares");
-            }
 
             renderHandler.screenAlpha = Time.increaseTimeValue(renderHandler.screenAlpha, 1, 4);
             whiteAlpha = Time.decreaseTimeValue(whiteAlpha, 0, 3);
@@ -153,9 +139,18 @@ public class Menu {
 
             boolean focus = !optionButton.isSelected() && !playButton.isSelected();
             caption.setActive(false);
-            rat.update(caption, input, window, focus);
-            cat.update(caption, input, window, focus);
-            vinnie.update(caption, input, window, focus && GameData.night < 2, false);
+
+            rat.characterPan(input, window);
+            rat.hover(input, 3.75f, 4, 2.25f, 1.5f);
+            rat.update(caption, input, focus);
+
+            cat.characterPan(input, window);
+            cat.hover(input, 6.25f, 4, 1.625f, 1.5f);
+            cat.update(caption, input, focus);
+
+            vinnie.characterPan(input, window);
+            vinnie.hover(input, 7, 4, 1.375f, 1.5f);
+            vinnie.update(caption, input, focus && GameData.night < 2, false);
 
             rainbowPos += Time.convertValue(96);
             if (rainbowPos > 256) rainbowPos -= 256;
@@ -166,15 +161,15 @@ public class Menu {
             changeMode();
             fontManager.setText(modeName);
 
-            arrows.update(input, fontManager, optionButton.isSelected(), section);
-            if (input.isLeftPressed()) {
-                if (arrows.getHovered() == 1) section--;
-                else if (arrows.getHovered() == 2) section++;
-                else if (GameData.night != 2){
-                    if (arrows.getHovered() == 3){
+            options.input(input);
+
+            if (GameData.night != 2){
+                arrows.update(input, fontManager, GameData.night, 2);
+                if (input.isLeftPressed()){
+                    if (arrows.getHovered() == 1){
                         setNight++;
                         if (setNight == 2) setNight++;
-                    } else if (arrows.getHovered() == 4){
+                    } else if (arrows.getHovered() == 2){
                         setNight--;
                         if (setNight == 2) setNight--;
                     }
@@ -182,54 +177,64 @@ public class Menu {
                 }
             }
 
-            optionButton.update(caption, input, true);
-            if (optionButton.isSelected()) {
-                if (section == 3) section = prevSection;
-                prevSection = section;
-                optionWindowAlpha = Time.increaseTimeValue(optionWindowAlpha, 1, 4);
-                if (section == 0) {
-                    laserPointerButton.update(caption, input, false);
-                    hardCassetteButton.update(caption, input, false);
-                    freeScrollButton.update(caption, input, false);
-                    allChallengesButton.update(caption, input, false);
+            optionButton.update(null, input, true);
 
-                    if (allChallengesButton.isSelected()) {
-                        if (laserPointerButton.isSelected()
-                                && hardCassetteButton.isSelected()
-                                && freeScrollButton.isSelected()) {
-                            laserPointerButton.setSelected();
-                            hardCassetteButton.setSelected();
-                            freeScrollButton.setSelected();
-                        } else {
-                            if (!laserPointerButton.isSelected()) laserPointerButton.setSelected();
-                            if (!hardCassetteButton.isSelected()) hardCassetteButton.setSelected();
-                            if (!freeScrollButton.isSelected()) freeScrollButton.setSelected();
-                        }
-                        allChallengesButton.setSelected();
-                    }
-                    GameData.hitboxMultiplier = laserPointerButton.isSelected() ? 0.75f : 1;
-                    GameData.hardCassette = hardCassetteButton.isSelected();
-                    GameData.freeScroll = freeScrollButton.isSelected();
-                } else if (section == 1){
-                    flashDebugButton.update(caption, input, false);
-                    GameData.flashDebug = flashDebugButton.isSelected();
-                    hitboxDebugButton.update(caption, input, false);
-                    GameData.hitboxDebug = hitboxDebugButton.isSelected();
-                    noJumpscaresButton.update(caption, input, false);
-                    GameData.noJumpscares = noJumpscaresButton.isSelected();
-                    expandedPointerButton.update(caption, input, false);
-                    GameData.expandedPointer = expandedPointerButton.isSelected();
-                } else {
-                    perspectiveButton.update(caption, input, false);
-                    GameData.perspective = perspectiveButton.isSelected();
-                    infiniteNightButton.update(caption, input, false);
-                    GameData.infiniteNight = infiniteNightButton.isSelected();
-                    restartOnJumpscareButton.update(caption, input, false);
-                    GameData.restartOnJumpscare = restartOnJumpscareButton.isSelected();
-                    classicJumpscaresButton.update(caption, input, false);
-                    GameData.classicJumpscares = classicJumpscaresButton.isSelected();
+            options.updateAlpha(optionButton.isSelected());
+
+            if (optionButton.isSelected()) {
+                List<Button> buttonsList = options.get(options.getSection() + 1);
+                for (Button button: buttonsList){
+                    button.update(caption, input, false);
                 }
-            } else if (GameData.night != setNight) {
+
+                if (options.getSection() == 0) {
+                    options.updateAllChallenges(buttonsList);
+                    GameData.laserVision = buttonsList.get(0).isSelected();
+                    GameData.hitboxMultiplier = buttonsList.get(1).isSelected() ? 0.75f : 1;
+                    GameData.hardCassette = buttonsList.get(2).isSelected();
+                } else if (options.getSection() == 1){
+                    GameData.flashDebug = buttonsList.get(0).isSelected();
+                    GameData.hitboxDebug = buttonsList.get(1).isSelected();
+                    GameData.noJumpscares = buttonsList.get(2).isSelected();
+                    GameData.expandedVision = buttonsList.get(3).isSelected();
+                } else {
+                    GameData.freeScroll = buttonsList.get(0).isSelected();
+                    GameData.infiniteNight = buttonsList.get(1).isSelected();
+                    GameData.perspective = buttonsList.get(2).isSelected();
+                    GameData.classicJumpscares = buttonsList.get(3).isSelected();
+                }
+            } else {
+                StarData[] modeStars = null;
+                Candys3Data data = engine.user.candys3Data;
+
+                if (GameData.night == 0) {
+                    if (rat.getAi() != 0 && cat.getAi() != 0) {
+                        if (vinnie.getAi() == 0) modeStars = data.mainCastStars;
+                        else modeStars = data.ratAndCatTheaterStars;
+                    }
+                } else if (GameData.night == 1) {
+                    if (rat.getAi() != 0 && cat.getAi() != 0) {
+                        if (vinnie.getAi() == 0) modeStars = data.shadowCastStars;
+                        else modeStars = data.theaterTraumaStars;
+                    }
+                } else modeStars = data.hellCastStars;
+
+                if (modeStars == null) {
+                    star.update(modeName, caption, input);
+                    laserVisionStar.update(modeName, caption, input);
+                    laserPointerStar.update(modeName, caption, input);
+                    hardCassetteStar.update(modeName, caption, input);
+                    allChallengesStar.update(modeName, caption, input);
+                } else {
+                    star.update(modeName, caption, input, modeStars[0].time);
+                    laserVisionStar.update(modeName, caption, input, modeStars[1].time);
+                    laserPointerStar.update(modeName, caption, input, modeStars[2].time);
+                    hardCassetteStar.update(modeName, caption, input, modeStars[3].time);
+                    allChallengesStar.update(modeName, caption, input, modeStars[4].time);
+                }
+            }
+
+            if (GameData.night != setNight) {
                 byte previousNight = GameData.night;
                 GameData.night = (byte) setNight;
                 if (GameData.night == 0) {
@@ -253,21 +258,14 @@ public class Menu {
                     cat.setInitX(cat.getInitX() - 75);
                 }
 
-                optionWindowAlpha = 0;
+                options.alpha = 0;
                 whiteAlpha = 1;
                 soundHandler.play("thunder");
-            } else {
-                star.update(modeName, caption, input);
-                laserStar.update(modeName, caption, input);
-                hardCassetteStar.update(modeName, caption, input);
-                freeScrollStar.update(modeName, caption, input);
-                allChallengesStar.update(modeName, caption, input);
-                optionWindowAlpha = Time.decreaseTimeValue(optionWindowAlpha, 0, 4);
             }
             changeMode();
 
-            caption.update(engine, captionFont);
-            playButton.update(caption, input, true);
+            caption.update(engine, captionFont, "candys3");
+            playButton.update(null, input, true);
             if (optionButton.isSelected()) playButton.reset();
             if (!playButton.isSelected()) return;
             soundHandler.stopAllSounds();
@@ -291,7 +289,7 @@ public class Menu {
                 return;
             }
             whiteAlpha = Time.decreaseTimeValue(whiteAlpha, 0, 2);
-            loadTime = Time.increaseTimeValue(loadTime, 1, 1.5f);
+            loadTime = Time.increaseTimeValue(loadTime, 1, 1);
         }
     }
 
@@ -355,43 +353,7 @@ public class Menu {
         fontManager.setSize(15);
         caption.prepare(engine, captionFBO);
 
-        windowFrameBuffer.begin();
-        if (windowX != 0) {
-            region = textureHandler.get("menu/window");
-            engine.candys3Deluxe.setNightColor(engine, 1.5f);
-            batch.draw(region, windowX, 144);
-            batch.setColor(1, 1, 1, 1);
-
-            if (section != 3) {
-                if (section == 0) {
-                    boolean allChallenges = laserPointerButton.isSelected() && hardCassetteButton.isSelected() && freeScrollButton.isSelected();
-                    laserPointerButton.render(textureHandler, batch);
-                    hardCassetteButton.render(textureHandler, batch);
-                    freeScrollButton.render(textureHandler, batch);
-                    allChallengesButton.render(textureHandler, batch, allChallenges);
-                } else if (section == 1) {
-                    flashDebugButton.render(textureHandler, batch);
-                    hitboxDebugButton.render(textureHandler, batch);
-                    noJumpscaresButton.render(textureHandler, batch);
-                    expandedPointerButton.render(textureHandler, batch);
-                } else {
-                    perspectiveButton.render(textureHandler, batch);
-                    infiniteNightButton.render(textureHandler, batch);
-                    restartOnJumpscareButton.render(textureHandler, batch);
-                    classicJumpscaresButton.render(textureHandler, batch);
-                }
-
-                engine.candys3Deluxe.setNightColor(engine, 1);
-                region = textureHandler.get("menu/arrow");
-                textureHandler.setFilter("menu/arrow");
-                region.flip(true, false);
-                if (section != 0) batch.draw(region, 502, 601);
-                region.flip(true, false);
-                if (section != 2) batch.draw(region, 752, 601);
-            }
-            batch.setColor(1, 1, 1, 1);
-        }
-        FrameBufferManager.end(batch, windowFrameBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        options.fboDraw(engine);
 
         rainbowFrameBuffer.begin();
         batch.draw(textureHandler.get("menu/rainbow"), rainbowPos, 0, 256, 256);
@@ -445,14 +407,14 @@ public class Menu {
         float layoutWidth = fontManager.getLayout().width;
 
         engine.candys3Deluxe.setNightColor(engine, 1);
-        region = textureHandler.get("menu/arrow");
+        region = engine.appHandler.getMenuUI().arrow;
         region.flip(true, false);
         if (GameData.night != 0 && GameData.night != 2) batch.draw(region, 640 - (int) (layoutWidth / 2) - 42, 673);
         region.flip(true, false);
         if (GameData.night != 1 && GameData.night != 2) batch.draw(region, 640 + (int) (layoutWidth / 2) + 16, 673);
         batch.setColor(1, 1, 1, 1);
 
-        int[] modeStars = null;
+        StarData[] modeStars = null;
         Candys3Data data = engine.user.candys3Data;
 
         if (GameData.night == 0) {
@@ -467,11 +429,19 @@ public class Menu {
             }
         } else modeStars = data.hellCastStars;
 
-        star.render(textureHandler, batch, rainbowFrameBuffer, modeStars != null && modeStars[0] == 1, false);
-        laserStar.render(textureHandler, batch, rainbowFrameBuffer, modeStars != null && modeStars[1] == 1, false);
-        hardCassetteStar.render(textureHandler, batch, rainbowFrameBuffer, modeStars != null && modeStars[2] == 1, false);
-        freeScrollStar.render(textureHandler, batch, rainbowFrameBuffer, modeStars != null && modeStars[3] == 1, false);
-        allChallengesStar.render(textureHandler, batch, rainbowFrameBuffer, modeStars != null && modeStars[4] == 1, false);
+        if (modeStars == null){
+            star.renderCandys3(textureHandler, batch, rainbowFrameBuffer, false, false);
+            laserVisionStar.renderCandys3(textureHandler, batch, rainbowFrameBuffer, false, false);
+            laserPointerStar.renderCandys3(textureHandler, batch, rainbowFrameBuffer, false, false);
+            hardCassetteStar.renderCandys3(textureHandler, batch, rainbowFrameBuffer, false, false);
+            allChallengesStar.renderCandys3(textureHandler, batch, rainbowFrameBuffer, false, false);
+        } else {
+            star.renderCandys3(textureHandler, batch, rainbowFrameBuffer, modeStars[0].complete, modeStars[0].special);
+            laserVisionStar.renderCandys3(textureHandler, batch, rainbowFrameBuffer, modeStars[1].complete, modeStars[1].special);
+            laserPointerStar.renderCandys3(textureHandler, batch, rainbowFrameBuffer, modeStars[2].complete, modeStars[2].special);
+            hardCassetteStar.renderCandys3(textureHandler, batch, rainbowFrameBuffer, modeStars[3].complete, modeStars[3].special);
+            allChallengesStar.renderCandys3(textureHandler, batch, rainbowFrameBuffer, modeStars[4].complete, modeStars[4].special);
+        }
 
         //start rendering texts
         fontManager.setCurrentFont(candysFont);
@@ -514,13 +484,13 @@ public class Menu {
             dstFunc = batch.getBlendDstFunc();
             batch.setBlendFunction(GL20.GL_SRC_COLOR, GL20.GL_DST_ALPHA);
             batch.setColor(1, 1, 1, 1);
-            VideoManager.render(batch, false, true, 1280, 720);
+            VideoManager.render(batch, engine.game, false, true, 1280, 720);
             batch.flush();
             batch.setBlendFunction(srcFunc, dstFunc);
         }
         else VideoManager.stop();
 
-        region = textureHandler.get("menu/button");
+        region = engine.appHandler.getMenuUI().button;
         textureHandler.setFilter(region.getTexture());
         for (byte i = 0; i < 2; i++) {
             Button button;
@@ -530,55 +500,19 @@ public class Menu {
             batch.draw(region, button.getX(), button.getY());
             engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, button.getAlpha(), true);
             fontManager.setText(button.getPath());
-            fontManager.setPosition(true, false, button.getX() + button.getWidth() / 2, 76);
+            fontManager.setPosition(true, false, button.getX() + button.getWidth() / 2, 75);
             fontManager.render(batch);
         }
 
-        if (optionWindowAlpha > 0) {
-            Texture texture = windowFrameBuffer.getColorBufferTexture();
-            textureHandler.setFilter(texture);
-            region = new TextureRegion(texture);
-            region.flip(false, true);
-            batch.setColor(1, 1, 1, optionWindowAlpha);
-            batch.draw(region, CameraManager.getX(), CameraManager.getY());
-
-            engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, optionWindowAlpha, false);
-            if (section == 3) fontManager.setText("Trophies");
-            else if (section == 0) fontManager.setText("Challenges");
-            else if (section == 1) fontManager.setText("Cheats");
-            else fontManager.setText("Options");
-
-            fontManager.setOutline(0.25f);
-            if (GameData.night != 1) fontManager.setColor(0.2f, 0, 0, optionWindowAlpha);
-            else fontManager.setColor(0.1f, 0, 0.2f, optionWindowAlpha);
-            fontManager.setPosition(true, false, (float) window.width() / 2, 627);
-            fontManager.render(batch);
-            fontManager.setOutline(0.5f);
-            fontManager.setColor(0, 0, 0, 1);
-
-            if (section == 0){
-                buttonFontRender(engine, laserPointerButton);
-                buttonFontRender(engine, hardCassetteButton);
-                buttonFontRender(engine, freeScrollButton);
-                buttonFontRender(engine, allChallengesButton);
-            } else if (section == 1){
-                buttonFontRender(engine, flashDebugButton);
-                buttonFontRender(engine, hitboxDebugButton);
-                buttonFontRender(engine, noJumpscaresButton);
-                buttonFontRender(engine, expandedPointerButton);
-            } else {
-                buttonFontRender(engine, perspectiveButton);
-                buttonFontRender(engine, infiniteNightButton);
-                buttonFontRender(engine, restartOnJumpscareButton);
-                buttonFontRender(engine, classicJumpscaresButton);
-            }
-        }
+        options.render(engine);
 
         fontManager.setCurrentFont(captionFont);
-        caption.render(engine, captionFBO, captionFont);
+        String orientation = "middle";
+        if (optionButton.isSelected()) orientation = "left";
+        caption.render(engine, captionFBO, captionFont, orientation);
         batch.setColor(1, 1, 1, 1);
 
-        fontManager.setSize(15);
+        fontManager.setSize(18);
         engine.candys3Deluxe.fontAlpha(renderHandler, captionFont, renderHandler.screenAlpha, false);
         fontManager.setText("Logged in as: " + engine.user.getUsername());
         fontManager.setRelativePosition(20, 700);
@@ -590,36 +524,27 @@ public class Menu {
             fontManager.setRelativePosition(20, 678);
             fontManager.render(batch);
         }
-        fontManager.setText("F11 = Fullscreen");
+
+        fontManager.setSize(15);
+        fontManager.setText("F11 - Fullscreen");
         fontManager.setRelativePosition(20, 100);
         fontManager.render(batch);
-        fontManager.setText("F2 = Return to Menu");
+        fontManager.setText("F2 - Return to Menu");
         fontManager.setRelativePosition(20, 78);
         fontManager.render(batch);
-        fontManager.setText("R = Restart Night");
+        fontManager.setText("R - Restart Night");
         fontManager.setRelativePosition(20, 56);
         fontManager.render(batch);
-        fontManager.setText("Patch " + engine.candys3Deluxe.version);
+        fontManager.setText("Patch " + engine.version);
         fontManager.setRelativePosition(20, 34);
         fontManager.render(batch);
 
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1 - renderHandler.screenAlpha);
         renderHandler.drawScreen();
 
-//        rat.debugRender();
-//        cat.debugRender();
-    }
-
-    private void buttonFontRender(Engine engine, Button button){
-        var renderHandler = engine.appHandler.getRenderHandler();
-        var batch = renderHandler.batch;
-        var fontManager = engine.appHandler.getFontManager();
-        var candysFont = fontManager.getFont("candys3/candysFont");
-
-        engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, optionWindowAlpha, false);
-        fontManager.setText(button.getPath());
-        fontManager.setPosition(button.getX() + 100, button.getY() + 55);
-        fontManager.render(batch);
+//        rat.debugRender(renderHandler, engine.game);
+//        cat.debugRender(renderHandler, engine.game);
+//        vinnie.debugRender(renderHandler, engine.game);
     }
 
     private void changeMode(){

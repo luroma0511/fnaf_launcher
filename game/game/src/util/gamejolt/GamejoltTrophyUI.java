@@ -14,15 +14,15 @@ public class GamejoltTrophyUI {
     private float cooldown;
     private float alpha;
     
-    public void update(String game, SoundHandler soundHandler, GamejoltManager gamejoltManager, JSONHandler jsonHandler){
-        if (ui == null) ui = new Texture("assets/trophy/ui.png");
+    public void update(String game, SoundHandler soundHandler, GamejoltManager gamejoltManager){
+        if (ui == null) ui = new Texture("assets/trophy/popup.png");
         if (outline == null) outline = new Texture("assets/trophy/outline.png");
 
         if (!gamejoltManager.trophy.isIDsEmpty() && !gamejoltManager.threadRunning()) gamejoltManager.execute(() -> {
             gamejoltManager.trophy.add(gamejoltManager);
             if (gamejoltManager.trophy.getNewTrophies().isEmpty()) return;
             if (gamejoltManager.trophy.fetch(gamejoltManager,
-                    jsonHandler, gamejoltManager.trophy.getNewTrophies().getFirst()))
+                    gamejoltManager.trophy.getNewTrophies().getFirst()))
                 gamejoltManager.trophy.getNewTrophies().removeFirst();
         });
 

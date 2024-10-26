@@ -12,7 +12,6 @@ public class Candys3Deluxe extends StateManager {
     private final Game game;
     private final Menu menu;
     private final Win win;
-    public final String version = "v1.1.0";
 
     public Candys3Deluxe(Engine engine){
         super();
@@ -29,7 +28,7 @@ public class Candys3Deluxe extends StateManager {
         else if (getState() == 2) win.update(engine);
 
         if (engine.isOnline()) {
-            engine.gamejoltTrophyUI.update(engine.game, engine.appHandler.soundHandler, engine.gamejoltManager, engine.jsonHandler);
+            engine.gamejoltTrophyUI.update(engine.game, engine.appHandler.soundHandler, engine.gamejoltManager);
         }
 
         if (sameStates()) return;

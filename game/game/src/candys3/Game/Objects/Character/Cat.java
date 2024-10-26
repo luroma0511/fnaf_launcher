@@ -56,7 +56,6 @@ public class Cat extends SpriteObject {
     public boolean execute(SoundHandler soundHandler, Player player, Rat rat, Room room, boolean twitching){
         var flashlight = player.getFlashlight();
         twitching = input(soundHandler, player, rat, room, flashlight.getX(), flashlight.getY(), twitching);
-        if (GameData.expandedPointer) hitbox.setSize(hitbox.size, 0.8f);
         twitching = update(soundHandler, rat, player, room, twitching);
         return twitching;
     }
@@ -393,10 +392,10 @@ public class Cat extends SpriteObject {
                     }
                 } else {
                     if (side == 0) {
-                        if (attack.getPosition() == 0) hitbox.setCoord(381, 743);
-                        else if (attack.getPosition() == 1) hitbox.setCoord(305, 630);
-                        else if (attack.getPosition() == 2) hitbox.setCoord(475, 620);
-                        else hitbox.setCoord(377, 548);
+                        if (attack.getPosition() == 0) hitbox.setCoord(366, 742);
+                        else if (attack.getPosition() == 1) hitbox.setCoord(281, 627);
+                        else if (attack.getPosition() == 2) hitbox.setCoord(477, 607);
+                        else hitbox.setCoord(364, 520);
                     } else if (side == 1) {
                         if (attack.getPosition() == 0) hitbox.setCoord(1524, 709);
                         else if (attack.getPosition() == 1) hitbox.setCoord(1318, 577);
@@ -563,10 +562,10 @@ public class Cat extends SpriteObject {
                     setWidth(406);
                     setHeight(515);
                 } else {
-                    setX(174);
-                    setY(242);
-                    setWidth(464);
-                    setHeight(612);
+                    setX(138);
+                    setY(253);
+                    setWidth(486);
+                    setHeight(581);
                 }
             } else if (side == 1) {
                 setPath("game/" + name + "/Battle/Middle");
@@ -700,7 +699,7 @@ public class Cat extends SpriteObject {
     }
 
     private boolean roomUpdate(SoundHandler soundHandler, Rat rat, Player player){
-        if (attack.update(soundHandler, random, type, player.isScared(), 0.01f)) {
+        if (attack.update(soundHandler, random, type, type == 2, player.isScared(), 0.01f)) {
             player.setBlacknessSpeed(6);
             if (attack.getTeleports() > 0) {
                 if (type == 2) {
@@ -741,7 +740,7 @@ public class Cat extends SpriteObject {
         if (attack.getLimit() < 2) attack.increaseLimit();
         if (type == 0) attack.setFlashTime(0.25f + random.nextInt(3) * 0.125f);
         else if (type == 1) attack.setFlashTime(0.125f + random.nextInt(3) * 0.125f);
-        else attack.setFlashTime(0.1f + random.nextInt(2) * 0.1f);
+        else attack.setFlashTime(0.04f + random.nextInt(2) * 0.04f);
         return false;
     }
 

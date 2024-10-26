@@ -1,0 +1,1 @@
+This option disables auto scrolling for battling.

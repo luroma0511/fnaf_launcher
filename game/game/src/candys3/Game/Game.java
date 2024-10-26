@@ -9,11 +9,11 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import core.Engine;
 import util.deluxe.Candys3Data;
-import util.deluxe.Paths;
 import candys3.Game.Objects.*;
 import candys3.Game.Objects.Character.Characters;
 import candys3.Game.Objects.Functions.Jumpscare;
 import util.*;
+import util.deluxe.StarData;
 import util.gamejolt.Score;
 
 public class Game {
@@ -44,7 +44,9 @@ public class Game {
         player = new Player();
         room = new Room();
         byte nightMinuteLength = 8;
-        nightTimeLength = 0.25f * nightMinuteLength;
+        byte minute = 60;
+        float debugMinute = 0.25f;
+        nightTimeLength = minute * nightMinuteLength;
         nightTimeBuilder = new StringBuilder();
     }
 
@@ -58,9 +60,9 @@ public class Game {
         retry = false;
         characters.ratCatLoad(textureHandler);
         room.load(textureHandler);
-        CameraManager.initShader();
+        CameraManager.initShader("perspective");
         textureHandler.add("Static/Static");
-        textureHandler.addImages("game/", Paths.dataPath + "candys3/game/textures/game.txt");
+        textureHandler.addImages("game/", "candys3/game/textures/game.txt");
         if (GameData.night != 2) textureHandler.add("game/BattleOverlay");
         else textureHandler.add("game/HellOverlay");
         for (int i = 1; i <= 11; i++){
@@ -69,7 +71,25 @@ public class Game {
             textureHandler.add("game/Moving/Turn Around/Moving" + i);
             textureHandler.add("game/Moving/Under Bed/Moving" + i);
         }
-        soundHandler.addAll(Paths.dataPath + "candys3/game/sounds.txt");
+        soundHandler.addAll("res/data/candys3/game/sounds.txt");
+    }
+
+    public void reset(RenderHandler renderHandler){
+        characters.reset();
+        player.reset();
+        room.reset();
+        Jumpscare.reset();
+        nightTime = 0;
+        fastNightTime = 0;
+        renderHandler.screenAlpha = 0;
+        scoreAlpha = 1;
+        gameOver = false;
+        clicked = false;
+        menu = false;
+        retry = false;
+        modifySave = true;
+        loaded = true;
+        loadingBegun = false;
     }
 
     public void update(Engine engine){
@@ -77,9 +97,9 @@ public class Game {
         var renderHandler = engine.appHandler.getRenderHandler();
         var soundHandler = engine.appHandler.soundHandler;
         var window = engine.appHandler.window;
-        
+
         boolean cond1 = gameOver && gameOverAlpha == 0 && clicked;
-        boolean cond2 = !gameOver && nightTime != 0 && (!player.isJumpscare() || GameData.restartOnJumpscare);
+        boolean cond2 = !gameOver && nightTime != 0 && !player.isJumpscare();
         if ((cond1 && retry) || (cond2 && input.keyTyped(Input.Keys.R))) reset(renderHandler);
         else if ((cond1 && menu) || (cond2 && input.keyTyped(Input.Keys.F2))) {
             characters.dispose();
@@ -93,24 +113,33 @@ public class Game {
         if (nightTime == 0) soundHandler.stopAllSounds();
         if (!gameOver) {
             renderHandler.screenAlpha = Time.increaseTimeValue(renderHandler.screenAlpha, 1, 2);
-            if (scoreAlpha > 0 && !player.isAttack() && !player.isJumpscare()) scoreAlpha = Time.decreaseTimeValue(scoreAlpha, 0, 2);
-            else if (scoreAlpha < 1 && (player.isAttack() || player.isJumpscare())) scoreAlpha = Time.increaseTimeValue(scoreAlpha, 1, 4);
+            if (player.isAttack() || player.isJumpscare()) scoreAlpha = Time.increaseTimeValue(scoreAlpha, 1, 4);
+            else scoreAlpha = Time.decreaseTimeValue(scoreAlpha, 0, 2);
             if (!player.isJumpscare()) {
                 player.update(window, input, room, characters.getRat(), characters.getCat());
                 if (player.getY() == 0) room.input(engine, player);
                 room.update(soundHandler, player);
                 characters.update(soundHandler, player, room);
-            }
-            if (player.isJumpscare() && modifySave){
-                if (!GameData.flashDebug && !GameData.hitboxDebug && !GameData.noJumpscares
-                        && characters.getRat() != null && characters.getCat() != null) writeScore(engine);
-                modifySave = false;
-            }
-            player.updateEffects(room, soundHandler);
-            if (!player.isJumpscare()) {
                 if (!GameData.hardCassette && room.isMusicPlaying()) fastNightTime = Time.increaseTimeValue(fastNightTime, nightTimeLength / 2, 1);
                 nightTime = Time.increaseTimeValue(nightTime, Integer.MAX_VALUE, 1);
             }
+
+            boolean cheating = GameData.flashDebug || GameData.hitboxDebug || GameData.noJumpscares
+                    || (GameData.expandedVision && !GameData.laserVision)
+                    || characters.getRat() == null || characters.getCat() == null;
+
+            Candys3Data data = engine.user.candys3Data;
+
+            if (player.isJumpscare() && modifySave){
+                if (!cheating) {
+                    if (GameData.night == 0) writeStars(engine, data.mainCastStars, false);
+                    else if (GameData.night == 1) writeStars(engine, data.shadowCastStars, false);
+                    else writeStars(engine, data.hellCastStars, false);
+                    writeScore(engine);
+                }
+                modifySave = false;
+            }
+            player.updateEffects(room, soundHandler);
             if (nightTime + fastNightTime < nightTimeLength || !modifySave) return;
             if (!GameData.infiniteNight) {
                 engine.candys3Deluxe.setState(2);
@@ -120,32 +149,26 @@ public class Game {
                 if (VideoManager.isPlaying()) VideoManager.stop();
             }
 
-            Candys3Data data = engine.user.candys3Data;
-
-            if (GameData.flashDebug || GameData.hitboxDebug || GameData.noJumpscares
-                    || (GameData.expandedPointer && GameData.hitboxMultiplier == 1)
-                    || characters.getRat() == null || characters.getCat() == null) return;
+            if (cheating) return;
 
             if (!GameData.infiniteNight) characters.dispose();
 
-            if (GameData.night == 0) writeStars(data.mainCastStars);
-            else if (GameData.night == 1) writeStars(data.shadowCastStars);
-            else writeStars(data.hellCastStars);
+            StarData[] starData;
+
+            if (GameData.night == 0) starData = data.mainCastStars;
+            else if (GameData.night == 1) starData = data.shadowCastStars;
+            else starData = data.hellCastStars;
+
+            boolean gamejoltExists = writeStars(engine, starData, true);
 
             writeScore(engine);
-            if (engine.gamejoltManager == null) {
-                FileUtils.write(engine.jsonHandler, engine.user, 0);
-                modifySave = false;
-                return;
-            }
-            engine.gamejoltManager.execute(() -> {
-                String value = engine.jsonHandler.write(engine.user);
-                engine.gamejoltManager.dataStore.set(engine.gamejoltManager, "user_id=" + engine.gamejoltManager.id, value);
-            });
+
+            if (!gamejoltExists) return;
+
             String trophyID;
             if (GameData.night == 0 && room.getTapePlayAchievement() < 1) engine.gamejoltManager.trophy.addID("233858");
 
-            if (GameData.hitboxMultiplier < 1 && GameData.hardCassette && GameData.freeScroll) {
+            if (GameData.hitboxMultiplier < 1 && GameData.laserVision && GameData.hardCassette) {
                 if (GameData.night == 0) trophyID = "233026";
                 else if (GameData.night == 1) trophyID = "233090";
                 else trophyID = "233887";
@@ -166,7 +189,7 @@ public class Game {
                 engine.gamejoltManager.trophy.addID(trophyID);
             }
 
-            if (GameData.freeScroll) {
+            if (GameData.laserVision) {
                 if (GameData.night == 0) trophyID = "245016";
                 else if (GameData.night == 1) trophyID = "245017";
                 else trophyID = "245018";
@@ -191,24 +214,6 @@ public class Game {
         }
     }
 
-    public void reset(RenderHandler renderHandler){
-        characters.reset();
-        player.reset();
-        room.reset();
-        Jumpscare.reset();
-        nightTime = 0;
-        fastNightTime = 0;
-        renderHandler.screenAlpha = 0;
-        scoreAlpha = 1;
-        gameOver = false;
-        clicked = false;
-        menu = false;
-        retry = false;
-        modifySave = true;
-        loaded = true;
-        loadingBegun = false;
-    }
-
     private void renderGame(Engine engine){
         var renderHandler = engine.appHandler.getRenderHandler();
         var textureHandler = engine.appHandler.getTextureHandler();
@@ -218,7 +223,7 @@ public class Game {
         var fontManager = engine.appHandler.getFontManager();
         var candysFont = engine.appHandler.getFontManager().getFont("candys3/candysFont");
 
-        player.adjustCamera(input);
+        player.adjustCamera(room, input);
         batch.setProjectionMatrix(CameraManager.getViewport().getCamera().combined);
         renderHandler.shapeDrawer.update();
         batch.enableBlending();
@@ -245,7 +250,7 @@ public class Game {
         if (player.isJumpscare() && player.getBlacknessTimes() == 0){
             renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
             renderHandler.drawScreen();
-            if (room.isMusicPlaying()) room.stopMusic();
+            room.stopMusic();
             if ((Jumpscare.isVideo() && !Jumpscare.render(engine.appHandler.soundHandler, batch))
                 || (!Jumpscare.isVideo() && !Jumpscare.classicShadowRender(engine.appHandler.soundHandler, batch, textureHandler))) {
                 gameOver = true;
@@ -325,7 +330,7 @@ public class Game {
         fontManager.setColor(0, 0, 0, 1);
 
         if (!GameData.flashDebug && !GameData.hitboxDebug && !GameData.noJumpscares
-            && (!GameData.expandedPointer || GameData.hitboxMultiplier != 1)) return;
+            && (!GameData.expandedVision || GameData.hitboxMultiplier != 1)) return;
         fontManager.setSize(24);
         candysFont.setColor(1, 0, 0, 1);
         fontManager.setText("Cheats on!");
@@ -402,9 +407,8 @@ public class Game {
     public void render(Engine engine){
         if (!gameOver) renderGame(engine);
         else renderGameOver(engine);
-        if (GameData.hitboxDebug || GameData.flashDebug) characters.debug(
-                engine.appHandler.getRenderHandler(),
-                engine.appHandler.window, player, room);
+        if (gameOver || (!GameData.hitboxDebug && !GameData.flashDebug)) return;
+        characters.debug(engine.appHandler.getRenderHandler(), engine.appHandler.window, player, room);
     }
 
     private void writeScore(Engine engine){
@@ -424,10 +428,9 @@ public class Game {
             });
         }
 
-        if (engine.scoreTable != null){
-            engine.scoreTable.setScore(GameData.night, player.getFlashPoints() + " Points", time + " seconds");
-            FileUtils.write(engine.jsonHandler, engine.scoreTable, 1);
-        }
+        if (engine.scoreTable == null) return;
+        engine.scoreTable.setCandys3Score(GameData.night, player.getFlashPoints() + " Points", time + " seconds");
+        FileUtils.writeTable(engine.jsonHandler, engine.scoreTable);
     }
 
     private void scoreFetch(Engine engine, String tableID, int sort, String value){
@@ -437,14 +440,30 @@ public class Game {
             engine.gamejoltManager.score.add(engine.gamejoltManager, tableID, String.valueOf(sort), value);
     }
 
-    private void writeStars(int[] modeStars) {
-        modeStars[0] = 1;
-        if (GameData.hitboxMultiplier < 1) modeStars[1] = 1;
-        if (GameData.hardCassette) modeStars[2] = 1;
-        if (GameData.freeScroll) modeStars[3] = 1;
-        if (GameData.hitboxMultiplier < 1 && GameData.hardCassette && GameData.freeScroll) {
-            modeStars[4] = 1;
+    private boolean writeStars(Engine engine, StarData[] starsData, boolean complete) {
+        setStar(starsData[0], complete);
+        if (GameData.laserVision) setStar(starsData[1], complete);
+        if (GameData.hitboxMultiplier < 1) setStar(starsData[2], complete);
+        if (GameData.hardCassette) setStar(starsData[3], complete);
+        if (GameData.laserVision && GameData.hitboxMultiplier < 1 && GameData.hardCassette) setStar(starsData[4], complete);
+
+        if (engine.gamejoltManager == null) {
+            FileUtils.writeUser(engine.jsonHandler, engine.user);
+            return false;
         }
+        engine.gamejoltManager.execute(() -> {
+            String value = engine.jsonHandler.writeCandysUser(engine.user);
+            engine.gamejoltManager.dataStore.set(engine.gamejoltManager, "user_id=" + engine.gamejoltManager.id, value);
+        });
+
+        return true;
+    }
+
+    private void setStar(StarData starData, boolean complete){
+        starData.time = Math.max((int) nightTime, starData.time);
+        if (!complete) return;
+        starData.complete = true;
+        if (GameData.freeScroll) starData.special = true;
     }
 
     public void dispose(){

@@ -23,10 +23,13 @@ public abstract class SpriteObject {
         sb.append(path);
     }
 
-    public boolean mouseOver(InputManager inputManager, boolean smaller){
-        if (smaller) return inputManager.mouseOver(x + width / 4.75f, y + height / 4,
-                width / 1.75f, height / 1.5f);
+    public boolean mouseOver(InputManager inputManager){
         return inputManager.mouseOver(x, y, width, height);
+    }
+
+    public boolean characterMouseOver(InputManager inputManager, float xDivider, float yDivider, float wDivider, float hDivider){
+        return inputManager.mouseOver(x + width / xDivider, y + height / yDivider,
+                width / wDivider, height / hDivider);
     }
 
     public boolean mouseOverWithPanning(float mx, float my){

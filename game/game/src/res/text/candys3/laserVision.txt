@@ -1,0 +1,1 @@
+This challenge shrinks the flashlight size.

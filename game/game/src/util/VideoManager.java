@@ -17,6 +17,10 @@ public class VideoManager {
         request = path;
     }
 
+    public static void cancel(){
+        request = null;
+    }
+
     public static void reset(){
         if (videoPlayer.isPlaying()) dispose();
     }
@@ -30,10 +34,10 @@ public class VideoManager {
         return playing;
     }
 
-    public static boolean render(SpriteBatch batch, boolean flip, boolean loop, int width, int height){
+    public static boolean render(SpriteBatch batch, String game, boolean flip, boolean loop, int width, int height){
         if (request != null){
             try {
-                videoPlayer.play(Gdx.files.local("assets/candys3/" + request + ".webm"));
+                videoPlayer.play(Gdx.files.local("assets/" + game + "/" + request + ".webm"));
                 videoPlayer.setLooping(loop);
                 playing = true;
                 videoPlayer.setOnCompletionListener(file -> dispose());

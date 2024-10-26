@@ -78,6 +78,15 @@ public class TextureHandler {
         return region;
     }
 
+    public TextureRegion getRegion(TextureRegion region, int width, int fileIndex){
+        region.setRegion(fileIndex * width + fileIndex + 1, 0, width, region.getTexture().getHeight());
+        return region;
+    }
+
+    public void setRegion(TextureRegion region, int width, int fileIndex){
+        region.setRegion(fileIndex * width + fileIndex + 1, 0, width, region.getTexture().getHeight());
+    }
+
     public void setFilter(String name){
         setFilter(get(name).getTexture());
     }
@@ -96,7 +105,9 @@ public class TextureHandler {
     }
 
     public void addImages(String dir, String path){
-        Gdx.files.local(path).readString().lines().forEach(line -> add(dir + line));
+        String content = Loader.loadFile("res/data/" + path);
+        assert content != null;
+        content.lines().forEach(line -> add(dir + line));
     }
 
     public TextureRegion get(String path){

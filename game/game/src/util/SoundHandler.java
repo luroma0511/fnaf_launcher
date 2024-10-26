@@ -25,7 +25,9 @@ public class SoundHandler implements Constants {
     }
 
     public void addAll(String path){
-        Gdx.files.local(path).readString().lines().forEach(this::add);
+        String content = Loader.loadFile(path);
+        assert content != null;
+        content.lines().forEach(this::add);
     }
 
     public boolean has(String key){
@@ -67,6 +69,11 @@ public class SoundHandler implements Constants {
         else if (effectType == PITCH) sounds.get(key).setPitch(value);
         else if (effectType == LOOP) sounds.get(key).setLoop((int) value == 1);
         else if (effectType == MUFFLE) sounds.get(key).setMuffle(value);
+    }
+
+    public void setSoundEffect(int effectType, String key, float v1, float v2){
+        if (!has(key)) return;
+        if (effectType == PAN) sounds.get(key).setPan(v1, v2);
     }
 
     public void dispose(){

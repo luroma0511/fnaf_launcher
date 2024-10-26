@@ -14,8 +14,13 @@ public class CameraManager {
     private static float y;
     static ShaderProgram shader;
 
-    public static void initShader(){
-        if (shader == null) shader = new ShaderProgram(Gdx.files.local("game/shaders/perspective.vert"), Gdx.files.local("game/shaders/perspective.frag"));
+    public static void initShader(String file){
+        if (shader != null) return;
+        String vertex = Loader.loadFile("res/shaders/" + file + ".vert");
+        String frag = Loader.loadFile("res/shaders/" + file + ".frag");
+        assert vertex != null;
+        assert frag != null;
+        shader = new ShaderProgram(vertex, frag);
         if (!shader.isCompiled()) Gdx.app.error("shader", "compilation failed:\n" + shader.getLog());
     }
 
@@ -43,8 +48,12 @@ public class CameraManager {
         viewport.apply();
     }
 
-    public static void applyShader(SpriteBatch batch){
+    public static void applyShader(SpriteBatch batch) {
         batch.setShader(shader);
+    }
+
+    public static void setUniform(String uniformName, float value){
+        shader.setUniformf(uniformName, value);
     }
 
     public static void setOrigin(){

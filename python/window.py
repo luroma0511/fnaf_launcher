@@ -107,21 +107,14 @@ class App(QWidget):
         y += 32
         self.username_entry = QLineEdit(self)
         self.username_entry.setFont(QFont(self.captionFont[0], 16))
-        self.username_entry.setStyleSheet(f"""
-        color: white;
-        background-color: {color};
-        """)
+        self.username_entry.setStyleSheet(f"color: white; background-color: {color};")
         self.username_entry.move(450, y)
         self.username_entry.show()
         
         self.login = QLabel("Login", self)
         self.login.setFont(QFont(self.candysFont[0], 18))
         self.login.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.login.setStyleSheet(f"""
-        color: white;
-        background-color: {login_color};
-        border: 2px solid {color};
-        """)
+        self.login.setStyleSheet(f"color: white; background-color: {login_color}; border: 2px solid {color};")
         self.login.setGeometry(750, y - 4, 100, 50)
         self.login.setCursor(Qt.CursorShape.PointingHandCursor)
         self.login.mousePressEvent = self.__login__
@@ -138,21 +131,14 @@ class App(QWidget):
         self.token_entry = QLineEdit(self)
         self.token_entry.setFont(QFont(self.captionFont[0], 16))
         self.token_entry.setEchoMode(QLineEdit.EchoMode.Password)
-        self.token_entry.setStyleSheet(f"""
-        color: white;
-        background-color: {color};
-        """)
+        self.token_entry.setStyleSheet(f"color: white; background-color: {color};")
         self.token_entry.move(450, y)
         self.token_entry.show()
         
         self.guest = QLabel("Guest", self)
         self.guest.setFont(QFont(self.candysFont[0], 18))
         self.guest.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.guest.setStyleSheet(f"""
-        color: white;
-        background-color: {guest_color};
-        border: 2px solid {color};
-        """)
+        self.guest.setStyleSheet(f"color: white; background-color: {guest_color}; border: 2px solid {color};")
         self.guest.setGeometry(750, y - 4, 100, 50)
         self.guest.setCursor(Qt.CursorShape.PointingHandCursor)
         self.guest.mousePressEvent = self.__guest_login__
@@ -180,17 +166,16 @@ class App(QWidget):
         
         self.play = QPushButton("Play", self)
         self.play.setFont(QFont(self.candysFont[0], 32))
-        self.play.setStyleSheet(f"""
-        QPushButton{left_curly}
-        color: white;
-        background-color: {play_color};
-        border: 2px solid;
-        text-align: center;
-        {right_curly}
-        QPushButton::hover{left_curly}
-        background-color: {play_hover_color};
-        {right_curly}
-        """)
+        self.play.setStyleSheet(f"\
+        QPushButton{left_curly}\
+        color: white;\
+        background-color: {play_color};\
+        border: 2px solid;\
+        text-align: center;\
+        {right_curly}\
+        QPushButton::hover{left_curly}\
+        background-color: {play_hover_color};\
+        {right_curly}")
         self.play.setGeometry(550, 620, 180, 80)
         self.play.setCursor(Qt.CursorShape.PointingHandCursor)
         self.play.mousePressEvent = self.__load__
@@ -198,9 +183,7 @@ class App(QWidget):
         
         self.dropdown = QLabel(self)
         self.dropdown.setGeometry(0, 540, 1280, 60)
-        self.dropdown.setStyleSheet(f"""
-        background-color: {dropdown_color};
-        """)
+        self.dropdown.setStyleSheet(f"background-color: {dropdown_color};")
         self.dropdown.show()
         
         global options
@@ -211,26 +194,22 @@ class App(QWidget):
         self.gamebox.setMaxVisibleItems(4)
         self.gamebox.setGeometry(0, 540, 324, 60)
         self.gamebox.setFont(QFont(self.candysFont[0], 20))
-        self.gamebox.setStyleSheet(f"""
-        color: white;
-        background-color: {dropdown_color};
-        """)
+        self.gamebox.setStyleSheet(f"color: white; background-color: {dropdown_color};")
         self.gamebox.show()
         
         self.signout = QPushButton("Sign out", self)
         self.signout.setGeometry(1132, 540, 148, 60)
         self.signout.setFont(QFont(self.candysFont[0], 20))
-        self.signout.setStyleSheet(f"""
-        QPushButton{left_curly}
-        color: white;
-        background-color: {color};
-        border: 2px solid;
-        text-align: center;
-        {right_curly}
-        QPushButton::hover{left_curly}
-        background-color: {signout_color};
-        {right_curly}
-        """)
+        self.signout.setStyleSheet(f"\
+        QPushButton{left_curly}\
+        color: white;\
+        background-color: {color};\
+        border: 2px solid;\
+        text-align: center;\
+        {right_curly}\
+        QPushButton::hover{left_curly}\
+        background-color: {signout_color};\
+        {right_curly}")
         self.signout.setCursor(Qt.CursorShape.PointingHandCursor)
         self.signout.mousePressEvent = self.__logout__
         self.signout.show()
@@ -238,17 +217,16 @@ class App(QWidget):
         self.update_button = QPushButton("Check for Updates", self)
         self.update_button.setGeometry(876, 540, 256, 60)
         self.update_button.setFont(QFont(self.candysFont[0], 20))
-        self.update_button.setStyleSheet(f"""
-        QPushButton{left_curly}
-        color: white;
-        background-color: {color};
-        border: 2px solid;
-        text-align: center;
-        {right_curly}
-        QPushButton::hover{left_curly}
-        background-color: {signout_color};
-        {right_curly}
-        """)
+        self.update_button.setStyleSheet(f"\
+        QPushButton{left_curly}\
+        color: white;\
+        background-color: {color};\
+        border: 2px solid;\
+        text-align: center;\
+        {right_curly}\
+        QPushButton::hover{left_curly}\
+        background-color: {signout_color};\
+        {right_curly}")
         self.update_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.update_button.mousePressEvent = self.__checkupdate__
         self.update_button.show()
@@ -256,9 +234,7 @@ class App(QWidget):
         global user
         self.account_text = QLabel(f"Logged in as: {user}", self)
         self.account_text.setFont(QFont(self.captionFont[0], 16))
-        self.account_text.setStyleSheet(f"""
-        color: white;
-        """)
+        self.account_text.setStyleSheet(f"color: white;")
         self.account_text.move(16, 12)
         self.account_text.show()
         
@@ -310,11 +286,11 @@ class App(QWidget):
             if (response['success'] == 'true'):
                 latest_version = int(response['data'])
                 if (version < latest_version):
-                    self.__messagewindow__("""
-                        An update is available! Please 
-                        delete this launcher and download 
-                        the latest version of the launcher!
-                        """, QMessageBox.Icon.Information, "ok")
+                    self.__messagewindow__("\
+                        An update is available! Please \
+                        delete this launcher and download \
+                        the latest version of the launcher!\
+                        ", QMessageBox.Icon.Information, "ok")
                 else:
                     self.__messagewindow__("Your launcher is up to date!", QMessageBox.Icon.Information, "ok")
             else:

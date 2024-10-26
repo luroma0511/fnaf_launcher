@@ -3,7 +3,9 @@ package util.gamejolt;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Net;
 import com.badlogic.gdx.net.HttpRequestBuilder;
-import util.JSONHandler;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import util.deluxe.CandysJSONHandler;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -171,7 +173,7 @@ public class GamejoltManager {
             System.out.println("Added score: " + score);
         }
 
-        public util.gamejolt.Score fetch(GamejoltManager gamejoltManager, JSONHandler jsonHandler, String tableID){
+        public util.gamejolt.Score fetch(GamejoltManager gamejoltManager, CandysJSONHandler jsonHandler, String tableID){
             httpResponses.remove("score-fetch");
             String url = baseURL + "v1_2/scores/"
                     + baseURL(gamejoltManager)
@@ -183,7 +185,7 @@ public class GamejoltManager {
             if (score == null) return null;
             score = score.substring(score.indexOf("score") + 9, score.length() - 3);
             if (score.isEmpty()) return null;
-            return jsonHandler.getGson().fromJson(score, util.gamejolt.Score.class);
+            return jsonHandler.guestTable.fromJson(score, util.gamejolt.Score.class);
         }
     }
 
@@ -193,6 +195,7 @@ public class GamejoltManager {
         private final Stack<String> newTrophies = new Stack<>();
         private final Stack<util.gamejolt.Trophy> unlockedTrophies = new Stack<>();
         private final Stack<util.gamejolt.Trophy> allTrophies = new Stack<>();
+        private final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         private String baseURL(GamejoltManager gamejoltManager){
             return "?game_id=" + gamejoltManager.gameID
@@ -219,7 +222,7 @@ public class GamejoltManager {
             gamejoltManager.sendRequest(url, "trophy-remove");
         }
 
-        public boolean fetch(GamejoltManager gamejoltManager, JSONHandler jsonHandler, String stackID) {
+        public boolean fetch(GamejoltManager gamejoltManager, String stackID) {
             httpResponses.remove("trophy-fetch");
             String url = baseURL + "v1_2/trophies/"
                     + baseURL(gamejoltManager);
@@ -233,7 +236,7 @@ public class GamejoltManager {
             }
             String jsonResponse = response.substring(response.indexOf(":{") + 1, response.lastIndexOf("}"));
             Gdx.app.log("JSON Response", jsonResponse);
-            ResponseTrophy responseTrophy = jsonHandler.getGson().fromJson(jsonResponse, ResponseTrophy.class);
+            ResponseTrophy responseTrophy = gson.fromJson(jsonResponse, ResponseTrophy.class);
             if (responseTrophy.success) {
                 if (stackID == null) {
                     for (util.gamejolt.Trophy trophy : responseTrophy.trophies) {

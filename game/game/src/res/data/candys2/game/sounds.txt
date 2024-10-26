@@ -1,0 +1,16 @@
+ambience
+cameraBeep
+phoneBeep
+flash
+monitorDown
+monitorUp
+phoneBreak
+phoneRinging
+signalLost
+ventKnocking
+ventOpen
+ventCrawl
+glitch
+shadowblank
+blank
+6am

@@ -1,9 +1,9 @@
 package util;
 
-import com.badlogic.gdx.Gdx;
-
 public class Text {
     public static String read(String dir, String file) {
-        return Gdx.files.local("game/text/" + dir + "/" + file).readString();
+        String content = Loader.loadFile("res/text/" + dir + "/" + file);
+        assert content != null;
+        return content;
     }
 }

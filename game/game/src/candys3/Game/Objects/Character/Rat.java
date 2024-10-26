@@ -61,7 +61,6 @@ public class Rat extends SpriteObject {
     public boolean execute(SoundHandler soundHandler, Player player, Cat cat, Room room, boolean twitching){
         var flashlight = player.getFlashlight();
         twitching = input(soundHandler, cat, player, room, flashlight.getX(), flashlight.getY(), twitching);
-        if (GameData.expandedPointer) hitbox.setSize(hitbox.size, 0.8f);
         twitching = update(soundHandler, cat, player, room, flashlight, twitching);
         return twitching;
     }
@@ -402,7 +401,7 @@ public class Rat extends SpriteObject {
         else pitchSpeed = 0;
         if (type == 2 && attack.isAttack()) attack.setAudioPitch(soundHandler, 0.875f);
 
-        if (attack.update(soundHandler, random, (byte) 0, player.isScared(), pitchSpeed)){
+        if (attack.update(soundHandler, random, (byte) 0, type == 2, player.isScared(), pitchSpeed)){
             player.setBlacknessSpeed(6);
             if (attack.getTeleports() > 0){
                 if (type == 2) attack.setFlashTime(0.375f);
@@ -434,7 +433,7 @@ public class Rat extends SpriteObject {
         if ((type == 0 && attack.getLimit() < 2) || (type != 0 && attack.getLimit() < 3)) attack.increaseLimit();
         if (type == 0) attack.setFlashTime(0.24f + random.nextInt(3) * 0.08f);
         else if (type == 1) attack.setFlashTime(0.16f + random.nextInt(3) * 0.08f);
-        else attack.setFlashTime(0.1f + random.nextInt(2) * 0.1f);
+        else attack.setFlashTime(0.04f + random.nextInt(2) * 0.04f);
         return false;
     }
 

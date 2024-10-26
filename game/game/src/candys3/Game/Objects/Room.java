@@ -30,6 +30,8 @@ public class Room extends SpriteObject {
     private boolean tapeStop;
     private float tapePos;
     private float tapeVolume;
+    private boolean tapeAdjusted;
+    private boolean heal;
 
     Music tapeMusic;
 
@@ -60,6 +62,7 @@ public class Room extends SpriteObject {
         if (GameData.hardCassette) tapePlayAchievement = 0;
         else tapePlayAchievement = 1;
         tapeStop = false;
+        tapeAdjusted = true;
         if (tapeMusic.isPlaying()) tapeMusic.stop();
     }
 
@@ -108,6 +111,8 @@ public class Room extends SpriteObject {
                         playFrame = 0;
                         rewindFrame = 0;
                         tapeStop = false;
+                        heal = tapeAdjusted;
+                        tapeAdjusted = false;
                     } else if (tapeState != 0 && textureHandler.isAlpha(stop, (int) ((mx - 690) / 1.25f), (int) ((360 - my) / 1.25f))) {
                         soundHandler.play("tapeStop");
                         soundHandler.stop("tapeRewind");
@@ -116,6 +121,7 @@ public class Room extends SpriteObject {
                             tapePos = tapeMusic.getPosition();
                             tapeMusic.stop();
                         }
+                        tapeAdjusted = true;
                         if (tapeState == 1) {
                             playFrame = 1;
                             rewindFrame = 0;
@@ -133,6 +139,7 @@ public class Room extends SpriteObject {
                             soundHandler.play("tapeRewind");
                             soundHandler.setSoundEffect(soundHandler.LOOP, "tapeRewind", 1);
                         }
+                        tapeAdjusted = true;
                         tapeState = 2;
                         stopFrame = 0;
                         playFrame = 0;
@@ -242,13 +249,13 @@ public class Room extends SpriteObject {
                 region = textureHandler.get("game/Flashlight");
 
                 float multiplier = 1;
-                if (GameData.hitboxMultiplier != 1) {
-                    if (GameData.expandedPointer) multiplier = 1.3125f;
-                    else multiplier = 1.75f;
-                } else if (GameData.expandedPointer) multiplier = 0.75f;
+                if (GameData.laserVision) {
+                    if (GameData.expandedVision) multiplier = 0.8f;
+                    else multiplier = 0.6f;
+                } else if (GameData.expandedVision) multiplier = 1.25f;
 
-                float width = (float) region.getRegionWidth() / multiplier;
-                float height = (float) region.getRegionHeight() / multiplier;
+                float width = (float) region.getRegionWidth() * multiplier;
+                float height = (float) region.getRegionHeight() * multiplier;
 
                 batch.draw(region,
                         flashlight.getX() - width / 2,
@@ -337,11 +344,11 @@ public class Room extends SpriteObject {
     }
 
     public void stopMusic(){
-        tapeMusic.stop();
+        if (tapeMusic.isPlaying()) tapeMusic.stop();
     }
 
     public boolean isMusicPlaying(){
-        return tapeMusic.isPlaying();
+        return tapeMusic.isPlaying() && heal;
     }
 
     public float getTapePlayAchievement() {

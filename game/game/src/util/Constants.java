@@ -6,5 +6,6 @@ public interface Constants {
     int VOLUME = 1;
     int PITCH = 2;
     int LOOP = 3;
-    int MUFFLE = 4;
+    int PAN = 4;
+    int MUFFLE = 5;
 }

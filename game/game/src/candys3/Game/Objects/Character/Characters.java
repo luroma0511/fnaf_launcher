@@ -3,7 +3,6 @@ package candys3.Game.Objects.Character;
 import candys3.GameData;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import util.deluxe.Paths;
 import candys3.Game.Objects.Player;
 import candys3.Game.Objects.Room;
 import util.*;
@@ -15,8 +14,8 @@ public class Characters {
     public void ratCatLoad(TextureHandler textureHandler){
         if (GameData.ratAI != 0 || GameData.night == 2) {
             rat = new Rat(GameData.night);
-            textureHandler.addImages("game/" + rat.getName() + "/", Paths.dataPath + "candys3/game/textures/characters/common.txt");
-            textureHandler.addImages("game/" + rat.getName() + "/", Paths.dataPath + "candys3/game/textures/characters/rat.txt");
+            textureHandler.addImages("game/" + rat.getName() + "/", "candys3/game/textures/characters/common.txt");
+            textureHandler.addImages("game/" + rat.getName() + "/", "candys3/game/textures/characters/rat.txt");
             if (rat.getType() == 1) textureHandler.add("game/Shadow Rat/Classic/Jumpscare");
         } else {
             rat = null;
@@ -24,11 +23,11 @@ public class Characters {
         if (GameData.catAI != 0 || GameData.night == 2) {
             cat = new Cat(GameData.night);
             if (GameData.night == 0) {
-                textureHandler.addImages("game/Cat/", Paths.dataPath + "candys3/game/textures/characters/common.txt");
-                textureHandler.addImages("game/Cat/", Paths.dataPath + "candys3/game/textures/characters/cat.txt");
+                textureHandler.addImages("game/Cat/", "candys3/game/textures/characters/common.txt");
+                textureHandler.addImages("game/Cat/", "candys3/game/textures/characters/cat.txt");
             } else {
-                textureHandler.addImages("game/Shadow Cat/", Paths.dataPath + "candys3/game/textures/characters/common.txt");
-                textureHandler.addImages("game/Shadow Cat/", Paths.dataPath + "candys3/game/textures/characters/shadowCat.txt");
+                textureHandler.addImages("game/Shadow Cat/", "candys3/game/textures/characters/common.txt");
+                textureHandler.addImages("game/Shadow Cat/", "candys3/game/textures/characters/shadowCat.txt");
             }
         } else {
             cat = null;
@@ -42,14 +41,8 @@ public class Characters {
 
     public void update(SoundHandler soundHandler, Player player, Room room){
         boolean twitch = false;
-        if (rat != null) {
-            twitch = rat.execute(soundHandler, player, cat, room, false);
-            if (GameData.expandedPointer) rat.getHitbox().setSize(rat.getHitbox().size, 1.25f);
-        }
-        if (cat != null) {
-            twitch = cat.execute(soundHandler, player, rat, room, twitch);
-            if (GameData.expandedPointer) cat.getHitbox().setSize(cat.getHitbox().size, 1.15f);
-        }
+        if (rat != null) twitch = rat.execute(soundHandler, player, cat, room, false);
+        if (cat != null) twitch = cat.execute(soundHandler, player, rat, room, twitch);
         if (twitch && !soundHandler.isPlaying("twitch")){
             soundHandler.play("twitch");
             soundHandler.setSoundEffect(soundHandler.LOOP, "twitch", 1);

@@ -24,6 +24,7 @@ public class Jumpscare {
         video = false;
         begin = false;
         sb.delete(0, sb.length());
+        VideoManager.cancel();
         VideoManager.reset();
     }
 
@@ -56,7 +57,7 @@ public class Jumpscare {
             soundHandler.stopAllSounds();
             begin = true;
         }
-        if (delay == 0) return VideoManager.render(batch, flip, false, 1280, 720);
+        if (delay == 0) return VideoManager.render(batch, "candys3", flip, false, 1280, 720);
         else delay = Time.decreaseTimeValue(delay, 0, 1);
         return true;
     }

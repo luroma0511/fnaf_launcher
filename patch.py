@@ -44,6 +44,6 @@ def __update__(current_version):
         else:
             print("You are using the latest version of the game.")
 
-version = "3"
+version = "4"
 set_game_data(version)
 # __update__(version)

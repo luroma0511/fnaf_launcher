@@ -72,7 +72,7 @@ public class Player {
         if (!attack || GameData.freeScroll) {
             if (room.getFrame() == 0 && room.getState() != 2 && !freeze) {
                 x += lookMechanic(x, inputManager.getX(), (float) window.width() / 4, 1, 3, room.getBoundsX(), shakeLimit);
-                y += lookMechanic(y, inputManager.getY(), (float) window.height() / 3, 4, 2, room.getBoundsY(), 0);
+                y += lookMechanic(y, inputManager.getY(), (float) window.height() / 3, 0.75f, 2, room.getBoundsY(), 0);
             }
             snapCooldown = 0.75f;
             if (flashlight.getX() < 1024) side = 0;
@@ -107,9 +107,15 @@ public class Player {
             boolean catCondition = cat != null && cat.getState() == 1 && cat.getSide() != side;
             snapCooldown = 0.5f;
             if (inputManager.getX() < (float) window.width() * 0.2f && side != 0
-                    && (ratCondition || catCondition)) side--;
+                    && (ratCondition || catCondition)) {
+                side--;
+                if (cat != null && rat != null && rat.getSide() == side) cat.getAttack().setReactionTimer(0.75f);
+            }
             else if (inputManager.getX() > (float) window.width() * 0.8f && side != 2
-                    && (ratCondition || catCondition)) side++;
+                    && (ratCondition || catCondition)) {
+                side++;
+                if (cat != null && rat != null && rat.getSide() == side) cat.getAttack().setReactionTimer(0.75f);
+            }
             else snapCooldown = 0;
         } else snapCooldown = Time.decreaseTimeValue(snapCooldown, 0, 1);
         overlayAlpha = Time.decreaseTimeValue(overlayAlpha, 0, 1);
@@ -145,7 +151,7 @@ public class Player {
         else buttonFade = Time.decreaseTimeValue(buttonFade, 0, 4);
 
         if (GameData.hardCassette) {
-            if (room.tapeMusic.isPlaying() || (jumpscare && blacknessTimes == 0)) {
+            if (room.isMusicPlaying() || (jumpscare && blacknessTimes == 0)) {
                 purpleSpeed = 0;
                 purpleAlpha = Time.decreaseTimeValue(purpleAlpha, 0, 3);
             } else if (!freeze) {
@@ -156,15 +162,19 @@ public class Player {
         }
     }
 
-    public void adjustCamera(InputManager inputManager){
-        CameraManager.move(getX(), y);
+    public void adjustCamera(Room room, InputManager inputManager){
+        float x = getX();
+        float y = getY();
+        if (room.getState() == 2) x = 0;
+        if (room.getFrame() > 0 || room.getState() != 0) y = 0;
+        CameraManager.move(x, y);
         if (!freeze) flashlight.setCoord(inputManager.getX() + x, inputManager.getY() + y);
     }
 
-    private float lookMechanic(float position, float mouse, float offset, int multiplier, int rightOffset, int bounds, float shakeLimit){
+    private float lookMechanic(float position, float mouse, float offset, float multiplier, int rightOffset, int bounds, float shakeLimit){
         float distance = 0;
-        float lookSpeed = 4.5f;
-        float limit = Time.convertValue(1100 * multiplier);
+        float lookSpeed = 6;
+        float limit = Time.convertValue(1250 * multiplier);
         if (mouse < offset * 1){
             distance = (mouse - offset * 1) * Time.convertValue(lookSpeed);
             if (position + distance < shakeLimit) distance = -position + shakeLimit;

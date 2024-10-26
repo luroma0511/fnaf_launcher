@@ -1,6 +1,7 @@
 package util;
 
 import com.badlogic.gdx.Gdx;
+import util.ui.MenuUI;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,9 +16,11 @@ public class AppHandler {
     private FontManager fontManager;
     public final SoundHandler soundHandler;
     private TextureHandler textureHandler;
+    private MenuUI menuUI;
 
     public AppHandler(int width, int height){
         window = new Window(width, height);
+        FrameBufferManager.assignWindow(window);
         timer = Executors.newScheduledThreadPool(1);
         soundHandler = new SoundHandler();
     }
@@ -30,6 +33,7 @@ public class AppHandler {
         renderHandler = new RenderHandler();
         textureHandler = new TextureHandler();
         fontManager = new FontManager();
+        menuUI = new MenuUI(textureHandler);
     }
 
     public InputManager getInput() {
@@ -48,9 +52,14 @@ public class AppHandler {
         return fontManager;
     }
 
+    public MenuUI getMenuUI() {
+        return menuUI;
+    }
+
     public void dispose(){
         timer.shutdown();
         soundHandler.dispose();
+        menuUI.dispose();
         textureHandler.dispose();
         renderHandler.dispose();
         fontManager.dispose();

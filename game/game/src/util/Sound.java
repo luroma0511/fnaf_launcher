@@ -1,5 +1,6 @@
 package util;
 
+import org.lwjgl.openal.AL;
 import org.lwjgl.openal.AL11;
 import org.lwjgl.openal.EXTEfx;
 
@@ -10,6 +11,7 @@ public class Sound {
     private float volume;
     private float pitch;
     private boolean loop;
+    private float[] pan = new float[2];
     private float muffle;
     private boolean playing;
 
@@ -26,10 +28,15 @@ public class Sound {
         EXTEfx.alFilterf(filter, EXTEfx.AL_LOWPASS_GAINHF, 1);
         AL11.alSource3i(source, EXTEfx.AL_AUXILIARY_SEND_FILTER, 0, 0, filter);
 
+        AL11.alSourcef(source, AL11.AL_REFERENCE_DISTANCE, 1.0f);  // Starts attenuating at 1 unit
+        AL11.alSourcef(source, AL11.AL_MAX_DISTANCE, 100.0f);      // Stops attenuating after 100 units
+        AL11.alSourcef(source, AL11.AL_ROLLOFF_FACTOR, 1.0f);
+
         resetValues();
     }
 
     public void resetValues(){
+        setPan(0, 0);
         setVolume(1);
         setPitch(1);
         setLoop(false);
@@ -77,6 +84,16 @@ public class Sound {
     public void setVolume(float volume) {
         this.volume = volume;
         AL11.alSourcef(source, AL11.AL_GAIN, volume);
+    }
+
+    public float[] getPan() {
+        return pan;
+    }
+
+    public void setPan(float panX, float panZ) {
+        pan[0] = panX;
+        pan[1] = panZ;
+        AL11.alSource3f(source, AL11.AL_POSITION, pan[0], 0, pan[1]);
     }
 
     public float getMuffle() {

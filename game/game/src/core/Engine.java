@@ -11,13 +11,17 @@ import util.error.GameError;
 import util.gamejolt.GamejoltManager;
 import util.gamejolt.GamejoltTrophyUI;
 
+import java.nio.ByteBuffer;
+
 public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
     public final AppHandler appHandler;
     private GameError gameError;
     public Candys2Deluxe candys2Deluxe;
     public Candys3Deluxe candys3Deluxe;
+    private ByteBuffer buffer;
 
     public final String game;
+    public final String version = "v1.1.3";
     public final CandysUser user;
     public final CandysJSONHandler jsonHandler;
     public final GamejoltManager gamejoltManager;
@@ -37,18 +41,28 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
             FileUtils.init("candysDeluxe");
 
             String userData = FileUtils.readFile(0);
+            System.out.println(userData);
             if (!userData.isEmpty()) {
-                var tempUser = jsonHandler.readUser(userData);
+                CandysUser tempUser;
+                try {
+                    tempUser = jsonHandler.readUser(userData);
+                } catch (Exception e){
+                    tempUser = user;
+                }
                 user.setUser(tempUser);
             }
-            FileUtils.write(jsonHandler, user, 0);
+            FileUtils.writeUser(jsonHandler, user);
 
             String scoreData = FileUtils.readFile(1);
+            System.out.println(scoreData);
             if (!scoreData.isEmpty()) {
                 scoreTable = jsonHandler.readScoreTable(scoreData);
             } else {
                 scoreTable = new DeluxeGuestStoreTable();
             }
+            scoreTable.init();
+            FileUtils.writeTable(jsonHandler, scoreTable);
+            System.out.println("Completed");
             return;
         }
         scoreTable = null;
@@ -60,6 +74,7 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
 
     @Override
     public void create(){
+
         if (gamejoltManager != null) {
             gamejoltManager.initialize();
             gamejoltManager.execute(() -> {
@@ -67,7 +82,12 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
                 gamejoltManager.dataStore.fetch(gamejoltManager, userKey);
                 String data = gamejoltManager.dataStore.getFetch();
                 if (data.contains("hell")){
-                    var tempUser = jsonHandler.readUser(gamejoltManager.dataStore.getFetch());
+                    CandysUser tempUser;
+                    try {
+                        tempUser = jsonHandler.readUser(gamejoltManager.dataStore.getFetch());
+                    } catch (Exception e){
+                        tempUser = user;
+                    }
                     user.setUser(tempUser);
                 } else {
                     String oldUserKey = "user=" + gamejoltManager.username;
@@ -75,7 +95,7 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
                     data = gamejoltManager.dataStore.getFetch();
                     if (!data.isEmpty()) gamejoltManager.dataStore.remove(gamejoltManager, oldUserKey);
                 }
-                String value = jsonHandler.write(user);
+                String value = jsonHandler.writeCandysUser(user);
                 System.out.println(value);
                 gamejoltManager.dataStore.set(gamejoltManager, userKey, value);
                 gamejoltManager.dataStore.loaded = true;
@@ -130,7 +150,8 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
                 FrameBufferManager.render(batch, renderHandler.screenBuffer, true);
 
                 if (gameError.font == null) {
-                    gameError.font = fontManager.getFont("candys3/captionFont");
+                    if (game.equals("candys2")) gameError.font = fontManager.getFont("candys2/font1");
+                    else gameError.font = fontManager.getFont("candys3/captionFont");
                 }
                 fontManager.setCurrentFont(gameError.font);
                 gameError.font.setColor(1, 1, 1, 1);
@@ -159,7 +180,6 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
             if (candys2Deluxe != null) candys2Deluxe.setState(0);
             else if (candys3Deluxe != null) candys3Deluxe.setState(0);
             appHandler.soundHandler.stopAllSounds();
-            System.out.println(appHandler.getRenderHandler().batch);
             appHandler.getRenderHandler().batchEnd();
         }
         appHandler.getInput().reset();

@@ -24,7 +24,11 @@ public class FontManager {
     private BitmapFont currentFont;
 
     {
-        shader = new ShaderProgram(Gdx.files.local("game/shaders/font.vert"), Gdx.files.local("game/shaders/font.frag"));
+        String vertex = Loader.loadFile("res/shaders/font.vert");
+        String frag = Loader.loadFile("res/shaders/font.frag");
+        assert vertex != null;
+        assert frag != null;
+        shader = new ShaderProgram(vertex, frag);
         if (!shader.isCompiled()) Gdx.app.error("shader", "compilation failed:\n" + shader.getLog());
     }
 

@@ -73,7 +73,7 @@ public class Attack {
         return false;
     }
 
-    public boolean update(SoundHandler soundHandler, Random random, byte id, boolean scared, float pitchSpeed){
+    public boolean update(SoundHandler soundHandler, Random random, byte id, boolean hell, boolean scared, float pitchSpeed){
         if (scared){
             float pitch = Time.increaseTimeValue(soundHandler.getSoundEffect(soundHandler.PITCH, audio), 2, pitchSpeed);
             soundHandler.setSoundEffect(soundHandler.PITCH, audio, pitch);
@@ -94,7 +94,7 @@ public class Attack {
         else if (flashTime == 0 && !skip){
             moveFrame = 2.99f;
             moves--;
-            reactionTimer = 0.35f;
+            reactionTimer = hell ? 0.2f : 0.35f;
             soundHandler.play("dodge");
             signal = true;
             movePosition(random, id);
