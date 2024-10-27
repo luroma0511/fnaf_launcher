@@ -23,18 +23,19 @@ public class Button extends SpriteObject {
         if (text != null) this.text = text + ".txt";
     }
 
-    public void update(Caption caption, InputManager inputManager, boolean alphaConfig){
-        update(caption, inputManager, false, alphaConfig);
+    public boolean update(Caption caption, InputManager inputManager, boolean alphaConfig){
+        return update(caption, inputManager, false, alphaConfig);
     }
 
-    public void update(Caption caption, InputManager inputManager, boolean lockHover, boolean alphaConfig){
+    public boolean update(Caption caption, InputManager inputManager, boolean lockHover, boolean alphaConfig){
         hovered = !lockHover && mouseOver(inputManager);
         if (hovered && inputManager.isLeftPressed()) selected = !selected;
         if (alphaConfig && (hovered || selected)) setAlpha(Time.increaseTimeValue(getAlpha(), 1, 8));
         else setAlpha(Time.decreaseTimeValue(getAlpha(), 0, 8));
-        if (!hovered || text == null || caption == null) return;
+        if (!hovered || text == null || caption == null) return hovered && inputManager.isLeftPressed();
         caption.setText(text);
         caption.setActive(true);
+        return hovered && inputManager.isLeftPressed();
     }
 
     public void reset(){
@@ -82,6 +83,6 @@ public class Button extends SpriteObject {
         } else {
             batch.setColor(0.65f, 0.65f, 0.85f, 1);
         }
-        batch.draw(region, getX(), getY());
+        batch.draw(region, getX(), getY(), 32, 32);
     }
 }

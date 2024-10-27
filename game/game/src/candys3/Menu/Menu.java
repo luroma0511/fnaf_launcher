@@ -80,7 +80,7 @@ public class Menu {
         engine.appHandler.getRenderHandler().screenAlpha = 0;
 
         if (options == null) {
-            options = new Options(engine.appHandler.getTextureHandler(), engine.appHandler.window);
+            options = new Options(engine.appHandler.getTextureHandler());
             options.add(1, "Laser Vision", "laserVision");
             options.add(1, "Laser Pointer", "laserPointer");
             options.add(1, "Hard Cassette", "hardCassette");
@@ -93,6 +93,11 @@ public class Menu {
             options.add(3, "Infinite Night", "infiniteNight");
             options.add(3, "Perspective Effect", "perspective");
             options.add(3, "Classic Jumpscares", "classicJumpscares");
+
+            fixButton(engine.user.candys3Data.freeScroll, options.get(3).getFirst());
+            fixButton(engine.user.candys3Data.infiniteNight, options.get(3).get(1));
+            fixButton(engine.user.candys3Data.perspective, options.get(3).get(2));
+            fixButton(engine.user.candys3Data.classicJumpscares, options.get(3).get(3));
         }
 
         optionButton.setAlpha(0);
@@ -184,8 +189,9 @@ public class Menu {
 
             if (optionButton.isSelected()) {
                 List<Button> buttonsList = options.get(options.getSection() + 1);
+                boolean selection = false;
                 for (Button button: buttonsList){
-                    button.update(caption, input, false);
+                    if (!selection) selection = button.update(caption, input, false);
                 }
 
                 if (options.getSection() == 0) {
@@ -193,16 +199,29 @@ public class Menu {
                     GameData.laserVision = buttonsList.get(0).isSelected();
                     GameData.hitboxMultiplier = buttonsList.get(1).isSelected() ? 0.75f : 1;
                     GameData.hardCassette = buttonsList.get(2).isSelected();
-                } else if (options.getSection() == 1){
+                } else if (options.getSection() == 1) {
                     GameData.flashDebug = buttonsList.get(0).isSelected();
                     GameData.hitboxDebug = buttonsList.get(1).isSelected();
                     GameData.noJumpscares = buttonsList.get(2).isSelected();
                     GameData.expandedVision = buttonsList.get(3).isSelected();
                 } else {
                     GameData.freeScroll = buttonsList.get(0).isSelected();
+                    engine.user.candys3Data.freeScroll = GameData.freeScroll;
                     GameData.infiniteNight = buttonsList.get(1).isSelected();
+                    engine.user.candys3Data.infiniteNight = GameData.infiniteNight;
                     GameData.perspective = buttonsList.get(2).isSelected();
+                    engine.user.candys3Data.perspective = GameData.perspective;
                     GameData.classicJumpscares = buttonsList.get(3).isSelected();
+                    engine.user.candys3Data.classicJumpscares = GameData.classicJumpscares;
+                }
+                if (input.isLeftPressed() && selection) {
+                    if (engine.gamejoltManager == null) FileUtils.writeUser(engine.jsonHandler, engine.user);
+                    else {
+                        engine.gamejoltManager.execute(() -> {
+                            String value = engine.jsonHandler.writeCandysUser(engine.user);
+                            engine.gamejoltManager.dataStore.set(engine.gamejoltManager, "user_id=" + engine.gamejoltManager.id, value);
+                        });
+                    }
                 }
             } else {
                 StarData[] modeStars = null;
@@ -292,6 +311,10 @@ public class Menu {
             whiteAlpha = Time.decreaseTimeValue(whiteAlpha, 0, 2);
             loadTime = Time.increaseTimeValue(loadTime, 1, 1);
         }
+    }
+
+    private void fixButton(boolean saveCondition, Button button){
+        if (saveCondition && !button.isSelected()) button.setSelected();
     }
 
     public void render(Engine engine){
@@ -504,9 +527,9 @@ public class Menu {
         options.render(engine);
 
         fontManager.setCurrentFont(captionFont);
-        String orientation = "middle";
-        if (optionButton.isSelected()) orientation = "left";
-        caption.render(engine, captionFBO, captionFont, orientation);
+        if (optionButton.isSelected()) {
+            caption.render(engine, captionFBO, captionFont, (float) window.width() / 2, 180);
+        } else caption.render(engine, captionFBO, captionFont, "middle");
         batch.setColor(1, 1, 1, 1);
 
         fontManager.setSize(18);

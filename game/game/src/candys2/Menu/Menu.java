@@ -96,14 +96,20 @@ public class Menu {
         textureHandler.add("menu/rat");
         textureHandler.add("menu/cat");
 
+        textureHandler.add("menu/background");
+
 //        textureHandler.add("font/stripeEffect");
         textureHandler.add("menu/star");
-        textureHandler.add("menu/laserPointer");
-        textureHandler.add("menu/faultyBattery");
-        textureHandler.add("menu/faultyPhones");
+        String[] arr = new String[]{"", "Off"};
+        for (String extra: arr) {
+            textureHandler.add("menu/laserPointer" + extra);
+            textureHandler.add("menu/faultyBattery" + extra);
+            textureHandler.add("menu/faultyPhones" + extra);
+            textureHandler.add("menu/shadow" + extra);
+        }
 
         if (options == null) {
-            options = new Options(engine.appHandler.getTextureHandler(), engine.appHandler.window);
+            options = new Options(engine.appHandler.getTextureHandler());
             options.add(1, "Laser Pointer", "laserPointer");
             options.add(1, "Faulty Battery", "faultyBattery");
             options.add(1, "Faulty Phones", "faultyPhones");
@@ -348,8 +354,16 @@ public class Menu {
         options.fboDraw(engine);
 
         renderHandler.screenBuffer.begin();
-        renderHandler.shapeDrawer.setColor(0.025f * renderHandler.screenAlpha, 0, 0.0625f * renderHandler.screenAlpha, 1);
-        renderHandler.drawScreen();
+//        renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
+//        renderHandler.drawScreen();
+        region = textureHandler.get("menu/background");
+        batch.setColor(0.5f, 0.5f, 0.8f, renderHandler.screenAlpha);
+        batch.draw(region,
+                -49.5f + shakeScreen - candy.getInitX() + candy.getX(),
+                -candy.getInitY() + candy.getY() - 28);
+//        if (modeSectionTarget == 0) renderHandler.shapeDrawer.setColor(0.025f * renderHandler.screenAlpha, 0, 0.0625f * renderHandler.screenAlpha, 1);
+//        else renderHandler.shapeDrawer.setColor(0.065f * renderHandler.screenAlpha, 0, 0.025f * renderHandler.screenAlpha, 1);
+//        renderHandler.drawScreen();
 
         batch.setColor(0.65f, 0.65f, 0.85f, renderHandler.screenAlpha);
 
@@ -394,16 +408,16 @@ public class Menu {
 
         offset = modeSection * window.width();
 
-        renderAILevel(batch, fontManager, candy, offset);
-        renderAILevel(batch, fontManager, cindy, offset);
-        renderAILevel(batch, fontManager, chester, offset);
-        renderAILevel(batch, fontManager, penguin, offset);
-        renderAILevel(batch, fontManager, blank, offset);
+        renderAILevel(batch, fontManager, candy, 2.5f, offset);
+        renderAILevel(batch, fontManager, cindy, 2.5f, offset);
+        renderAILevel(batch, fontManager, chester, 2.5f, offset);
+        renderAILevel(batch, fontManager, penguin, 2.25f, offset);
+        renderAILevel(batch, fontManager, blank, 2.5f, offset);
 
         offset = 1280 - offset;
 
-        renderAILevel(batch, fontManager, rat, -offset);
-        renderAILevel(batch, fontManager, cat, -offset);
+        renderAILevel(batch, fontManager, rat, 2.5f, -offset);
+        renderAILevel(batch, fontManager, cat, 2.5f, -offset);
 
         fontManager.setOutline(0.5f);
         fontManager.setColor(0, 0, 0, 1);
@@ -436,6 +450,22 @@ public class Menu {
 
         options.render(engine);
 
+        batch.setColor(0.6f, 0.6f, 0.8f, renderHandler.screenAlpha);
+
+        float position = 144;
+        region = textureHandler.get("menu/laserPointerOff");
+        batch.draw(region, position, 20);
+        position += 86;
+        region = textureHandler.get("menu/faultyBatteryOff");
+        batch.draw(region, position, 20);
+        position += 86;
+        region = textureHandler.get("menu/faultyPhonesOff");
+        batch.draw(region, position, 20);
+        position += 86;
+        region = textureHandler.get("menu/shadowOff");
+        batch.draw(region, position, 20);
+
+        batch.setColor(1, 1, 1, 1);
         font1.setColor(0.8f, 0.8f, 1, renderHandler.screenAlpha);
 
         fontManager.setSize(32);
@@ -445,10 +475,30 @@ public class Menu {
         fontManager.render(batch);
 
         fontManager.setSize(15);
-        String orientation = "middle";
-        if (optionButton.isSelected()) orientation = "left";
-        caption.render(engine, captionFBO, font1, orientation);
-
+        if (caption.getText() != null) {
+            if (caption.getText().equals("candy.txt")) {
+                caption.render(engine, captionFBO, font1, candy.getX() + candy.getWidth() / 2,
+                        candy.getY() + candy.getHeight() / 2.15f);
+            } else if (caption.getText().equals("cindy.txt")) {
+                caption.render(engine, captionFBO, font1, cindy.getX() + cindy.getWidth() / 2,
+                        cindy.getY() + cindy.getHeight() / 2.15f);
+            } else if (caption.getText().equals("chester.txt")) {
+                caption.render(engine, captionFBO, font1, chester.getX() + chester.getWidth() / 2,
+                        chester.getY() + chester.getHeight() / 2.15f);
+            } else if (caption.getText().equals("penguin.txt")) {
+                caption.render(engine, captionFBO, font1, penguin.getX() + penguin.getWidth() / 2,
+                        penguin.getY() + penguin.getHeight());
+            } else if (caption.getText().equals("blank.txt")) {
+                caption.render(engine, captionFBO, font1, blank.getX() + blank.getWidth() / 2,
+                        blank.getY() + blank.getHeight() / 2.15f);
+            } else if (caption.getText().equals("rat.txt")) {
+                caption.render(engine, captionFBO, font1, rat.getX() + rat.getWidth() / 2,
+                    rat.getY() + rat.getHeight() / 2.15f);
+            } else if (caption.getText().equals("cat.txt")) {
+                caption.render(engine, captionFBO, font1, cat.getX() + cat.getWidth() / 2,
+                        cat.getY() + cat.getHeight() / 2.15f);
+            } else caption.render(engine, captionFBO, font1, (float) window.width() / 2, 180);
+        }
         font1.setColor(0.8f, 0.8f, 1, renderHandler.screenAlpha);
         fontManager.setSize(18);
         fontManager.setText("Logged in as: " + engine.user.getUsername());
@@ -462,7 +512,7 @@ public class Menu {
             fontManager.render(batch);
         }
 
-        float position = 672;
+        position = 672;
         fontManager.setSize(15);
         fontManager.setText("F11 - Fullscreen");
         fontManager.setRelativePosition(20, position);
@@ -495,18 +545,18 @@ public class Menu {
 //        }
     }
 
-    private void renderAILevel(SpriteBatch batch, FontManager fontManager, MenuCharacter menuCharacter, float offset){
+    private void renderAILevel(SpriteBatch batch, FontManager fontManager, MenuCharacter menuCharacter, float multiplier, float offset){
         fontManager.setSize(26);
         fontManager.setText("AI LEVEL");
         fontManager.setPosition(true, true,
                 menuCharacter.getX() + shakeScreen + menuCharacter.getWidth() / 2 - offset,
-                menuCharacter.getY() + menuCharacter.getHeight() / 2.5f);
+                menuCharacter.getY() + menuCharacter.getHeight() / multiplier);
         fontManager.render(batch);
         fontManager.setSize(96);
         fontManager.setText(String.valueOf(menuCharacter.getAi()));
         fontManager.setPosition(true, true,
                 menuCharacter.getX() + shakeScreen + menuCharacter.getWidth() / 2 - offset,
-                menuCharacter.getY() + menuCharacter.getHeight() / 2.5f - 52);
+                menuCharacter.getY() + menuCharacter.getHeight() / multiplier - 52);
         fontManager.render(batch);
     }
 

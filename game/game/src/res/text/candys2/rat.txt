@@ -1,1 +1,1 @@
-Rat
+Rat will roam in the building. He will eventually stop before entering the hallway. Once in the hallway, flash him and lure him to his last camera location. If he appears in the monitor, switch cameras multiple times.

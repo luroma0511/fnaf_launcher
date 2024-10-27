@@ -1,6 +1,5 @@
 package util.ui;
 
-import candys3.GameData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -17,19 +16,17 @@ public class Options {
     private final Map<Integer, List<Button>> buttons = new HashMap<>();
     private final FrameBuffer fbo = FrameBufferManager.newFrameBuffer();
     public final TextureRegion windowRegion;
-    private final float windowX;
     public float alpha;
     private int section;
 
-    public Options(TextureHandler textureHandler, Window window){
+    public Options(TextureHandler textureHandler){
         var pixmap = textureHandler.loadImageBuffer("assets", "ui/window");
         windowRegion = new TextureRegion(new Texture(pixmap));
-        windowX = (float) window.width() / 2 - (float) windowRegion.getRegionWidth() / 2;
     }
 
     public void input(InputManager input){
-        var arrowLeft = section != 0 && input.mouseOver(502, 601, 26, 26);
-        var arrowRight = section != 2 && input.mouseOver(752, 601, 26, 26);
+        var arrowLeft = section != 0 && input.mouseOver(60, 325, 26, 26);
+        var arrowRight = section != 2 && input.mouseOver(260, 325, 26, 26);
         if (input.isLeftPressed()) {
             if (arrowLeft) section--;
             else if (arrowRight) section++;
@@ -49,7 +46,7 @@ public class Options {
             batch.setColor(0.75f, 0.75f, 1f, renderHandler.screenAlpha);
         }
 
-        batch.draw(windowRegion, windowX, 144);
+        batch.draw(windowRegion, 20, 118);
         batch.setColor(1, 1, 1, 1);
 
         var buttonsList = buttons.get(section + 1);
@@ -71,9 +68,9 @@ public class Options {
         var region = engine.appHandler.getMenuUI().arrow;
         textureHandler.setFilter(region.getTexture());
         region.flip(true, false);
-        if (section != 0) batch.draw(region, 502, 601);
+        if (section != 0) batch.draw(region, 60, 325);
         region.flip(true, false);
-        if (section != 2) batch.draw(region, 752, 601);
+        if (section != 2) batch.draw(region, 260, 325);
 
         batch.setColor(1, 1, 1, 1);
         FrameBufferManager.end(batch, fbo, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -86,7 +83,6 @@ public class Options {
         var batch = renderHandler.batch;
         var textureHandler = engine.appHandler.getTextureHandler();
         var fontManager = engine.appHandler.getFontManager();
-        var window = engine.appHandler.window;
         var texture = fbo.getColorBufferTexture();
         textureHandler.setFilter(texture);
         var region = new TextureRegion(texture);
@@ -95,6 +91,7 @@ public class Options {
         batch.setColor(1, 1, 1, alpha);
         batch.draw(region, CameraManager.getX(), CameraManager.getY());
 
+        fontManager.setSize(34);
         if (engine.game.equals("candys3")){
             engine.candys3Deluxe.fontAlpha(renderHandler,
                     fontManager.getFont("candys3/candysFont"),
@@ -111,17 +108,11 @@ public class Options {
         else if (section == 1) fontManager.setText("Cheats");
         else fontManager.setText("Options");
 
-        fontManager.setOutline(0.25f);
-        if (engine.game.equals("candys3")) {
-            if (GameData.night != 1) fontManager.setColor(0.2f, 0, 0, alpha);
-            else fontManager.setColor(0.1f, 0, 0.2f, alpha);
-        } else {
-            fontManager.setColor(0.1f, 0.1f, 0.2f, alpha);
-        }
-        fontManager.setPosition(true, false, (float) window.width() / 2, 627);
+
+        fontManager.setPosition(true, false, (float) 308 / 2 + 20, 351);
         fontManager.render(batch);
-        fontManager.setOutline(0.5f);
-        fontManager.setColor(0, 0, 0, 1);
+
+        fontManager.setSize(20);
 
         for (Button button: buttons.get(section + 1)){
             if (engine.game.equals("candys3")){
@@ -137,7 +128,7 @@ public class Options {
                         false);
             }
             fontManager.setText(button.getPath());
-            fontManager.setPosition(button.getX() + 100, button.getY() + 55);
+            fontManager.setPosition(button.getX() + 44, button.getY() + 22);
             fontManager.render(batch);
         }
     }
@@ -167,7 +158,7 @@ public class Options {
     public void add(int key, String path, String text){
         buttons.putIfAbsent(key, new ArrayList<>());
         var buttonsList = buttons.get(key);
-        var button = new Button(path, (int) (windowX + 32), 470 - 98 * buttonsList.size(), 84, text);
+        var button = new Button(path, 36, 274 - 44 * buttonsList.size(), 32, text);
         buttonsList.add(button);
     }
 

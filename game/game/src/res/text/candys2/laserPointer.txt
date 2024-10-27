@@ -1,1 +1,1 @@
-This challenge turns the flash into a flash pointer. Some characters must be flashed by aiming at their face.
+This challenge turns the flash into a laser pointer. Some characters must be flashed by aiming at their face.

@@ -102,6 +102,31 @@ public class Caption extends SpriteObject {
         font.setColor(1, 1, 1, 1);
     }
 
+    public void render(Engine engine, FrameBuffer captionFBO, BitmapFont font, float x, float y){
+        if (getAlpha() == 0) return;
+
+        var renderHandler = engine.appHandler.getRenderHandler();
+        var batch = renderHandler.batch;
+        var fontManager = engine.appHandler.getFontManager();
+
+        CaptionData captionData = captions.get(text);
+        float screenAlpha = renderHandler.screenAlpha;
+        TextureRegion region = new TextureRegion(captionFBO.getColorBufferTexture());
+        region.setRegionWidth(captionData.width() + 16);
+        region.setRegionHeight(captionData.height());
+        region.flip(false, true);
+        batch.setColor(1, 1, 1, screenAlpha * getAlpha());
+        batch.draw(region, x - (float) region.getRegionWidth() / 2, y);
+
+        font.setColor(1, 1, 1, screenAlpha * getAlpha());
+        for (byte i = 0; i < captionData.captions().size(); i++) {
+            fontManager.setText(captionData.captions().get(i));
+            fontManager.setPosition(x - (float) region.getRegionWidth() / 2 + 8, y + region.getRegionHeight() - getHeight() * i - 8);
+            fontManager.render(batch);
+        }
+        font.setColor(1, 1, 1, 1);
+    }
+
     public void wordWrap(List<String> captions, String text, int characterLimit) {
         StringBuilder sb = new StringBuilder(text);
         while (characterLimit < sb.length()){
@@ -111,6 +136,10 @@ public class Caption extends SpriteObject {
             sb.delete(0, index + 1);
         }
         captions.add(sb.toString());
+    }
+
+    public String getText() {
+        return text;
     }
 
     public void setText(String text) {
