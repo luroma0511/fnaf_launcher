@@ -63,7 +63,7 @@ public class Cindy {
                 if (cam2Lure || cam3Lure) camera++;
                 else camera--;
                 if ((player.monitor.activeCamera == camera || player.monitor.activeCamera == prevCamera)
-                        && (int) player.roomFrame == 17) player.setSignalLost();
+                        && player.inCamera) player.setSignalLost();
                 if (camera == 3 || camera == 4){
                     cooldown = 2 + aiCounter * 0.2f;
                     switchCooldown = (int) (1 + Math.random() * 7);
@@ -107,6 +107,6 @@ public class Cindy {
         }
 
         if (moving && (player.monitor.activeCamera == camera || player.monitor.activeCamera == prevCamera)
-                && (int) player.roomFrame == 17) player.setSignalLost();
+                && player.inCamera) player.setSignalLost();
     }
 }

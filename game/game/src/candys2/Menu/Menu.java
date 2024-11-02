@@ -2,16 +2,13 @@ package candys2.Menu;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import util.FontManager;
+import util.*;
 import util.deluxe.Candys2Data;
 import util.ui.*;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import core.Engine;
-import util.CameraManager;
-import util.FrameBufferManager;
-import util.Time;
 
 import java.util.List;
 
@@ -31,7 +28,12 @@ public class Menu {
     public final Button optionButton;
     public final Button playButton;
 
-    private Options options;
+    public final Button laserPointerButton;
+    public final Button faultyBatteryButton;
+    public final Button faultyPhonesButton;
+    public final Button shadowButton;
+
+    public Options options;
 
     private final Caption caption;
     private final Star star;
@@ -70,6 +72,16 @@ public class Menu {
 
         optionButton = new Button("", 20, 20, 82, 82, null);
         playButton = new Button("", 1196, 20, 64, 76, null);
+
+        int x = 144;
+        laserPointerButton = new Button("", x, 20, 82, 82, "laserPointer");
+        x += 86;
+        faultyBatteryButton = new Button("", x, 20, 82, 82, "faultyBattery");
+        x += 86;
+        faultyPhonesButton = new Button("", x, 20, 82, 82, "faultyPhones");
+        x += 86;
+        shadowButton = new Button("", x, 20, 82, 82, "unavailable");
+
         caption = new Caption();
 
         int size = 40;
@@ -110,15 +122,19 @@ public class Menu {
 
         if (options == null) {
             options = new Options(engine.appHandler.getTextureHandler());
-            options.add(1, "Laser Pointer", "laserPointer");
-            options.add(1, "Faulty Battery", "faultyBattery");
-            options.add(1, "Faulty Phones", "faultyPhones");
-            options.add(1, "All Challenges", null);
+            var user = engine.user;
+            options.add(1, Input.Keys.toString(user.fullscreenKey) + " - Fullscreen", null);
+            options.add(1, Input.Keys.toString(user.restartGameKey) + " - Restart Game", null);
+            options.add(1, Input.Keys.toString(user.returnMenuKey) + " - Return to Menu", null);
+            options.add(1, Input.Keys.toString(user.candys2Data.flashKey) + " - Flash Key", null);
             options.add(2, "Map Debug", "mapDebug");
             options.add(2, "Hitbox Debug", "hitboxDebug");
             options.add(2, "No Jumpscares", "noJumpscares");
             options.add(3, "Infinite Night", "infiniteNight");
             options.add(3, "Perspective Effect", "perspective");
+
+            if (engine.user.candys2Data.infiniteNight) options.get(3).getFirst().setSelected();
+            if (engine.user.candys2Data.perspective) options.get(3).get(1).setSelected();
         }
 
         thunder = 0;
@@ -195,52 +211,162 @@ public class Menu {
 
             if (modeSectionTarget == 0) {
                 candy.hover(input, 4.75f, 4, 1.75f, 1.5f);
-                candy.update(caption, input, focus);
+                if (candy.update(caption, input, focus)) soundHandler.play("select");
 
                 penguin.hover(input, 4, 4, 2, 1.5f);
-                penguin.update(caption, input, focus);
+                if (penguin.update(caption, input, focus)) soundHandler.play("select");
 
                 cindy.hover(input, 3.75f, 4, 2.25f, 1.5f);
-                cindy.update(caption, input, focus && !penguin.isHovered());
+                if (cindy.update(caption, input, focus && !penguin.isHovered())) soundHandler.play("select");
 
                 chester.hover(input, 3.5f, 4, 2.25f, 1.5f);
-                chester.update(caption, input, focus);
+                if (chester.update(caption, input, focus)) soundHandler.play("select");
 
                 blank.hover(input, 3.5f, 4, 2.25f, 1.5f);
-                blank.update(caption, input, focus);
+                if (blank.update(caption, input, focus)) soundHandler.play("select");
             }
 
             if (modeSectionTarget == 1){
                 rat.hover(input, 4, 4, 2, 1.5f);
-                rat.update(caption, input, focus);
+                if (rat.update(caption, input, focus)) soundHandler.play("select");
 
                 cat.hover(input, 4, 4, 2, 1.5f);
-                cat.update(caption, input, focus);
+                if (cat.update(caption, input, focus)) soundHandler.play("select");
             }
 
             String modeName = modeSectionTarget == 0 ? "Candy's Showdown" : "Rat & Cat Theater";
 
-            options.input(input);
+            if (options.input(input)) soundHandler.play("select");
 
-            optionButton.update(null, input, true);
+            if (!options.keySwitching) optionButton.update(null, input, true);
             options.updateAlpha(optionButton.isSelected());
 
             if (optionButton.isSelected()){
                 List<Button> buttonsList = options.get(options.getSection() + 1);
                 for (Button button: buttonsList){
-                    button.update(caption, input, false);
-                }
+                    boolean select = button.update(caption, input, false);
+                    if (select && options.keySwitching && options.currentKeyButton != null && options.currentKeyButton != button){
+                        button.setSelected();
+                    }
 
-                if (options.getSection() == 0) options.updateAllChallenges(buttonsList);
+                    if (!options.keySwitching && select && options.getSection() == 2){
+                        engine.user.candys2Data.infiniteNight = buttonsList.get(0).isSelected();
+                        engine.user.candys2Data.perspective = buttonsList.get(1).isSelected();
+                        if (engine.gamejoltManager == null) FileUtils.writeUser(engine.jsonHandler, engine.user);
+                        else {
+                            engine.gamejoltManager.execute(() -> {
+                                String value = engine.jsonHandler.writeCandysUser(engine.user);
+                                engine.gamejoltManager.dataStore.set(engine.gamejoltManager, "user_id=" + engine.gamejoltManager.id, value);
+                            });
+                        }
+                    }
+
+                    if ((!options.keySwitching
+                            || (options.currentKeyButton != null && options.currentKeyButton == button))
+                        && select) {
+                        soundHandler.play("select");
+                        if (options.getSection() == 0) {
+                            options.keySwitching = !options.keySwitching;
+                            if (options.keySwitching) options.currentKeyButton = button;
+                            else options.currentKeyButton = null;
+                        }
+                    }
+
+                    if (options.keySwitching && options.currentKeyButton != null && options.currentKeyButton == button
+                        && input.getCurrentKey() != -1){
+                        boolean duplicate = true;
+                        int keyCode = input.getCurrentKey();
+                        if (button.getPath().equals(Input.Keys.toString(engine.user.fullscreenKey) + " - Fullscreen")){
+                            if (engine.user.restartGameKey != keyCode && engine.user.returnMenuKey != keyCode
+                                && engine.user.candys2Data.flashKey != keyCode) {
+                                engine.user.fullscreenKey = keyCode;
+                                button.setPath(Input.Keys.toString(engine.user.fullscreenKey) + " - Fullscreen");
+                                duplicate = false;
+                            }
+                        } else if (button.getPath().equals(Input.Keys.toString(engine.user.restartGameKey) + " - Restart Game")){
+                            if (engine.user.fullscreenKey != keyCode && engine.user.returnMenuKey != keyCode
+                                    && engine.user.candys2Data.flashKey != keyCode) {
+                                engine.user.restartGameKey = keyCode;
+                                button.setPath(Input.Keys.toString(engine.user.restartGameKey) + " - Restart Game");
+                                duplicate = false;
+                            }
+                        } else if (button.getPath().equals(Input.Keys.toString(engine.user.returnMenuKey) + " - Return to Menu")){
+                            if (engine.user.fullscreenKey != keyCode && engine.user.restartGameKey != keyCode
+                                    && engine.user.candys2Data.flashKey != keyCode) {
+                                engine.user.returnMenuKey = keyCode;
+                                button.setPath(Input.Keys.toString(engine.user.returnMenuKey) + " - Return to Menu");
+                                duplicate = false;
+                            }
+                        } else if (button.getPath().equals(Input.Keys.toString(engine.user.candys2Data.flashKey) + " - Flash Key")){
+                            if (engine.user.fullscreenKey != keyCode && engine.user.restartGameKey != keyCode
+                                    && engine.user.returnMenuKey != keyCode) {
+                                engine.user.candys2Data.flashKey = keyCode;
+                                button.setPath(Input.Keys.toString(engine.user.candys2Data.flashKey) + " - Flash Key");
+                                duplicate = false;
+                            }
+                        }
+
+                        if (!duplicate) {
+                            options.keySwitching = !options.keySwitching;
+                            options.currentKeyButton = null;
+                            button.setSelected();
+                            soundHandler.play("select");
+                            if (engine.gamejoltManager == null) FileUtils.writeUser(engine.jsonHandler, engine.user);
+                            else {
+                                engine.gamejoltManager.execute(() -> {
+                                    String value = engine.jsonHandler.writeCandysUser(engine.user);
+                                    engine.gamejoltManager.dataStore.set(engine.gamejoltManager, "user_id=" + engine.gamejoltManager.id, value);
+                                });
+                            }
+                        } else {
+                            soundHandler.play("error");
+                        }
+                    }
+                }
             } else {
+                if (laserPointerButton.update(caption, input, false)) soundHandler.play("select");
+                if (faultyBatteryButton.update(caption, input, false)) soundHandler.play("select");
+                if (faultyPhonesButton.update(caption, input, false)) soundHandler.play("select");
+                shadowButton.update(caption, input, true, false);
+
                 Candys2Data data = engine.user.candys2Data;
                 var stars = modeSectionTarget == 0 ? data.newCandysShowdownStars : data.ratAndCatTheaterStars;
 
-                star.update(modeName, caption, input, stars[0].time);
-                laserPointerStar.update(modeName, caption, input, stars[1].time);
-                faultyBatteryStar.update(modeName, caption, input, stars[2].time);
-                faultyPhonesStar.update(modeName, caption, input, stars[3].time);
-                allChallengesStar.update(modeName, caption, input, stars[4].time);
+                if (star.update(modeName, caption, input, stars[0].time)) {
+                    setMaxMode();
+                    laserPointerButton.setSelected(false);
+                    faultyBatteryButton.setSelected(false);
+                    faultyPhonesButton.setSelected(false);
+                    soundHandler.play("select");
+                }
+                if (laserPointerStar.update(modeName, caption, input, stars[1].time)){
+                    setMaxMode();
+                    laserPointerButton.setSelected(true);
+                    faultyBatteryButton.setSelected(false);
+                    faultyPhonesButton.setSelected(false);
+                    soundHandler.play("select");
+                }
+                if (faultyBatteryStar.update(modeName, caption, input, stars[2].time)){
+                    setMaxMode();
+                    laserPointerButton.setSelected(false);
+                    faultyBatteryButton.setSelected(true);
+                    faultyPhonesButton.setSelected(false);
+                    soundHandler.play("select");
+                }
+                if (faultyPhonesStar.update(modeName, caption, input, stars[3].time)){
+                    setMaxMode();
+                    laserPointerButton.setSelected(false);
+                    faultyBatteryButton.setSelected(false);
+                    faultyPhonesButton.setSelected(true);
+                    soundHandler.play("select");
+                }
+                if (allChallengesStar.update(modeName, caption, input, stars[4].time)){
+                    setMaxMode();
+                    laserPointerButton.setSelected(true);
+                    faultyBatteryButton.setSelected(true);
+                    faultyPhonesButton.setSelected(true);
+                    soundHandler.play("select");
+                }
             }
 
             caption.update(engine, fontManager.getFont("candys2/font1"), "candys2");
@@ -282,6 +408,19 @@ public class Menu {
             }
             loadTime += Time.getDelta();
             if (loadTime > loadTimeTarget) loadTime = loadTimeTarget;
+        }
+    }
+
+    private void setMaxMode(){
+        if (modeSectionTarget == 0) {
+            candy.setAi(20);
+            cindy.setAi(20);
+            chester.setAi(20);
+            penguin.setAi(20);
+            blank.setAi(20);
+        } else {
+            rat.setAi(20);
+            cat.setAi(20);
         }
     }
 
@@ -354,8 +493,8 @@ public class Menu {
         options.fboDraw(engine);
 
         renderHandler.screenBuffer.begin();
-//        renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
-//        renderHandler.drawScreen();
+        renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
+        renderHandler.drawScreen();
         region = textureHandler.get("menu/background");
         batch.setColor(0.5f, 0.5f, 0.8f, renderHandler.screenAlpha);
         batch.draw(region,
@@ -452,18 +591,14 @@ public class Menu {
 
         batch.setColor(0.6f, 0.6f, 0.8f, renderHandler.screenAlpha);
 
-        float position = 144;
-        region = textureHandler.get("menu/laserPointerOff");
-        batch.draw(region, position, 20);
-        position += 86;
-        region = textureHandler.get("menu/faultyBatteryOff");
-        batch.draw(region, position, 20);
-        position += 86;
-        region = textureHandler.get("menu/faultyPhonesOff");
-        batch.draw(region, position, 20);
-        position += 86;
-        region = textureHandler.get("menu/shadowOff");
-        batch.draw(region, position, 20);
+        region = textureHandler.get("menu/laserPointer" + (laserPointerButton.isSelected() ? "" : "Off"));
+        batch.draw(region, laserPointerButton.getX(), laserPointerButton.getY());
+        region = textureHandler.get("menu/faultyBattery" + (faultyBatteryButton.isSelected() ? "" : "Off"));
+        batch.draw(region, faultyBatteryButton.getX(), faultyBatteryButton.getY());
+        region = textureHandler.get("menu/faultyPhones" + (faultyPhonesButton.isSelected() ? "" : "Off"));
+        batch.draw(region, faultyPhonesButton.getX(), faultyPhonesButton.getY());
+        region = textureHandler.get("menu/shadow" + (shadowButton.isSelected() ? "" : "Off"));
+        batch.draw(region, shadowButton.getX(), shadowButton.getY());
 
         batch.setColor(1, 1, 1, 1);
         font1.setColor(0.8f, 0.8f, 1, renderHandler.screenAlpha);
@@ -512,22 +647,8 @@ public class Menu {
             fontManager.render(batch);
         }
 
-        position = 672;
-        fontManager.setSize(15);
-        fontManager.setText("F11 - Fullscreen");
-        fontManager.setRelativePosition(20, position);
-        fontManager.render(batch);
-        position -= 22;
-        fontManager.setText("F2 - Return to Menu");
-        fontManager.setRelativePosition(20, position);
-        fontManager.render(batch);
-        position -= 22;
-        fontManager.setText("R - Restart Night");
-        fontManager.setRelativePosition(20, position);
-        fontManager.render(batch);
-        position -= 22;
         fontManager.setText("Patch " + engine.version);
-        fontManager.setRelativePosition(20, position);
+        fontManager.setRelativePosition(window.width() - fontManager.getLayout().width - 20, 700);
         fontManager.render(batch);
 
         renderHandler.shapeDrawer.setColor(0.25f, 0, 0.5f, (float) Math.sin(thunder * Math.PI));

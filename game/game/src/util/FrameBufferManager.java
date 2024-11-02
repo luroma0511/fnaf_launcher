@@ -33,6 +33,13 @@ public class FrameBufferManager {
         batch.draw(region, x, y);
     }
 
+    public static void rawRender(SpriteBatch batch, FrameBuffer fbo, float x, float y, float w, float h){
+        Texture texture = fbo.getColorBufferTexture();
+        TextureRegion region = new TextureRegion(texture);
+        region.flip(false, true);
+        batch.draw(region, x, y, w, h);
+    }
+
     public static void render(SpriteBatch batch, FrameBuffer fbo, boolean linear){
         render(batch, fbo, linear, -1, -1);
     }

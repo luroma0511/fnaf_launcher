@@ -84,7 +84,7 @@ public class Blank {
 
             float cameraTimerTarget = 10 + 0.5f * aiCounter;
 
-            if ((int) player.roomFrame == 17 && player.monitor.activeCamera == camera){
+            if (player.inCamera && player.monitor.activeCamera == camera){
                 if (turns == 0 && shadow && !penguin.isBlockingView()) {
                     if (!soundHandler.isPlaying("shadowblank")){
                         soundHandler.play("shadowblank");

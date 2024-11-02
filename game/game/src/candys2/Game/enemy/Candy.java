@@ -105,7 +105,7 @@ public class Candy {
                         hallPosition = 0;
                         setHitboxes();
                     }
-                    if (player.monitor.activeCamera == camera && (int) player.roomFrame == 17) player.setSignalLost();
+                    if (player.monitor.activeCamera == camera && player.inCamera) player.setSignalLost();
                 }
             } else telephoneCooldown = 2;
 
@@ -161,7 +161,7 @@ public class Candy {
                 }
 
                 if ((player.monitor.activeCamera == camera || player.monitor.activeCamera == prevCamera)
-                        && (int) player.roomFrame == 17) player.setSignalLost();
+                        && player.inCamera) player.setSignalLost();
             }
         }
     }

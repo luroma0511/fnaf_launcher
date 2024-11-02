@@ -41,13 +41,13 @@ public class MenuCharacter extends SpriteObject {
         hovered = characterMouseOver(input, xDivider, yDivider, wDivider, hDivider);
     }
 
-    public void update(Caption caption, InputManager inputManager, boolean focus){
-        update(caption, inputManager, focus, true);
+    public boolean update(Caption caption, InputManager inputManager, boolean focus){
+        return update(caption, inputManager, focus, true);
     }
 
-    public void update(Caption caption, InputManager inputManager, boolean focus, boolean clickable){
+    public boolean update(Caption caption, InputManager inputManager, boolean focus, boolean clickable){
         boolean hovering = hovered && focus;
-        if (!hovering) return;
+        if (!hovering) return false;
         caption.setText(filename);
         caption.setActive(true);
         if (!aiCustom && inputManager.isLeftPressed() && clickable) ai = (byte) (ai == 0 ? 1 : 0);
@@ -55,10 +55,12 @@ public class MenuCharacter extends SpriteObject {
             if (inputManager.isLeftPressed()) ai = 20;
             else if (inputManager.isRightPressed()) ai = 0;
         }
-        if (inputManager.getScrolled() == 0 || !aiCustom) return;
-        ai += (byte) inputManager.getScrolled();
-        if (ai < 0) ai = 0;
-        if (ai > 20) ai = 20;
+        if (inputManager.getScrolled() != 0 && aiCustom) {
+            ai += (byte) inputManager.getScrolled();
+            if (ai < 0) ai = 0;
+            if (ai > 20) ai = 20;
+        }
+        return inputManager.isLeftPressed() || inputManager.isRightPressed();
     }
 
     public void debugRender(RenderHandler renderHandler, String game){
@@ -89,6 +91,10 @@ public class MenuCharacter extends SpriteObject {
 
     public byte getAi() {
         return ai;
+    }
+
+    public void setAi(int ai) {
+        this.ai = (byte) ai;
     }
 
     public void setFilename(String filename){

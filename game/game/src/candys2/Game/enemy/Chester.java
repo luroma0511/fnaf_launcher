@@ -96,7 +96,7 @@ public class Chester {
             if (ventCooldown <= 0 && !noJumpscares){
                 ventCooldown = 0;
                 deathCooldown = 8;
-                if (camera == player.monitor.activeCamera && (int) player.roomFrame == 17) player.setSignalLost();
+                if (camera == player.monitor.activeCamera && player.inCamera) player.setSignalLost();
                 camera = 0;
                 soundHandler.play("ventOpen");
                 soundHandler.setSoundEffect(SoundHandler.PAN, "ventOpen", camera <= 3 ? -0.5f : 0.5f, -0.25f);

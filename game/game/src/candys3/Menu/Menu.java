@@ -25,7 +25,7 @@ public class Menu {
     private final Button optionButton;
     private final Button playButton;
 
-    private Options options;
+    public Options options;
 
     private final Arrows arrows;
     private final Caption caption;
@@ -189,16 +189,21 @@ public class Menu {
 
             if (optionButton.isSelected()) {
                 List<Button> buttonsList = options.get(options.getSection() + 1);
-                boolean selection = false;
+                boolean select = false;
                 for (Button button: buttonsList){
-                    if (!selection) selection = button.update(caption, input, false);
+                    if (!select) select = button.update(caption, input, false);
+                    if (select && options.keySwitching && options.currentKeyButton != null && options.currentKeyButton != button){
+                        button.setSelected();
+                        select = false;
+                    }
                 }
 
                 if (options.getSection() == 0) {
-                    options.updateAllChallenges(buttonsList);
                     GameData.laserVision = buttonsList.get(0).isSelected();
                     GameData.hitboxMultiplier = buttonsList.get(1).isSelected() ? 0.75f : 1;
                     GameData.hardCassette = buttonsList.get(2).isSelected();
+
+
                 } else if (options.getSection() == 1) {
                     GameData.flashDebug = buttonsList.get(0).isSelected();
                     GameData.hitboxDebug = buttonsList.get(1).isSelected();
@@ -213,14 +218,15 @@ public class Menu {
                     engine.user.candys3Data.perspective = GameData.perspective;
                     GameData.classicJumpscares = buttonsList.get(3).isSelected();
                     engine.user.candys3Data.classicJumpscares = GameData.classicJumpscares;
-                }
-                if (input.isLeftPressed() && selection) {
-                    if (engine.gamejoltManager == null) FileUtils.writeUser(engine.jsonHandler, engine.user);
-                    else {
-                        engine.gamejoltManager.execute(() -> {
-                            String value = engine.jsonHandler.writeCandysUser(engine.user);
-                            engine.gamejoltManager.dataStore.set(engine.gamejoltManager, "user_id=" + engine.gamejoltManager.id, value);
-                        });
+
+                    if (input.isLeftPressed() && select) {
+                        if (engine.gamejoltManager == null) FileUtils.writeUser(engine.jsonHandler, engine.user);
+                        else {
+                            engine.gamejoltManager.execute(() -> {
+                                String value = engine.jsonHandler.writeCandysUser(engine.user);
+                                engine.gamejoltManager.dataStore.set(engine.gamejoltManager, "user_id=" + engine.gamejoltManager.id, value);
+                            });
+                        }
                     }
                 }
             } else {

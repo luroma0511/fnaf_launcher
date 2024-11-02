@@ -121,7 +121,7 @@ public class Caption extends SpriteObject {
         font.setColor(1, 1, 1, screenAlpha * getAlpha());
         for (byte i = 0; i < captionData.captions().size(); i++) {
             fontManager.setText(captionData.captions().get(i));
-            fontManager.setPosition(x - (float) region.getRegionWidth() / 2 + 8, y + region.getRegionHeight() - getHeight() * i - 8);
+            fontManager.setPosition(x - (float) region.getRegionWidth() / 2 + 8, y + region.getRegionHeight() - getHeight() * i - 9);
             fontManager.render(batch);
         }
         font.setColor(1, 1, 1, 1);

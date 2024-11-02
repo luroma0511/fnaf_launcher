@@ -51,59 +51,60 @@ public class CandysShowdown {
     public boolean renderCamera(Engine engine, int activeCamera){
         var textureHandler = engine.appHandler.getTextureHandler();
         var batch = engine.appHandler.getRenderHandler().batch;
-        var window = engine.appHandler.window;
         String path = "game/enemy/";
-        float yPos = 160;
-        float height = window.width() * 0.75f;
+        int width = 812;
+        int height = 609;
+        int x = 234;
+        int y = 20;
 
         if (penguin.cooldown == 0 && penguin.turns == 0){
-            batch.draw(textureHandler.get(path + "penguin/warning"), 0, 0, window.width(), window.height());
+            batch.draw(textureHandler.get(path + "penguin/warning"), x, y, width, height);
             return true;
         }
 
         if (cindy.ai > 0 && candy.camera == cindy.camera && candy.camera == activeCamera){
             var region = textureHandler.getRegion(path + "candyAndCindy/cameras", 1024, activeCamera - 1);
-            batch.draw(region, 0, -yPos, window.width(), height);
+            batch.draw(region, x, y, width, height);
             return true;
         }
 
         if (!blank.hallRender && cindy.ai > 0 && blank.camera == cindy.camera && blank.camera == activeCamera){
             var region = textureHandler.getRegion(path + "cindyAndBlank/cameras", 1024, activeCamera - 1);
-            batch.draw(region, 0, -yPos, window.width(), height);
+            batch.draw(region, x, y, width, height);
             return true;
         }
 
         if (candy.camera == activeCamera){
             var region = textureHandler.getRegion(path + "candy/cameras", 1024, activeCamera - 1);
-            batch.draw(region, 0, -yPos, window.width(), height);
+            batch.draw(region, x, y, width, height);
             return true;
         }
 
         if (cindy.camera == activeCamera){
             var region = textureHandler.getRegion(path + "cindy/cameras", 1024, activeCamera - 1);
-            batch.draw(region, 0, -yPos, window.width(), height);
+            batch.draw(region, x, y, width, height);
             return true;
         }
 
         if (chester.camera == activeCamera){
             var region = textureHandler.getRegion(path + "chester/camera" + chester.camera, 1024, chester.leaveCooldown > 0 ? 3: (int) chester.frame);
-            batch.draw(region, 0, -yPos, window.width(), height);
+            batch.draw(region, x, y, width, height);
             return true;
         }
 
         if (blank.camera == activeCamera){
             if (blank.shadow){
                 var region = textureHandler.getRegion("game/camera/cameras", 1024, activeCamera - 1);
-                batch.draw(region, 0, -yPos, window.width(), height);
+                batch.draw(region, x, y, width, height);
                 region = textureHandler.getRegion(path + "blank/shadow/cameras", 1024, activeCamera - 1);
-                batch.draw(region, 0, -yPos, window.width(), height);
+                batch.draw(region, x, y, width, height);
                 if (blank.turns != 0) {
                     region = textureHandler.getRegion(path + "blank/shadow/cameras_eyes", 1024, activeCamera - 1);
-                    batch.draw(region, 0, -yPos, window.width(), height);
+                    batch.draw(region, x, y, width, height);
                 }
             } else {
                 var region = textureHandler.getRegion(path + "blank/cameras", 1024, activeCamera - 1);
-                batch.draw(region, 0, -yPos, window.width(), height);
+                batch.draw(region, x, y, width, height);
             }
             return true;
         }

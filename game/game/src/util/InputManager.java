@@ -3,15 +3,17 @@ package util;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import util.deluxe.CandysUser;
 
 public class InputManager extends InputAdapter {
     float x;
     float y;
     float scroll;
     boolean lock;
+    int currentKey = -1;
 
-    public void fullscreen(Window window){
-        if (!keyTyped(Input.Keys.F11) || lock) return;
+    public void fullscreen(Window window, CandysUser user){
+        if (!keyTyped(user.fullscreenKey) || lock) return;
         if (Gdx.graphics.isFullscreen()) Gdx.graphics.setWindowedMode(window.width(), window.height());
         else Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
     }
@@ -36,7 +38,12 @@ public class InputManager extends InputAdapter {
         return buttonType(Input.Buttons.RIGHT);
     }
 
+    public int getCurrentKey() {
+        return currentKey;
+    }
+
     public void reset(){
+        currentKey = -1;
         scroll = 0;
         lock = false;
     }
@@ -58,6 +65,18 @@ public class InputManager extends InputAdapter {
         if (x > 1280) x = 1280;
         if (y < 0) y = 0;
         if (y > 720) y = 720;
+    }
+
+    @Override
+    public boolean keyUp(int keycode) {
+        currentKey = -1;
+        return super.keyUp(keycode);
+    }
+
+    @Override
+    public boolean keyDown(int keycode) {
+        currentKey = keycode;
+        return super.keyDown(keycode);
     }
 
     @Override

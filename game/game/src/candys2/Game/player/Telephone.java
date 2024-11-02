@@ -17,12 +17,6 @@ public class Telephone {
     public int[] cooldownSeconds = new int[6];
     public float[] cooldowns = new float[6];
     public int[] status = new int[6];
-    public int[] xPos = new int[]{
-            615, 615, 663, 906, 970, 972
-    };
-    public int[] yPos = new int[]{
-            71, 216, 410, 393, 230, 72
-    };
 
     public TextureRegion[] regions = new TextureRegion[6];
     public TextureRegion[] cooldownRegions = new TextureRegion[6];
@@ -43,13 +37,12 @@ public class Telephone {
         Arrays.fill(cooldownRegions, new TextureRegion(textureHandler.get("game/gui/phoneCooldown")));
     }
 
-    public void input(InputManager inputManager, SoundHandler soundHandler, int activeCamera, boolean faultyPhones){
+    public void input(InputManager inputManager, SoundHandler soundHandler, int activeCamera, boolean mouseOver, boolean faultyPhones){
         clickDelay -= Time.getDelta();
         if (clickDelay <= 0) clickDelay = 0;
         boolean clicked = inputManager.isLeftPressed() && clickDelay == 0;
         int state = status[activeCamera - 1];
-        if (inputManager.mouseOver(xPos[activeCamera - 1] * 1.25f, yPos[activeCamera - 1] * 0.9375f, 32, 32)
-                && state != 2 && clicked){
+        if (mouseOver && state != 2 && clicked){
             if (state == 0 && !ringing && cooldowns[activeCamera - 1] == 0 && cooldownSeconds[activeCamera - 1] == 0){
                 location = activeCamera;
                 status[location - 1] = 1;

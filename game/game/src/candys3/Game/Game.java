@@ -38,6 +38,9 @@ public class Game {
 
     public static FrameBuffer lightBuffer;
     public static FrameBuffer roomBuffer;
+    public static FrameBuffer ratDebugBuffer;
+    public static FrameBuffer catDebugBuffer;
+    public static FrameBuffer vinnieDebugBuffer;
 
     public Game(){
         characters = new Characters();
@@ -76,8 +79,8 @@ public class Game {
 
     public void reset(RenderHandler renderHandler){
         characters.reset();
-        player.reset();
         room.reset();
+        player.reset(room);
         Jumpscare.reset();
         nightTime = 0;
         fastNightTime = 0;
@@ -117,7 +120,7 @@ public class Game {
             else scoreAlpha = Time.decreaseTimeValue(scoreAlpha, 0, 2);
             if (!player.isJumpscare()) {
                 player.update(window, input, room, characters.getRat(), characters.getCat());
-                if (player.getY() == 0) room.input(engine, player);
+                if (player.getY() < 720 - room.height) room.input(engine, player);
                 room.update(soundHandler, player);
                 characters.update(soundHandler, player, room);
                 if (!GameData.hardCassette && room.isMusicPlaying()) fastNightTime = Time.increaseTimeValue(fastNightTime, nightTimeLength / 2, 1);
@@ -229,6 +232,10 @@ public class Game {
         batch.enableBlending();
         renderHandler.batchBegin();
 
+        if (GameData.hitboxDebug || GameData.flashDebug){
+            characters.debug(batch, engine.appHandler.getRenderHandler(), engine.appHandler.window, player, room);
+        }
+
         room.render(engine, characters, player.getFlashlight());
 
         if (player.getOverlayAlpha() > 0) {
@@ -290,10 +297,38 @@ public class Game {
             }
         }
         batch.setColor(1, 1, 1, 1);
+
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1 - renderHandler.screenAlpha);
         renderHandler.drawScreen();
         FrameBufferManager.end(batch, renderHandler.screenBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         FrameBufferManager.render(batch, renderHandler.screenBuffer, true);
+
+        if (GameData.hitboxDebug) {
+            int srcFunc = batch.getBlendSrcFunc();
+            int dstFunc = batch.getBlendDstFunc();
+            //DON'T CHANGE THIS!!!
+            batch.setBlendFunction(GL20.GL_SRC_COLOR, GL20.GL_DST_ALPHA);
+
+            if (characters.getRat() != null) {
+                int type = characters.getRat().getType();
+                if (type == 0) batch.setColor(0.5f, 0.35f, 0.35f, 1);
+                else if (type == 1) batch.setColor(0.5f, 0, 0.5f, 1);
+                else batch.setColor(0.5f, 0.375f, 0.375f, 1);
+                FrameBufferManager.render(batch, ratDebugBuffer, true, room.width, room.height);
+            }
+
+            if (characters.getCat() != null) {
+                int type = characters.getCat().getType();
+                if (type == 0) batch.setColor(0.75f, 0.5f, 0.5f, 1);
+                else if (type == 1) batch.setColor(0.75f, 0, 0.75f, 1);
+                else batch.setColor(0.75f, 0.25f, 0.25f, 1);
+                FrameBufferManager.render(batch, catDebugBuffer, true, room.width, room.height);
+            }
+
+            batch.setColor(1, 1, 1, 1);
+            batch.flush();
+            batch.setBlendFunction(srcFunc, dstFunc);
+        }
 
         fontManager.setCurrentFont(candysFont);
         fontManager.setSize(40);
@@ -407,8 +442,6 @@ public class Game {
     public void render(Engine engine){
         if (!gameOver) renderGame(engine);
         else renderGameOver(engine);
-        if (gameOver || (!GameData.hitboxDebug && !GameData.flashDebug)) return;
-        characters.debug(engine.appHandler.getRenderHandler(), engine.appHandler.window, player, room);
     }
 
     private void writeScore(Engine engine){

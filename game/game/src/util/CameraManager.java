@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class CameraManager {
+    static OrthographicCamera camera;
     static Viewport viewport;
     private static float x;
     private static float y;
@@ -25,7 +26,7 @@ public class CameraManager {
     }
 
     public static void createCamera(int width, int height){
-        OrthographicCamera camera = new OrthographicCamera(width, height);
+        camera = new OrthographicCamera(width, height);
         camera.setToOrtho(false);
         viewport = new FitViewport(width, height, camera);
         viewport.getCamera().update();

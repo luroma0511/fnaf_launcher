@@ -1,6 +1,8 @@
 package candys3.Game.Objects.Character;
 
+import candys3.Game.Game;
 import candys3.GameData;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import candys3.Game.Objects.Player;
@@ -157,31 +159,42 @@ public class Characters {
                 50);
     }
 
-    private void hitboxDebug(RenderHandler renderHandler, Hitbox hitbox, byte type){
+    private void hitboxDebug(RenderHandler renderHandler, Hitbox hitbox){
         if (!GameData.hitboxDebug || hitbox.size == 0) return;
-        if (type == 0) renderHandler.shapeDrawer.setColor(0.75f, 0.5f, 0.5f, 0.5f);
-        else if (type == 1) renderHandler.shapeDrawer.setColor(0.75f, 0, 0.75f, 0.5f);
-        else renderHandler.shapeDrawer.setColor(0.75f, 0.25f, 0.25f, 0.5f);
+        renderHandler.shapeDrawer.setColor(1, 1, 1, 1);
         renderHandler.shapeDrawer.filledCircle(
                 hitbox.getX(),
                 hitbox.getY(),
                 hitbox.size);
     }
 
-    public void debug(RenderHandler renderHandler, Window window, Player player, Room room) {
+    public void debug(SpriteBatch batch, RenderHandler renderHandler, Window window, Player player, Room room) {
         if (player.isJumpscare()) return;
-        if (rat != null) {
-            if (player.getSide() == rat.getSide() && room.getState() == 0 && room.getFrame() == 0) {
-                hitboxDebug(renderHandler, rat.getHitbox(), rat.getType());
-            }
-            if (rat.getAttack().isAttack()) flashDebug(renderHandler, window, rat.getAttack().getKillTimer() / 2, rat.getType());
-        }
+        boolean roomView = room.getState() == 0 && room.getFrame() == 0;
 
-        if (cat != null) {
-            if (player.getSide() == cat.getSide() && room.getState() == 0 && room.getFrame() == 0) {
-                hitboxDebug(renderHandler, cat.getHitbox(), cat.getType());
-            }
-            if (cat.getAttack().isAttack()) flashDebug(renderHandler, window, cat.getAttack().getKillTimer() / 2, cat.getType());
+        if (Game.ratDebugBuffer == null) Game.ratDebugBuffer = FrameBufferManager.newFrameBuffer();
+        Game.ratDebugBuffer.begin();
+        renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
+        renderHandler.drawScreen();
+        if (rat != null && player.getSide() == rat.getSide() && roomView) {
+            hitboxDebug(renderHandler, rat.getHitbox());
+        }
+        FrameBufferManager.end(batch, Game.ratDebugBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        if (Game.catDebugBuffer == null) Game.catDebugBuffer = FrameBufferManager.newFrameBuffer();
+        Game.catDebugBuffer.begin();
+        renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
+        renderHandler.drawScreen();
+        if (cat != null && player.getSide() == cat.getSide() && roomView) {
+            hitboxDebug(renderHandler, cat.getHitbox());
+        }
+        FrameBufferManager.end(batch, Game.catDebugBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+        if (rat != null && rat.getAttack().isAttack()) {
+            flashDebug(renderHandler, window, rat.getAttack().getKillTimer() / 2, rat.getType());
+        }
+        if (cat != null && cat.getAttack().isAttack()) {
+            flashDebug(renderHandler, window, cat.getAttack().getKillTimer() / 2, cat.getType());
         }
     }
 

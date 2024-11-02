@@ -1,1 +1,1 @@
-This challenge adds a 5 second delay to phones that recently stopped ringing, and the phones can't be rung forever.
+Faulty Phones: This challenge adds a 5 second delay to phones that recently stopped ringing, and the phones can't be rung forever.

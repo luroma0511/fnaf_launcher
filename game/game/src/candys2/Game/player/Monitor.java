@@ -15,24 +15,20 @@ public class Monitor {
     public boolean error;
 
     public int[] xPos = new int[]{
-            684, 664, 729, 791, 888, 931
+            746, 729, 781, 844, 926, 965
     };
     public int[] yPos = new int[]{
-            171, 216, 410, 357, 266, 183
+            140, 186, 335, 303, 220, 150
     };
 
-    public int[] xCheatPos = new int[]{
-            834, 725, 874, 1072, 1212, 1195,
-            959, 1004, 1049
+    public int[] xButtonPos = new int[]{
+            707, 682, 742, 924, 987, 981
     };
-
-    public int[] yCheatPos = new int[]{
-            106, 203, 351, 360, 249, 118,
-            281, 196, 128
+    public int[] yButtonPos = new int[]{
+            70, 186, 335, 327, 197, 70
     };
 
     public TextureRegion[] regions = new TextureRegion[6];
-    public TextureRegion[] mapDebugMode1Regions = new TextureRegion[4];
 
     public void reset(){
         activeCamera = 1;
@@ -41,23 +37,21 @@ public class Monitor {
         error = false;
     }
 
-    public void load(TextureHandler textureHandler, boolean mapDebug){
+    public void load(TextureHandler textureHandler){
         if (loaded) return;
         loaded = true;
         for (int i = 0; i < 6; i++) regions[i] = new TextureRegion(textureHandler.get("game/gui/camera" + (i + 1)));
-        if (!mapDebug) return;
-        for (int i = 0; i < 4; i++) mapDebugMode1Regions[i] = new TextureRegion(textureHandler.get("game/cheat1"));
     }
 
-    public void input(InputManager inputManager, SoundHandler soundHandler, int roomFrame){
+    public void input(InputManager inputManager, SoundHandler soundHandler, boolean inCamera){
         if (error) {
-            if (roomFrame == 17 && !soundHandler.isPlaying("glitch")){
+            if (inCamera && !soundHandler.isPlaying("glitch")){
                 soundHandler.play("glitch");
                 soundHandler.setSoundEffect(SoundHandler.LOOP, "glitch", 1);
-            } else if (roomFrame < 17 && soundHandler.isPlaying("glitch")){
+            } else if (!inCamera && soundHandler.isPlaying("glitch")){
                 soundHandler.stop("glitch");
             }
-            if (roomFrame == 17 && inputManager.mouseOver(561, 318, 75, 23) && inputManager.isLeftPressed()) {
+            if (inCamera && inputManager.mouseOver(561, 276, 75, 23) && inputManager.isLeftPressed()) {
                 error = false;
                 glitchCooldown = 3;
                 glitchFrame = 0;
@@ -66,11 +60,11 @@ public class Monitor {
             }
             return;
         }
-        if (glitchCooldown > 0 || roomFrame < 17) return;
+        if (glitchCooldown > 0 || !inCamera) return;
         boolean clicked = inputManager.isLeftPressed();
         switched = false;
         for (int i = 0; i < 6; i++) {
-            if (inputManager.mouseOver(xPos[i] * 1.25f, yPos[i] * 0.9375f, 48, 32) && clicked){
+            if (inputManager.mouseOver(xPos[i], yPos[i], 48, 32) && clicked){
                 if (activeCamera == i + 1) break;
                 activeCamera = i + 1;
                 switched = true;
@@ -92,7 +86,6 @@ public class Monitor {
 
     public void dispose(){
         dispose(regions);
-        dispose(mapDebugMode1Regions);
         loaded = false;
     }
 

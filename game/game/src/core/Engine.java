@@ -11,17 +11,14 @@ import util.error.GameError;
 import util.gamejolt.GamejoltManager;
 import util.gamejolt.GamejoltTrophyUI;
 
-import java.nio.ByteBuffer;
-
 public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
     public final AppHandler appHandler;
     private GameError gameError;
     public Candys2Deluxe candys2Deluxe;
     public Candys3Deluxe candys3Deluxe;
-    private ByteBuffer buffer;
 
     public final String game;
-    public final String version = "v1.1.3";
+    public final String version = "v1.1.4";
     public final CandysUser user;
     public final CandysJSONHandler jsonHandler;
     public final GamejoltManager gamejoltManager;
@@ -116,7 +113,9 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
     @Override
     public void render(){
         Time.update();
-        appHandler.getInput().fullscreen(appHandler.window);
+        boolean lock = (candys2Deluxe != null && candys2Deluxe.menu.options != null && candys2Deluxe.menu.options.keySwitching)
+                || (candys3Deluxe != null && candys3Deluxe.getMenu().options != null && candys3Deluxe.getMenu().options.keySwitching);
+        if (!lock) appHandler.getInput().fullscreen(appHandler.window, user);
 
         try {
             if (gameError == null) {

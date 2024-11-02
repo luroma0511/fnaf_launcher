@@ -21,7 +21,7 @@ public class Star extends SpriteObject {
         update(modeName, caption, inputManager, -1);
     }
 
-    public void update(String modeName, Caption caption, InputManager inputManager, int time){
+    public boolean update(String modeName, Caption caption, InputManager inputManager, int time){
         int hour = 0;
         while (time >= 60){
             hour++;
@@ -29,10 +29,11 @@ public class Star extends SpriteObject {
         }
         String timeText = String.valueOf(time);
         if (time < 10) timeText = "0" + timeText;
-        if (!mouseOver(inputManager) || text == null) return;
+        if (!mouseOver(inputManager) || text == null) return false;
         String extra = time == -1 ? "" : "\nBest Time: " + hour + ":" + timeText;
         caption.setText(modeName + text + extra);
         caption.setActive(true);
+        return inputManager.isLeftPressed();
     }
 
     public void renderCandys3(TextureHandler textureHandler, SpriteBatch batch, FrameBuffer rainbowFrameBuffer, boolean achieved, boolean rainbow){

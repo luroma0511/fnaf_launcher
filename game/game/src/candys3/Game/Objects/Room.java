@@ -18,6 +18,9 @@ public class Room extends SpriteObject {
     private float frame;
     private int boundsX;
     private int boundsY;
+    public int width;
+    public int height;
+
     private int limit;
     public boolean hoverButton;
 
@@ -52,8 +55,8 @@ public class Room extends SpriteObject {
         targetState = 0;
         frame = 0;
         limit = 20;
-        boundsX = 1792;
-        boundsY = 304;
+        boundsX = 3072;
+        boundsY = 1024;
         playFrame = 0;
         stopFrame = 0;
         rewindFrame = 0;
@@ -64,6 +67,9 @@ public class Room extends SpriteObject {
         tapeStop = false;
         tapeAdjusted = true;
         if (tapeMusic.isPlaying()) tapeMusic.stop();
+
+        width = 1152;
+        height = 648;
     }
 
     public void load(TextureHandler textureHandler){
@@ -179,11 +185,11 @@ public class Room extends SpriteObject {
             }
             state = targetState;
             if (state == 0) {
-                boundsX = 1792;
-                boundsY = 304;
+                boundsX = 3072;
+                boundsY = 1024;
             } else if (state == 1){
-                boundsX = 768;
-                boundsY = 0;
+                boundsX = 2048;
+                boundsY = 720;
             }
         }
 
@@ -306,18 +312,20 @@ public class Room extends SpriteObject {
 
         if (state != 2 && GameData.perspective) CameraManager.applyShader(batch);
 
-        if (state != 2 && (int) frame == 0) {
-            FrameBufferManager.render(batch, Game.lightBuffer, false);
+        boolean debug = false;
+        
+        if (state != 2 && (int) frame == 0 && !debug) {
+            FrameBufferManager.render(batch, Game.lightBuffer, false, width, height);
             int srcFunc = batch.getBlendSrcFunc();
             int dstFunc = batch.getBlendDstFunc();
             //DON'T CHANGE THIS!!!
             batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
-            FrameBufferManager.render(batch, Game.roomBuffer, false);
+            FrameBufferManager.render(batch, Game.roomBuffer, false, width, height);
             batch.setBlendFunction(srcFunc, dstFunc);
             batch.flush();
         } else {
             if (state == 2) FrameBufferManager.render(batch, Game.roomBuffer, false, 1024, 576);
-            else FrameBufferManager.render(batch, Game.roomBuffer, false);
+            else FrameBufferManager.render(batch, Game.roomBuffer, false, width, height);
         }
 
         batch.setShader(null);

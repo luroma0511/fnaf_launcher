@@ -28,8 +28,8 @@ public class Button extends SpriteObject {
     }
 
     public boolean update(Caption caption, InputManager inputManager, boolean lockHover, boolean alphaConfig){
-        hovered = !lockHover && mouseOver(inputManager);
-        if (hovered && inputManager.isLeftPressed()) selected = !selected;
+        hovered = mouseOver(inputManager);
+        if (hovered && !lockHover && inputManager.isLeftPressed()) selected = !selected;
         if (alphaConfig && (hovered || selected)) setAlpha(Time.increaseTimeValue(getAlpha(), 1, 8));
         else setAlpha(Time.decreaseTimeValue(getAlpha(), 0, 8));
         if (!hovered || text == null || caption == null) return hovered && inputManager.isLeftPressed();
@@ -56,18 +56,19 @@ public class Button extends SpriteObject {
         selected = cond;
     }
 
-    public void render(Engine engine){
-        render(engine, selected);
+    public void render(Engine engine, boolean exclamation){
+        render(engine, selected, hovered, exclamation);
     }
 
-    public void render(Engine engine, boolean cond){
+    public void render(Engine engine, boolean cond, boolean hovered, boolean exclamation){
         TextureRegion region;
         var textureHandler = engine.appHandler.getTextureHandler();
         var batch = engine.appHandler.getRenderHandler().batch;
         var menuUI = engine.appHandler.getMenuUI();
 
-        if (cond) region = textureHandler.getRegion(menuUI.checkbox, 84, 1);
-        else region = textureHandler.getRegion(menuUI.checkbox, 84, 0);
+        if (cond) {
+            region = textureHandler.getRegion(menuUI.checkbox, 84, exclamation ? 2 : 1);
+        } else region = textureHandler.getRegion(menuUI.checkbox, 84, 0);
         if (hovered) batch.setColor(1, 1, 1, 1);
         else if (engine.game.equals("candys3")) {
             if (GameData.night == 1) {

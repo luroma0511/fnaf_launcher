@@ -41,25 +41,26 @@ public class RatCatTheater {
     public boolean renderCamera(Engine engine, int activeCamera){
         var textureHandler = engine.appHandler.getTextureHandler();
         var batch = engine.appHandler.getRenderHandler().batch;
-        var window = engine.appHandler.window;
         String path = "game/enemy/";
-        float yPos = 160;
-        float height = window.width() * 0.75f;
+        int width = 812;
+        int height = 609;
+        int x = 234;
+        int y = 20;
 
-        if (rat.monitorCooldown == 0 && rat.turns == 0){
-            batch.draw(textureHandler.get(path + "rat/warning"), 0, 0, window.width(), window.height());
+        if (rat.ai > 0 && rat.monitorCooldown == 0 && rat.turns == 0){
+            batch.draw(textureHandler.get(path + "rat/warning"), x, y, width, height);
             return true;
         }
 
         if (cat.ai > 0 && rat.camera == cat.camera && rat.camera == activeCamera){
             var region = textureHandler.getRegion(path + "ratAndCat/cameras", 1024, activeCamera - 1);
-            batch.draw(region, 0, -yPos, window.width(), height);
+            batch.draw(region, x, y, width, height);
             return true;
         }
 
         if (rat.camera == activeCamera){
             var region = textureHandler.getRegion(path + "rat/cameras", 1024, activeCamera - 1);
-            batch.draw(region, 0, -yPos, window.width(), height);
+            batch.draw(region, x, y, width, height);
             return true;
         }
 
@@ -67,7 +68,7 @@ public class RatCatTheater {
             TextureRegion region;
             if (cat.vents == 0) region = textureHandler.getRegion(path + "cat/cameras", 1024, activeCamera - 1);
             else region = textureHandler.getRegion(path + "cat/vent/" + cat.camera, 1024, cat.leaveCooldown > 0 ? 3: (int) cat.frame);
-            batch.draw(region, 0, -yPos, window.width(), height);
+            batch.draw(region, x, y, width, height);
             return true;
         }
 

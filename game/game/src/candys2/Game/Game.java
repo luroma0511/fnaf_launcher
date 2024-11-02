@@ -5,9 +5,9 @@ import candys2.Game.mode.RatCatTheater;
 import candys2.Game.player.Player;
 import candys2.Menu.Menu;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import core.Engine;
@@ -77,10 +77,9 @@ public class Game {
                 && menu.penguin.getAi() == 20
                 && menu.blank.getAi() == 20);
 
-        var challenges = menu.getOptions().get(1);
-        laserPointer = challenges.get(0).isSelected();
-        faultyBattery = challenges.get(1).isSelected();
-        faultyPhones = challenges.get(2).isSelected();
+        laserPointer = menu.laserPointerButton.isSelected();
+        faultyBattery = menu.faultyBatteryButton.isSelected();
+        faultyPhones = menu.faultyPhonesButton.isSelected();
 
         var cheats = menu.getOptions().get(2);
         mapDebug = cheats.get(0).isSelected();
@@ -94,20 +93,27 @@ public class Game {
         perspectiveEffect = options.get(1).isSelected();
 
         textureHandler.add("game/office/deskLayer");
-        textureHandler.add("game/office/rackBlackLayer");
         textureHandler.add("game/office/cabinetLayer");
         textureHandler.add("game/office/office");
+        textureHandler.add("game/office/officeDark");
         textureHandler.add("game/office/Flashlight");
-        textureHandler.add("game/office/lookDown");
-        textureHandler.add("game/office/pickupMonitor");
+
+        textureHandler.add("game/camera/monitor");
         textureHandler.add("game/camera/cameras");
-        textureHandler.add("game/camera/screen");
+        textureHandler.add("game/camera/vignette");
+        textureHandler.add("game/camera/reboot");
+        textureHandler.add("game/camera/static");
+
+        textureHandler.add("game/gui/button");
+        textureHandler.add("game/gui/ui");
+        textureHandler.add("game/gui/hover");
         textureHandler.add("game/gui/phone");
         textureHandler.add("game/gui/phoneCooldown");
+        textureHandler.add("game/gui/error");
+
+        textureHandler.add("static/static1");
         textureHandler.add("static/newspaper");
         textureHandler.add("game/newspaper");
-        textureHandler.add("game/camera/reboot");
-        textureHandler.add("game/gui/error");
         textureHandler.add("game/6am");
         for (int i = 1; i <= 6; i++){
             textureHandler.add("game/gui/camera" + i);
@@ -146,7 +152,11 @@ public class Game {
     private void updateGame(Engine engine){
         var soundHandler = engine.appHandler.soundHandler;
 
-        if (engine.appHandler.getInput().keyTyped(Input.Keys.F2)){
+        var restartGame = engine.user.restartGameKey;
+        var returnMenu = engine.user.returnMenuKey;
+        var flashKey = engine.user.candys2Data.flashKey;
+
+        if (engine.appHandler.getInput().keyTyped(returnMenu)){
             engine.appHandler.getRenderHandler().screenAlpha = 0;
             engine.candys2Deluxe.setState(0);
             engine.appHandler.getTextureHandler().dispose();
@@ -154,7 +164,7 @@ public class Game {
             soundHandler.stopAllSounds();
             VideoManager.stop();
             return;
-        } else if (engine.appHandler.getInput().keyTyped(Input.Keys.R)) {
+        } else if (engine.appHandler.getInput().keyTyped(restartGame)) {
             soundHandler.stopAllSounds();
             VideoManager.stop();
             reset = true;
@@ -171,7 +181,7 @@ public class Game {
         Candys2Data data = engine.user.candys2Data;
 
         if (player.jumpscareDelay > 0 || player.jumpscareEnemy.isEmpty()) {
-            player.update(engine, faultyBattery, faultyPhones);
+            player.update(engine, faultyBattery, faultyPhones, flashKey);
             if (mode == 0) candysShowdown.update(soundHandler, player, laserPointer, noJumpscares);
             else ratCatTheater.update(soundHandler, player, laserPointer, noJumpscares);
             nightTime += Time.getDelta();
@@ -242,218 +252,166 @@ public class Game {
         renderHandler.shapeDrawer.update();
         batch.enableBlending();
 
-        if ((int) player.roomFrame >= 8){
-            batch.setProjectionMatrix(CameraManager.getViewport().getCamera().combined);
-            renderHandler.batchBegin();
-            renderHandler.screenBuffer.begin();
+        batch.setProjectionMatrix(framebufferCamera.combined);
+        Gdx.gl.glViewport(0, 0, 1440, 768);
+        renderHandler.batchBegin();
+
+        if (laserPointer && player.flashAlpha > 0) {
+            laserPointerBuffer.begin();
             renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
-            renderHandler.drawScreen();
-            if ((int) player.roomFrame < 17){
-                region = textureHandler.getRegion("game/office/pickupMonitor", 1024, (int) player.roomFrame - 8);
-                batch.draw(region, 0, 0, window.width(), window.height());
+            renderHandler.shapeDrawer.filledRectangle(0, 0, 1440, 768);
+            region = textureHandler.get("game/office/Flashlight");
+            float length = (float) region.getRegionWidth() / 2;
+            batch.draw(region, player.flashX - player.position - length, player.flashY + 24 - length);
+            FrameBufferManager.end(batch, laserPointerBuffer, 1440, 768);
+        }
+        if (player.flashAlpha > 0) {
+            officeBuffer.begin();
+            renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
+            renderHandler.shapeDrawer.filledRectangle(0, 0, 1440, 768);
+            region = textureHandler.get("game/office/office");
+            batch.draw(region, -player.position, 0);
+            if (mode == 0) {
+                candysShowdown.renderHall1(engine, -player.position);
+                candysShowdown.renderHall2(engine, -player.position);
             } else {
-                if (player.signalLost < 1) {
-                    if (player.monitor.error){
-                        if (mode == 0) {
-                            batch.draw(textureHandler.get("game/enemy/penguin/glitch"), 0, 0, window.width(), window.height());
-                            region = textureHandler.getRegion("game/gui/error", 374, 0);
-                            batch.draw(region, (float) window.width() / 2 - (float) region.getRegionWidth() / 2,
-                                    (float) window.height() / 2 - (float) region.getRegionHeight() / 2);
-                        } else batch.draw(textureHandler.get("game/enemy/rat/glitch"), 0, 0, window.width(), window.height());
-                    } else if (player.monitor.glitchCooldown > 0) {
-                        region = textureHandler.getRegion("game/camera/reboot", 1024, (int) player.monitor.glitchFrame);
-                        batch.draw(region, (float) window.width() / 2 - (float) region.getRegionWidth() / 2, 0);
-                    } else {
-                        boolean character = false;
-                        if (mode == 0) character = candysShowdown.renderCamera(engine, player.monitor.activeCamera);
-                        else if (mode == 1) character = ratCatTheater.renderCamera(engine, player.monitor.activeCamera);
-                        if (!character) {
-                            region = textureHandler.getRegion("game/camera/cameras", 1024, player.monitor.activeCamera - 1);
-                            batch.draw(region, 0, -160, window.width(), window.width() * 0.75f);
-                        }
-                    }
-
-                    if (!player.monitor.error) {
-                        if (player.monitor.glitchCooldown > 0) region = textureHandler.getRegion("game/camera/screen", 1024, 0);
-                        else region = textureHandler.getRegion("game/camera/screen", 1024, (int) (player.staticFrame + 1));
-                    } else region = textureHandler.getRegion("game/camera/screen", 1024, 0);
-                    batch.draw(region, 0, 0, window.width(), window.height());
-                } else {
-                    region = textureHandler.getRegion("game/camera/screen", 1024, (int) (11 - player.signalLost));
-                    batch.draw(region, 0, 0, window.width(), window.height());
-                }
-
-                if (!player.monitor.error && player.monitor.glitchCooldown == 0) {
-                    for (int i = 0; i < player.telephone.regions.length; i++) {
-                        if (player.telephone.cooldowns[i] == 0 && player.telephone.cooldownSeconds[i] == 0) {
-                            region = player.telephone.regions[i];
-                            textureHandler.setRegion(region, 32, player.telephone.status[i]);
-                            if (player.monitor.activeCamera == i + 1) batch.setColor(1, 1, 1, 1);
-                            else batch.setColor(0.6f, 0.6f, 0.6f, 1);
-                        } else {
-                            region = player.telephone.cooldownRegions[i];
-                            textureHandler.setRegion(region, 32, player.telephone.cooldownSeconds[i]);
-                            batch.setColor(0.85f, 0.85f, 0.85f, 1);
-                        }
-
-                        batch.draw(region,
-                                player.telephone.xPos[i] * 1.25f,
-                                player.telephone.yPos[i] * 0.9375f);
-                    }
-
-                    batch.setColor(1, 1, 1, 1);
-
-                    for (int i = 0; i < player.monitor.regions.length; i++) {
-                        region = player.monitor.regions[i];
-                        textureHandler.setRegion(region, 48, player.monitor.activeCamera == i + 1 ? 1 : 0);
-                        batch.draw(region,
-                                player.monitor.xPos[i] * 1.25f,
-                                player.monitor.yPos[i] * 0.9375f);
-                    }
-
-                    if (mapDebug){
-                        int[] camerasOffset = new int[6];
-                        var regions = player.monitor.mapDebugMode1Regions;
-                        for (int i = 0; i < regions.length; i++){
-                            int cameraIndex = 0;
-                            int yIndex = -1;
-                            int xIndex = -1;
-                            if (i == 0){
-                                var candy = candysShowdown.candy;
-                                if (candy.hall){
-                                    xIndex = candy.side == 0 ? 6 : 8;
-                                    int position;
-                                    if (candy.hallPosition == 3) position = 2;
-                                    else if (candy.hallPosition == 2) position = 1;
-                                    else position = 0;
-                                    yIndex = 6 + position;
-                                } else {
-                                    var camera = candy.camera;
-                                    xIndex = camera - 1;
-                                    yIndex = camera - 1;
-                                    camerasOffset[camera - 1] -= 40;
-                                    cameraIndex = camera;
-                                }
-                            } else if (i == 1){
-                                var cindy = candysShowdown.cindy;
-                                if (cindy.ai != 0) {
-                                    var camera = cindy.camera;
-                                    if (camera >= 1 && camera <= 6) {
-                                        xIndex = camera - 1;
-                                        yIndex = camera - 1;
-                                        camerasOffset[camera - 1] -= 40;
-                                        cameraIndex = camera;
-                                    }
-                                }
-                            } else if (i == 2){
-                                var blank = candysShowdown.blank;
-                                if (blank.camera == 0 && blank.ai != 0){
-                                    if (blank.hallPosition > 0 && blank.hallPosition < 4) {
-                                        xIndex = 7;
-                                        yIndex = 5 + blank.hallPosition;
-                                    }
-                                } else if (blank.ai > 0){
-                                    var camera = blank.camera;
-                                    xIndex = camera - 1;
-                                    yIndex = camera - 1;
-                                    camerasOffset[camera - 1] -= 40;
-                                    cameraIndex = camera;
-                                }
-                            } else {
-                                var chester = candysShowdown.chester;
-                                if (chester.camera == 0) continue;
-                                var camera = chester.camera;
-                                xIndex = camera - 1;
-                                yIndex = camera - 1;
-                            }
-
-                            if (xIndex == -1 || yIndex == -1) continue;
-                            region = textureHandler.getRegion(regions[i], 32, i);
-                            var offset = cameraIndex != 0 ? camerasOffset[cameraIndex - 1] + 40 : 0;
-                            batch.draw(region,
-                                    player.monitor.xCheatPos[xIndex] + offset,
-                                    player.monitor.yCheatPos[yIndex]);
-                        }
-                    }
-                }
+                ratCatTheater.renderHall1(engine, -player.position);
+                ratCatTheater.renderHall2(engine, -player.position);
             }
-        } else {
-            batch.setProjectionMatrix(framebufferCamera.combined);
-            Gdx.gl.glViewport(0, 0, 1440, 768);
-            renderHandler.batchBegin();
-
-            if (laserPointer && (int) player.roomFrame == 0 && player.flashAlpha > 0) {
-                laserPointerBuffer.begin();
-                renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
-                renderHandler.shapeDrawer.filledRectangle(0, 0, 1440, 768);
-                region = textureHandler.get("game/office/Flashlight");
-                float length = (float) region.getRegionWidth() / 2;
-                batch.draw(region, player.flashX - player.position - length, player.flashY + 24 - length);
-                FrameBufferManager.end(batch, laserPointerBuffer, 1440, 768);
-            }
-            if ((int) player.roomFrame == 0 && player.flashAlpha > 0) {
-                officeBuffer.begin();
-                renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
-                renderHandler.shapeDrawer.filledRectangle(0, 0, 1440, 768);
-                region = textureHandler.get("game/office/office");
-                batch.draw(region, -player.position, 0);
-                if (mode == 0) {
-                    candysShowdown.renderHall1(engine, -player.position);
-                    candysShowdown.renderHall2(engine, -player.position);
-                } else {
-                    ratCatTheater.renderHall1(engine, -player.position);
-                    ratCatTheater.renderHall2(engine, -player.position);
-                }
-                region = textureHandler.get("game/office/cabinetLayer");
-                batch.draw(region, -player.position, 0);
-
-                if (mode == 0) candysShowdown.renderHall3(engine, -player.position);
-                else ratCatTheater.renderHall3(engine, -player.position);
-
-                region = textureHandler.get("game/office/deskLayer");
-                batch.draw(region, -player.position, 0);
-
-                if (laserPointer) {
-                    var srcFunc = batch.getBlendSrcFunc();
-                    var dstFunc = batch.getBlendDstFunc();
-                    batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
-                    FrameBufferManager.rawRender(batch, laserPointerBuffer);
-                    batch.flush();
-                    batch.setBlendFunction(srcFunc, dstFunc);
-                }
-                FrameBufferManager.end(batch, officeBuffer, 1440, 768);
-            }
-            fbo.begin();
-            float lightAlpha = (float) Math.sin(player.flashAlpha * (Math.PI / 2));
-            region = textureHandler.getRegion("game/office/lookDown", 1440, (int) player.roomFrame);
-            batch.setColor(1, 1, 1, 1);
+            region = textureHandler.get("game/office/cabinetLayer");
             batch.draw(region, -player.position, 0);
 
-            var srcFunc = batch.getBlendSrcFunc();
-            var dstFunc = batch.getBlendDstFunc();
-            batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_DST_ALPHA);
-            batch.setColor(1, 1, 1, lightAlpha);
-            FrameBufferManager.rawRender(batch, officeBuffer);
-            batch.flush();
-            batch.setColor(1, 1, 1, 1);
-            batch.setBlendFunction(srcFunc, dstFunc);
+            if (mode == 0) candysShowdown.renderHall3(engine, -player.position);
+            else ratCatTheater.renderHall3(engine, -player.position);
 
-            FrameBufferManager.end(batch, fbo, 1440, 768);
-            batch.end();
+            region = textureHandler.get("game/office/deskLayer");
+            batch.draw(region, -player.position, 0);
 
-            batch.setProjectionMatrix(CameraManager.getViewport().getCamera().combined);
-            Gdx.gl.glViewport(0, 0, window.width(), window.height());
-            batch.begin();
-
-            renderHandler.screenBuffer.begin();
-            if (perspectiveEffect && (int) player.roomFrame < 8) {
-                CameraManager.applyShader(batch);
-                CameraManager.setUniform("u_cameraX", player.position - 80);
-                CameraManager.setUniform("u_distortionAmount", 0.00125f);
+            if (laserPointer) {
+                var srcFunc = batch.getBlendSrcFunc();
+                var dstFunc = batch.getBlendDstFunc();
+                batch.setBlendFunction(GL20.GL_ZERO, GL20.GL_SRC_COLOR);
+                FrameBufferManager.rawRender(batch, laserPointerBuffer);
+                batch.flush();
+                batch.setBlendFunction(srcFunc, dstFunc);
             }
-            FrameBufferManager.rawRender(batch, fbo, 0, -24);
-            batch.setShader(null);
+            FrameBufferManager.end(batch, officeBuffer, 1440, 768);
         }
+
+        fbo.begin();
+        float lightAlpha = (float) Math.sin(player.flashAlpha * (Math.PI / 2));
+        region = textureHandler.get("game/office/officeDark");
+        batch.setColor(1, 1, 1, 1);
+        batch.draw(region, -player.position, 0);
+
+        var srcFunc = batch.getBlendSrcFunc();
+        var dstFunc = batch.getBlendDstFunc();
+        batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_DST_ALPHA);
+        batch.setColor(1, 1, 1, lightAlpha);
+        FrameBufferManager.rawRender(batch, officeBuffer);
+        batch.flush();
+        batch.setColor(1, 1, 1, 1);
+        batch.setBlendFunction(srcFunc, dstFunc);
+
+        FrameBufferManager.end(batch, fbo, 1440, 768);
+        batch.end();
+
+        batch.setProjectionMatrix(CameraManager.getViewport().getCamera().combined);
+        Gdx.gl.glViewport(0, 0, window.width(), window.height());
+        batch.begin();
+
+        renderHandler.screenBuffer.begin();
+        if (perspectiveEffect) {
+            CameraManager.applyShader(batch);
+            CameraManager.setUniform("u_cameraX", player.position - 80);
+            CameraManager.setUniform("u_distortionAmount", 0.00125f);
+        }
+
+        float multiplier = (1 + 0.075f * player.zoomFactor);
+        float distance = (1 + 0.0375f * player.zoomFactor);
+        float xDistance = 1440 - (1440 * distance);
+        float yDistance = 768 - (768 * distance);
+
+        FrameBufferManager.rawRender(batch, fbo, xDistance, -24 + yDistance, 1440 * multiplier, 768 * multiplier);
+        batch.setShader(null);
+
+        if ((int) player.roomFrame > 0){
+            region = textureHandler.getRegion("game/camera/monitor", 1088, (int) player.roomFrame - 1);
+            batch.draw(region, 192, 0);
+        }
+
+        if (player.inCamera){
+            int width = 812;
+            int height = 609;
+            int x = 234;
+            int y = 20;
+            if (player.monitor.error){
+                if (mode == 0) {
+                    batch.draw(textureHandler.get("game/enemy/penguin/glitch"), x, y, width, height);
+                    region = textureHandler.getRegion("game/gui/error", 374, 0);
+                    batch.draw(region, x + (float) width / 2 - (float) region.getRegionWidth() / 2,
+                            y + (float) height / 2 - (float) region.getRegionHeight() / 2);
+                } else batch.draw(textureHandler.get("game/enemy/rat/glitch"), x, y, width, height);
+            } else if (player.monitor.glitchCooldown > 0) {
+                region = textureHandler.getRegion("game/camera/reboot", 1024, (int) player.monitor.glitchFrame);
+                region.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
+                batch.draw(region, x, y, width, height);
+            } else if (player.signalLost > 0) {
+                region = textureHandler.getRegion("game/camera/static", 1024, (int) (6 - player.signalLost));
+                batch.draw(region, x, y, width, height);
+            } else {
+                boolean character = false;
+                if (mode == 0) character = candysShowdown.renderCamera(engine, player.monitor.activeCamera);
+                else if (mode == 1) character = ratCatTheater.renderCamera(engine, player.monitor.activeCamera);
+                if (!character) {
+                    region = textureHandler.getRegion("game/camera/cameras", 1024, player.monitor.activeCamera - 1);
+                    batch.draw(region, x, y, width, height);
+                }
+
+                srcFunc = batch.getBlendSrcFunc();
+                dstFunc = batch.getBlendDstFunc();
+                batch.setBlendFunction(GL20.GL_DST_ALPHA, GL20.GL_SRC_ALPHA);
+                region = textureHandler.getRegion("static/static1", 1024, (int) player.staticFrame);
+                batch.setColor(0.5f, 0.5f, 0.5f, 1);
+                batch.draw(region, x, y, width, height);
+                batch.setColor(1, 1, 1, 1);
+                batch.flush();
+                batch.setBlendFunction(srcFunc, dstFunc);
+            }
+
+            if (!player.monitor.error && player.monitor.glitchCooldown == 0) {
+                region = textureHandler.get("game/gui/ui");
+                batch.draw(region, x, y, width, height);
+
+                for (int i = 0; i < player.telephone.regions.length; i++) {
+                    if (player.telephone.cooldowns[i] == 0 && player.telephone.cooldownSeconds[i] == 0) {
+                        region = player.telephone.regions[i];
+                        textureHandler.setRegion(region, 32, player.telephone.status[i]);
+                        if (player.monitor.activeCamera == i + 1) batch.setColor(1, 1, 1, 1);
+                        else batch.setColor(0.6f, 0.6f, 0.6f, 1);
+                    } else {
+                        region = player.telephone.cooldownRegions[i];
+                        textureHandler.setRegion(region, 32, player.telephone.cooldownSeconds[i]);
+                        batch.setColor(0.85f, 0.85f, 0.85f, 1);
+                    }
+
+                    batch.draw(region,
+                            player.monitor.xButtonPos[i],
+                            player.monitor.yButtonPos[i]);
+                }
+
+                batch.setColor(1, 1, 1, 1);
+
+                for (int i = 0; i < player.monitor.regions.length; i++) {
+                    region = player.monitor.regions[i];
+                    textureHandler.setRegion(region, 48, player.monitor.activeCamera == i + 1 ? 1 : 0);
+                    batch.draw(region,
+                            player.monitor.xPos[i],
+                            player.monitor.yPos[i]);
+                }
+            }
+        }
+
         FrameBufferManager.end(batch, renderHandler.screenBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         float length = minuteLength * 6;
@@ -505,6 +463,15 @@ public class Game {
         var font2 = fontManager.getFont("candys2/font2");
         fontManager.setCurrentFont(font2);
         font2.setColor(0.8f, 0.8f, 0.8f, 1);
+        fontManager.setSize(24);
+        int yPosition = 618;
+        fontManager.setText("Map Radar: " + (mapDebug ? "On" : "Off"));
+        fontManager.setPosition(248, yPosition);
+//        fontManager.render(batch);
+        if (mapDebug){
+
+        }
+
         fontManager.setSize(32);
         if (infiniteNight){
             nightTimeBuilder.delete(0, nightTimeBuilder.length());

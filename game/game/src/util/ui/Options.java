@@ -18,19 +18,25 @@ public class Options {
     public final TextureRegion windowRegion;
     public float alpha;
     private int section;
+    public Button currentKeyButton;
+    public boolean keySwitching;
 
     public Options(TextureHandler textureHandler){
         var pixmap = textureHandler.loadImageBuffer("assets", "ui/window");
         windowRegion = new TextureRegion(new Texture(pixmap));
     }
 
-    public void input(InputManager input){
+    public boolean input(InputManager input){
+        if (keySwitching) return false;
+        boolean switchSection = true;
         var arrowLeft = section != 0 && input.mouseOver(60, 325, 26, 26);
         var arrowRight = section != 2 && input.mouseOver(260, 325, 26, 26);
         if (input.isLeftPressed()) {
             if (arrowLeft) section--;
             else if (arrowRight) section++;
-        }
+            else switchSection = false;
+        } else switchSection = false;
+        return switchSection;
     }
 
     public void fboDraw(Engine engine){
@@ -50,20 +56,18 @@ public class Options {
         batch.setColor(1, 1, 1, 1);
 
         var buttonsList = buttons.get(section + 1);
-        for (int i = 0; i < buttonsList.size(); i++){
-            var button = buttonsList.get(i);
-            if (section == 0 && i == 3) {
-                boolean allChallenges = buttonsList.get(0).isSelected()
-                        && buttonsList.get(1).isSelected()
-                        && buttonsList.get(2).isSelected();
-                button.render(engine, allChallenges);
-            } else button.render(engine);
+        for (Button button : buttonsList) {
+            if (!keySwitching) {
+                button.render(engine, section == 0);
+            } else {
+                button.render(engine, button.isSelected(), currentKeyButton != null && currentKeyButton == button, section == 0);
+            }
         }
 
         if (engine.game.equals("candys3")){
             engine.candys3Deluxe.setNightColor(engine, 1);
         } else {
-            batch.setColor(0.8f, 0.8f, 1, renderHandler.screenAlpha);
+            batch.setColor(0.65f, 0.65f, 0.85f, renderHandler.screenAlpha);
         }
         var region = engine.appHandler.getMenuUI().arrow;
         textureHandler.setFilter(region.getTexture());
@@ -104,7 +108,7 @@ public class Options {
                     alpha,
                     false);
         }
-        if (section == 0) fontManager.setText("Challenges");
+        if (section == 0) fontManager.setText("Keybinds");
         else if (section == 1) fontManager.setText("Cheats");
         else fontManager.setText("Options");
 
@@ -134,25 +138,8 @@ public class Options {
     }
 
     public void updateAlpha(boolean selected){
-        if (selected) alpha = Time.increaseTimeValue(alpha, 1, 4);
-        else alpha = Time.decreaseTimeValue(alpha, 0, 4);
-    }
-
-    public void updateAllChallenges(List<Button> buttonsList){
-        if (buttonsList.get(3).isSelected()) {
-            if (buttonsList.get(0).isSelected()
-                    && buttonsList.get(1).isSelected()
-                    && buttonsList.get(2).isSelected()) {
-                buttonsList.get(0).setSelected();
-                buttonsList.get(1).setSelected();
-                buttonsList.get(2).setSelected();
-            } else {
-                if (!buttonsList.get(0).isSelected()) buttonsList.get(0).setSelected();
-                if (!buttonsList.get(1).isSelected()) buttonsList.get(1).setSelected();
-                if (!buttonsList.get(2).isSelected()) buttonsList.get(2).setSelected();
-            }
-            buttonsList.get(3).setSelected();
-        }
+        if (selected) alpha = Time.increaseTimeValue(alpha, 1, 6);
+        else alpha = Time.decreaseTimeValue(alpha, 0, 6);
     }
 
     public void add(int key, String path, String text){

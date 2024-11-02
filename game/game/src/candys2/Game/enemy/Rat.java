@@ -12,6 +12,7 @@ public class Rat {
     public boolean shadow;
     public final Hitbox hitbox = new Hitbox(0);
 
+    public int side;
     public float cooldown;
     public float hallwayCooldown;
     public float telephoneCooldown;
@@ -27,7 +28,6 @@ public class Rat {
     public int flashRemaining;
     public int turns;
     public int cameraSwitches;
-    public boolean pause;
     public boolean error;
 
     public void reset(byte ai){
@@ -38,15 +38,14 @@ public class Rat {
         cameraLure = 0;
         hallPosition = 0;
         hall = false;
-        pause = false;
         hitbox.setCoord(0, 0);
+        monitorCooldown = 8 + (20 - ai);
         if (ai == 0) return;
 
         float aiCounter = 20 - ai;
         hallwayCooldown = 10 + 0.5f * aiCounter;
         cooldown = (float) (1.25f + 1 * Math.random());
         camera = (int) (1 + Math.random() * 6);
-        monitorCooldown = 8 + (20 - ai);
     }
 
     public void load(TextureHandler textureHandler, boolean shadow){
@@ -87,7 +86,7 @@ public class Rat {
         }
 
         if (monitorCooldown == 0 && turns == 0){
-            if (reactionTimer > 0 && (int) player.roomFrame == 17) reactionTimer -= Time.getDelta();
+            if (reactionTimer > 0 && player.inCamera) reactionTimer -= Time.getDelta();
             if (reactionTimer <= 0){
                 reactionTimer = 0;
                 player.monitor.error = true;
@@ -137,7 +136,9 @@ public class Rat {
                 flashRemaining--;
             }
 
-            if (player.telephone.ringing && cameraLure == player.telephone.location && flashRemaining == 0){
+            if (player.telephone.ringing && flashRemaining == 0
+                && ((side == 0 && player.telephone.location <= 3)
+                || (side == 1 && player.telephone.location > 3))){
                 telephoneCooldown -= Time.getDelta();
                 hallwayCooldown += Time.getDelta();
                 if (telephoneCooldown <= 0){
@@ -150,7 +151,7 @@ public class Rat {
                         hallPosition = 0;
                         setHitboxes();
                     }
-                    if (player.monitor.activeCamera == camera && (int) player.roomFrame == 17) player.setSignalLost();
+                    if (player.monitor.activeCamera == camera && player.inCamera) player.setSignalLost();
                 }
             } else telephoneCooldown = 2;
 
@@ -178,27 +179,21 @@ public class Rat {
             if (telephoneCooldown < 0) telephoneCooldown = 0;
 
             if (cooldown == 0) {
-                if (hallwayCooldown == 0 && pause) {
+                if (hallwayCooldown == 0) {
                     waitToMove = player.flashAlpha > 0;
                     telephoneCooldown = 2;
                     hallwayCooldown = 4 + (0.5f * aiCounter);
                     cameraLure = camera;
                     camera = 0;
                     hall = true;
-                    pause = false;
-                    flashRemaining = 1;
+                    side = (int) (Math.random() * 2);
+                    flashRemaining = 3;
                     if (!waitToMove) {
                         hallPosition++;
                         setHitboxes();
                     }
                 } else {
-                    if (hallwayCooldown == 0) {
-                        cooldown = 6;
-                        pause = true;
-                    } else {
-                        cooldown = (float) (1.25f + 1 * Math.random());
-                    }
-
+                    cooldown = (float) (1.25f + 1 * Math.random());
                     int nextCamera = camera;
                     if (camera == 1) nextCamera++;
                     else if (camera == 6) nextCamera--;
@@ -212,7 +207,7 @@ public class Rat {
                 }
 
                 if ((player.monitor.activeCamera == camera || player.monitor.activeCamera == prevCamera)
-                        && (int) player.roomFrame == 17) player.setSignalLost();
+                        && player.inCamera) player.setSignalLost();
             }
         }
     }

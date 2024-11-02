@@ -8,8 +8,6 @@ import util.*;
 public class Player {
     private final Flashlight flashlight;
     private final float shakeLimit;
-    private final int initX;
-    private final int initY;
 
     private float x;
     private float y;
@@ -36,17 +34,15 @@ public class Player {
     private float blacknessSpeed;
 
     public Player(){
-        initX = 896;
-        initY = 152;
         shakeLimit = 4;
         flashlight = new Flashlight();
     }
 
-    public void reset(){
+    public void reset(Room room){
         flashlight.setCoord(0, 0);
         flashPoints = 0;
-        x = initX;
-        y = initY;
+        x = 1536 - (float) room.width / 2;
+        y = 512 - (float) room.height / 2;
         side = 1;
         snapCooldown = 0;
         freeze = false;
@@ -69,11 +65,17 @@ public class Player {
 
     public void update(Window window, InputManager inputManager, Room room, Rat rat, Cat cat){
         if (purpleAlpha == 1 && !GameData.noJumpscares) freeze = true;
+
+        if ((room.getState() != 0 || room.getFrame() > 0) && y > 72) y = 72;
+
         if (!attack || GameData.freeScroll) {
             if (room.getFrame() == 0 && room.getState() != 2 && !freeze) {
-                x += lookMechanic(x, inputManager.getX(), (float) window.width() / 4, 1, 3, room.getBoundsX(), shakeLimit);
-                y += lookMechanic(y, inputManager.getY(), (float) window.height() / 3, 0.75f, 2, room.getBoundsY(), 0);
+                int boundsX = room.getBoundsX() - room.width;
+                int boundsY = room.getBoundsY() - room.height;
+                x += lookMechanic(x, inputManager.getX(), (float) window.width() / 4, 1, 3, boundsX, 6, shakeLimit);
+                y += lookMechanic(y, inputManager.getY(), (float) window.height() / 3, 0.75f, 2, boundsY, 5, 0);
             }
+
             snapCooldown = 0.75f;
             if (flashlight.getX() < 1024) side = 0;
             else if (flashlight.getX() >= 2048) side = 2;
@@ -82,15 +84,19 @@ public class Player {
             float targetX;
             float targetY;
             if (side == 0){
-                targetX = 16;
-                targetY = 300;
+                targetX = 656;
+                targetY = 660;
             } else if (side == 1){
-                targetX = initX;
-                targetY = 232;
+                targetX = 1536;
+                targetY = 592;
             } else {
-                targetX = 1792 - shakeLimit;
-                targetY = 304;
+                targetX = 2432;
+                targetY = 664;
             }
+            if (room.getState() == 1 && y > 72) y = 72;
+            targetX -= (float) room.width / 2;
+            targetY -= (float) room.height / 2;
+
             float distanceX = Time.convertValue(targetX - x) * 6;
             float limit = Time.convertValue(2000);
             if (distanceX > limit) distanceX = limit;
@@ -147,7 +153,7 @@ public class Player {
             blacknessAlpha = 0;
         }
 
-        if ((mouseY <= 256 || room.getState() != 0) && room.getFrame() == 0 && y == 0 && !freeze) buttonFade = Time.increaseTimeValue(buttonFade, 1, 4);
+        if ((mouseY <= 256 || room.getState() != 0) && room.getFrame() == 0 && y < 720 - room.height && !freeze) buttonFade = Time.increaseTimeValue(buttonFade, 1, 4);
         else buttonFade = Time.decreaseTimeValue(buttonFade, 0, 4);
 
         if (GameData.hardCassette) {
@@ -165,15 +171,18 @@ public class Player {
     public void adjustCamera(Room room, InputManager inputManager){
         float x = getX();
         float y = getY();
-        if (room.getState() == 2) x = 0;
-        if (room.getFrame() > 0 || room.getState() != 0) y = 0;
+        if (room.getState() == 2) {
+            x = 0;
+            y = 0;
+        }
         CameraManager.move(x, y);
-        if (!freeze) flashlight.setCoord(inputManager.getX() + x, inputManager.getY() + y);
+        if (!freeze) flashlight.setCoord(
+                (((float) room.width / CameraManager.getViewport().getWorldWidth() * inputManager.getX()) + x),
+                ((float) room.height / CameraManager.getViewport().getWorldHeight() * inputManager.getY()) + y);
     }
 
-    private float lookMechanic(float position, float mouse, float offset, float multiplier, int rightOffset, int bounds, float shakeLimit){
+    private float lookMechanic(float position, float mouse, float offset, float multiplier, int rightOffset, int bounds, float lookSpeed, float shakeLimit){
         float distance = 0;
-        float lookSpeed = 6;
         float limit = Time.convertValue(1250 * multiplier);
         if (mouse < offset * 1){
             distance = (mouse - offset * 1) * Time.convertValue(lookSpeed);

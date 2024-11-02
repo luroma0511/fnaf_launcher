@@ -19,7 +19,6 @@ public class Cat {
     public float cooldown;
     public float telephoneCooldown;
     public float deathCooldown;
-    public int switchCooldown;
     public float leaveCooldown;
     public int cameraVentCooldown;
     public float ventCooldown;
@@ -30,9 +29,8 @@ public class Cat {
         this.ai = ai;
         cameraVentCooldown = (int) (1 + Math.random() * 3);
         frame = 0;
-        cooldown = 1;
+        cooldown = 5 + 0.5f * (20 - ai);
         telephoneCooldown = 0;
-        switchCooldown = (int) (1 + Math.random() * 8);
         leaveCooldown = 0;
         vents = 0;
         camera = (int) (3 + Math.random() * 2);
@@ -60,33 +58,21 @@ public class Cat {
 
         if (vents == 0) {
             if (player.telephone.ringing && cameraVentCooldown > 0) {
-                boolean cam2Lure = camera == 1 && player.telephone.location == 2;
-                boolean cam3Lure = camera == 2 && player.telephone.location == 3;
-                boolean cam4Lure = camera == 5 && player.telephone.location == 4;
-                boolean cam5Lure = camera == 6 && player.telephone.location == 5;
-                if (player.telephone.location == camera
-                        || cam2Lure || cam3Lure
-                        || cam4Lure || cam5Lure) {
+                if (player.telephone.location == camera) {
                     telephoneCooldown += Time.getDelta();
                     cooldown += Time.getDelta();
                 } else telephoneCooldown = 0;
 
-                if (player.telephone.location == camera && telephoneCooldown >= 3) {
-                    player.telephone.destroy(soundHandler, camera);
+                if (telephoneCooldown >= 2) {
                     telephoneCooldown = 0;
-                } else if (telephoneCooldown >= 2 && (cam2Lure || cam3Lure || cam4Lure || cam5Lure)) {
-                    telephoneCooldown = 0;
-                    if (cam2Lure || cam3Lure) camera++;
-                    else camera--;
+                    if (camera <= 3) camera = 4;
+                    else camera = 3;
                     cameraVentCooldown--;
                     if ((player.monitor.activeCamera == camera || player.monitor.activeCamera == prevCamera)
-                            && (int) player.roomFrame == 17) player.setSignalLost();
-                    if (camera == 3 || camera == 4) {
-                        cooldown = 1.5f + aiCounter * 0.2f;
-                        switchCooldown = (int) (1 + Math.random() * 7);
-                    } else cooldown = 5 + aiCounter * 0.5f;
+                            && player.inCamera) player.setSignalLost();
+                    cooldown = 5 + aiCounter * 0.5f;
 
-                    if (cameraVentCooldown == 0) cooldown = 2.5f;
+                    if (cameraVentCooldown == 0) cooldown = 2.5f + 0.1f * aiCounter;
                 }
             } else telephoneCooldown = 0;
             if (cooldown != 0) return;
@@ -114,31 +100,21 @@ public class Cat {
                 return;
             }
 
-            if (switchCooldown > 0) {
-                int nextCamera = camera;
-                if (nextCamera == 3) nextCamera = 4;
-                else nextCamera = 3;
+            int nextCamera = camera;
+            if (nextCamera <= 3) nextCamera--;
+            else nextCamera++;
+            if ((nextCamera != 0 && nextCamera != 7) || !noJumpscares) {
                 camera = nextCamera;
-                switchCooldown--;
-                cooldown = 1.25f + aiCounter * 0.2f;
                 moving = true;
-            } else {
-                int nextCamera = camera;
-                if (nextCamera <= 3) nextCamera--;
-                else nextCamera++;
-                if ((nextCamera != 0 && nextCamera != 7) || !noJumpscares) {
-                    camera = nextCamera;
-                    moving = true;
-                }
-                cooldown = 5 + aiCounter * 0.5f;
-                if (camera == 0 || camera == 7) {
-                    camera = 0;
-                    player.setJumpscare("cat", 5);
-                }
+            }
+            cooldown = 5 + aiCounter * 0.5f;
+            if (camera == 0 || camera == 7) {
+                camera = 0;
+                player.setJumpscare("cat", 5);
             }
 
             if (moving && (player.monitor.activeCamera == camera || player.monitor.activeCamera == prevCamera)
-                    && (int) player.roomFrame == 17) player.setSignalLost();
+                    && player.inCamera) player.setSignalLost();
         } else {
             if (leaveCooldown > 0){
                 leaveCooldown -= Time.getDelta();
@@ -167,11 +143,7 @@ public class Cat {
                         camera = (int) (1 + Math.random() * 6);
                         prevCamera = camera;
                         if (player.monitor.activeCamera == camera) player.setSignalLost();
-                        if (camera != 3 && camera != 4) cooldown = 10;
-                        else {
-                            switchCooldown = (int) (1 + Math.random() * 7);
-                            cooldown = (float) (1.25f + 1 * Math.random());
-                        }
+                        cooldown = 5 + 0.5f * (20 - ai);
                     }
                 }
             } else if (ventCooldown > 0){
@@ -195,7 +167,7 @@ public class Cat {
                 if (ventCooldown <= 0 && !noJumpscares){
                     ventCooldown = 0;
                     deathCooldown = 8;
-                    if (camera == player.monitor.activeCamera && (int) player.roomFrame == 17) player.setSignalLost();
+                    if (camera == player.monitor.activeCamera && player.inCamera) player.setSignalLost();
                     camera = 0;
                     soundHandler.play("ventOpen");
                     soundHandler.setSoundEffect(SoundHandler.PAN, "ventOpen", camera <= 3 ? -0.5f : 0.5f, -0.25f);

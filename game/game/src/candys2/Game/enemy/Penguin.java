@@ -40,7 +40,7 @@ public class Penguin {
                 reactionTimer = 0.95f + aiCounter * 0.065f;
             }
         } else {
-            if (turns == 0 && player.roomFrame < 17){
+            if (turns == 0 && !player.inCamera){
                 cooldown = 4 + aiCounter;
                 return;
             }
