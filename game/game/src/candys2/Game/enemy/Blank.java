@@ -55,11 +55,12 @@ public class Blank {
         var chester = candysShowdown.chester;
         var penguin = candysShowdown.penguin;
 
-        while (camera == 0 && cameraTimer > 0){
+        while (camera == 0 && player.monitor.brokenCameras < 3){
             int cam = (int) (Math.random() * 6);
             if (candy.camera == cam + 1
                     || chester.camera == cam + 1
                     || prevCamera == cam + 1
+                    || player.monitor.brokenCam[cam]
                     || (player.telephone.ringing && player.telephone.location == cam + 1)) continue;
             camera = cam + 1;
         }
@@ -73,7 +74,7 @@ public class Blank {
 
         float aiCounter = 20 - ai;
 
-        if (cameraTimer > 0){
+        if (player.monitor.brokenCameras < 3){
             //camera logic
 
             if (shadow && player.monitor.switched) {
@@ -92,12 +93,13 @@ public class Blank {
                     eyeStareTimer += Time.getDelta();
                 } else if (!penguin.isBlockingView()) {
                     stareTimer += Time.getDelta();
-                    cameraTimer += Time.getDelta() * 1.5f;
+                    cameraTimer += Time.getDelta();
                     if (cameraTimer >= cameraTimerTarget) {
                         cameraTimer = cameraTimerTarget;
                     }
                 }
                 if (stareTimer >= 2) {
+                    cameraTimer = 10 + 0.5f * aiCounter;
                     stareTimer = 0;
                     prevCamera = camera;
                     camera = 0;
@@ -122,16 +124,32 @@ public class Blank {
                 telephoneCooldown += Time.getDelta();
             } else telephoneCooldown = 0;
 
-            if (eyeStareTimer >= 1 || telephoneCooldown >= 2){
+            if (telephoneCooldown >= 2){
                 telephoneCooldown = 0;
-                player.setSignalLost();
-                soundHandler.stop("shadowblank");
+                if (!player.monitor.brokenCam[player.monitor.activeCamera]) player.setSignalLost();
                 player.telephone.destroy(soundHandler, camera);
             }
 
+            if (eyeStareTimer >= 1){
+                player.setSignalLost();
+                soundHandler.stop("shadowblank");
+                player.monitor.destroy(soundHandler, camera);
+                cameraTimer = 10 + 0.5f * aiCounter;
+                stareTimer = 0;
+                prevCamera = camera;
+                camera = 0;
+            }
+
             if (cameraTimer <= 0) {
+                player.monitor.destroy(soundHandler, camera);
+                cameraTimer = 10 + 0.5f * aiCounter;
+                stareTimer = 0;
+                prevCamera = camera;
+                camera = 0;
+            }
+
+            if (player.monitor.brokenCameras == 3){
                 transitionToHall(player);
-                soundHandler.play("blank");
             }
         } else if (hallPosition > 0 && hallwayCooldown > 0){
             //hallway logic
@@ -148,11 +166,8 @@ public class Blank {
                 }
             } else {
                 if (flashRemaining == 0){
-                    hallPosition = 0;
-                    hallRender = false;
-                    cameraTimer = 10 + (20 - ai);
-                    stareTimer = 0;
-                    return;
+                    flashRemaining = 4;
+                    hallPosition--;
                 }
             }
 
@@ -172,26 +187,16 @@ public class Blank {
             }
 
             if (hallwayCooldown <= 0 && !noJumpscares) {
-                player.setJumpscare("blank", 0.5f);
                 hallwayCooldown = 0;
             }
             else if (noJumpscares) hallwayCooldown = 0.25f;
         }
-
-        if (flashRemaining == 0 && soundHandler.isPlaying("blank")){
-            hallVolume -= Time.getDelta() * 1.5f;
-            if (hallVolume <= 0) {
-                hallVolume = 0;
-                soundHandler.stop("blank");
-            }
-        }
-        soundHandler.setSoundEffect(SoundHandler.VOLUME, "blank", hallVolume * (0.1f + (0.5f * (1 - hallwayCooldown / 9))));
     }
 
     private void transitionToHall(Player player){
         camera = 0;
         hallVolume = 1;
-        flashRemaining = 6;
+        flashRemaining = 4;
         hallwayCooldown = 9;
         cameraTimer = 0;
         waitToMove = player.flashAlpha > 0;

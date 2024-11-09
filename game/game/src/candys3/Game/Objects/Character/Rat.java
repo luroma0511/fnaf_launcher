@@ -1,5 +1,6 @@
 package candys3.Game.Objects.Character;
 
+import candys3.Game.Game;
 import candys3.Game.Objects.Flashlight;
 import candys3.Game.Objects.Functions.*;
 import candys3.Game.Objects.Player;
@@ -58,14 +59,14 @@ public class Rat extends SpriteObject {
         }
     }
 
-    public boolean execute(SoundHandler soundHandler, Player player, Cat cat, Room room, boolean twitching){
+    public boolean execute(SoundHandler soundHandler, Game game, Player player, Cat cat, Room room, boolean twitching){
         var flashlight = player.getFlashlight();
-        twitching = input(soundHandler, cat, player, room, flashlight.getX(), flashlight.getY(), twitching);
-        twitching = update(soundHandler, cat, player, room, flashlight, twitching);
+        twitching = input(soundHandler, game, cat, player, room, flashlight.getX(), flashlight.getY(), twitching);
+        twitching = update(soundHandler, game, cat, player, room, flashlight, twitching);
         return twitching;
     }
 
-    private boolean input(SoundHandler soundHandler, Cat cat, Player player, Room room, float mx, float my, boolean twitching){
+    private boolean input(SoundHandler soundHandler, Game game, Cat cat, Player player, Room room, float mx, float my, boolean twitching){
         boolean hovered = hitbox.isHovered(mx, my);
         boolean imageHovered = this.mouseOverWithPanning(mx, my);
         switch (state){
@@ -83,7 +84,7 @@ public class Rat extends SpriteObject {
                 bed.input(soundHandler, player, room, imageHovered);
                 break;
             case 3:
-                if (peek.input(soundHandler, player, room, hovered, 1.25f) && type == 2) {
+                if (peek.input(soundHandler, game, player, room, hovered, 1.25f) && type == 2) {
                     transitionCooldown = 1.15f;
                     player.setBlacknessDelay(1.25f);
                     attack.stopAudio(soundHandler);
@@ -94,7 +95,7 @@ public class Rat extends SpriteObject {
         return twitching;
     }
 
-    private boolean update(SoundHandler soundHandler, Cat cat, Player player, Room room, Flashlight flashlight, boolean twitching){
+    private boolean update(SoundHandler soundHandler, Game game, Cat cat, Player player, Room room, Flashlight flashlight, boolean twitching){
         if (!hellStart && type == 2){
             soundHandler.play("get_in");
             player.setBlacknessTimes(2);
@@ -164,11 +165,11 @@ public class Rat extends SpriteObject {
                 if (((attack.getKillTimer() == 0 && attack.getReactionTimer() == 0)
                         || (cat != null && cat.getType() != 0 && ((cat.getState() == 1 && cat.getSide() == side)
                         || (attack.isAttack() && cat.getAttack().isAttack()))))
-                        && !GameData.noJumpscares){
+                        && !game.noJumpscares){
                     player.setJumpscare();
                     if (type == 0) Jumpscare.set("game/Rat/Jumpscare/room");
                     else if (type == 1) {
-                        if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Rat/Jumpscare", 0.75f);
+                        if (!game.classicJumpscares) Jumpscare.set("game/Shadow Rat/Jumpscare", 0.75f);
                         else Jumpscare.classicSet("game/Shadow Rat/Classic/Jumpscare", 1.9f, 160, 960, 20);
                     }
                     else Jumpscare.set("game/Shadow Rat/HellJumpscare");
@@ -200,11 +201,11 @@ public class Rat extends SpriteObject {
                 attack.setMoved();
                 break;
             case 2:
-                if (bed.killTime() && !GameData.noJumpscares) {
+                if (bed.killTime() && !game.noJumpscares) {
                     player.setJumpscare();
                     if (type == 0) Jumpscare.set("game/Rat/Jumpscare/bed");
                     else if (type == 1) {
-                        if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Rat/Jumpscare", 0.75f);
+                        if (!game.classicJumpscares) Jumpscare.set("game/Shadow Rat/Jumpscare", 0.75f);
                         else Jumpscare.classicSet("game/Shadow Rat/Classic/Jumpscare", 1.9f, 160, 960, 20);
                     }
                     else Jumpscare.set("game/Shadow Rat/HellJumpscare");
@@ -222,11 +223,11 @@ public class Rat extends SpriteObject {
                     } else transitionRoomState((byte) 3);
                     break;
                 }
-                if (GameData.noJumpscares) break;
+                if (game.noJumpscares) break;
                 player.setJumpscare();
                 if (type == 0) Jumpscare.set("game/Rat/Jumpscare/bed");
                 else if (type == 1) {
-                    if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Rat/Jumpscare", 0.75f);
+                    if (!game.classicJumpscares) Jumpscare.set("game/Shadow Rat/Jumpscare", 0.75f);
                     else Jumpscare.classicSet("game/Shadow Rat/Classic/Jumpscare", 1.9f, 160, 960, 20);
                 }
                 else Jumpscare.set("game/Shadow Rat/HellJumpscare");
@@ -254,11 +255,11 @@ public class Rat extends SpriteObject {
                     break;
                 }
                 if (!peek.update()) {
-                    if (peek.notKillTime() || GameData.noJumpscares) return twitching;
+                    if (peek.notKillTime() || game.noJumpscares) return twitching;
                     player.setJumpscare();
                     if (type == 0) Jumpscare.set("game/Rat/Jumpscare/bed");
                     else if (type == 1) {
-                        if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Rat/Jumpscare", 0.75f);
+                        if (!game.classicJumpscares) Jumpscare.set("game/Shadow Rat/Jumpscare", 0.75f);
                         else Jumpscare.classicSet("game/Shadow Rat/Classic/Jumpscare", 1.9f, 160, 960, 20);
                     }
                     else Jumpscare.set("game/Shadow Rat/HellJumpscare");

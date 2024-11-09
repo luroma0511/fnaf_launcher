@@ -39,7 +39,7 @@ public class Options {
         return switchSection;
     }
 
-    public void fboDraw(Engine engine){
+    public void fboDraw(Engine engine, int night){
         if (alpha == 0) return;
         var renderHandler = engine.appHandler.getRenderHandler();
         var batch = renderHandler.batch;
@@ -47,7 +47,7 @@ public class Options {
 
         fbo.begin();
         if (engine.game.equals("candys3")){
-            engine.candys3Deluxe.setNightColor(engine, 1.5f);
+            engine.candys3Deluxe.setNightColor(engine, night, 1.5f);
         } else {
             batch.setColor(0.75f, 0.75f, 1f, renderHandler.screenAlpha);
         }
@@ -58,14 +58,14 @@ public class Options {
         var buttonsList = buttons.get(section + 1);
         for (Button button : buttonsList) {
             if (!keySwitching) {
-                button.render(engine, section == 0);
+                button.render(engine, night, section == 0);
             } else {
-                button.render(engine, button.isSelected(), currentKeyButton != null && currentKeyButton == button, section == 0);
+                button.render(engine, night, button.isSelected(), currentKeyButton != null && currentKeyButton == button, section == 0);
             }
         }
 
         if (engine.game.equals("candys3")){
-            engine.candys3Deluxe.setNightColor(engine, 1);
+            engine.candys3Deluxe.setNightColor(engine, night, 1);
         } else {
             batch.setColor(0.65f, 0.65f, 0.85f, renderHandler.screenAlpha);
         }
@@ -80,7 +80,7 @@ public class Options {
         FrameBufferManager.end(batch, fbo, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
-    public void render(Engine engine){
+    public void render(Engine engine, int night){
         if (alpha == 0) return;
 
         var renderHandler = engine.appHandler.getRenderHandler();
@@ -99,11 +99,11 @@ public class Options {
         if (engine.game.equals("candys3")){
             engine.candys3Deluxe.fontAlpha(renderHandler,
                     fontManager.getFont("candys3/candysFont"),
-                    alpha,
+                    night, alpha,
                     false);
         } else {
             engine.candys2Deluxe.fontAlpha(renderHandler,
-                    fontManager.getFont("candys2/font1"),
+                    fontManager.getFont("font"),
                     0,
                     alpha,
                     false);
@@ -122,11 +122,11 @@ public class Options {
             if (engine.game.equals("candys3")){
                 engine.candys3Deluxe.fontAlpha(renderHandler,
                         fontManager.getFont("candys3/candysFont"),
-                        alpha,
+                        night, alpha,
                         false);
             } else {
                 engine.candys2Deluxe.fontAlpha(renderHandler,
-                        fontManager.getFont("candys2/font1"),
+                        fontManager.getFont("font"),
                         0,
                         alpha,
                         false);
@@ -155,6 +155,10 @@ public class Options {
 
     public void remove(int key){
         buttons.remove(key);
+    }
+
+    public void clear(){
+        buttons.clear();
     }
 
     public int getSection() {

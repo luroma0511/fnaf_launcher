@@ -9,12 +9,14 @@ public class MenuUI {
     public final TextureRegion play;
     public final TextureRegion options;
     public final TextureRegion checkbox;
+    public final TextureRegion back;
 
     public MenuUI(TextureHandler textureHandler){
         arrow = loadUI(textureHandler, "arrow");
         play = loadUI(textureHandler, "play");
         options = loadUI(textureHandler, "options");
         checkbox = loadUI(textureHandler, "checkbox");
+        back = loadUI(textureHandler, "back");
     }
 
     private TextureRegion loadUI(TextureHandler textureHandler, String path){
@@ -28,5 +30,6 @@ public class MenuUI {
         play.getTexture().dispose();
         options.getTexture().dispose();
         checkbox.getTexture().dispose();
+        back.getTexture().dispose();
     }
 }

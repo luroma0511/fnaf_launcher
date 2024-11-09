@@ -1,6 +1,5 @@
 package util.ui;
 
-import candys3.GameData;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -36,7 +35,7 @@ public class Star extends SpriteObject {
         return inputManager.isLeftPressed();
     }
 
-    public void renderCandys3(TextureHandler textureHandler, SpriteBatch batch, FrameBuffer rainbowFrameBuffer, boolean achieved, boolean rainbow){
+    public void renderCandys3(TextureHandler textureHandler, SpriteBatch batch, FrameBuffer rainbowFrameBuffer, int night, boolean achieved, boolean rainbow){
         TextureRegion textureRegion = textureHandler.get("menu/" + getPath());
         textureHandler.setFilter(textureRegion.getTexture());
         if (rainbow) {
@@ -50,7 +49,7 @@ public class Star extends SpriteObject {
                     rainbowRegion.getRegionHeight() / multiplier);
             return;
         } else if (!achieved) batch.setColor(0.5f, 0.5f, 0.5f, 0.5f);
-        else if (GameData.night == 2 || text.isEmpty()) batch.setColor(1, 0, 0, 1);
+        else if (night == 2 || text.isEmpty()) batch.setColor(1, 0, 0, 1);
         else if (getPath().equals("star")) batch.setColor(1, 1, 0, 1);
         else batch.setColor(1, 0.25f, 1, 1);
         batch.draw(textureRegion, getX(), getY(), getWidth(), getHeight());

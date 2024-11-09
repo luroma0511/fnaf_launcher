@@ -149,7 +149,7 @@ public class Player {
 
             if (signalLost > 0){
                 if (signalLost == 6.99f) soundHandler.play("signalLost");
-                signalLost -= Time.getDelta() * 45;
+                signalLost -= Time.getDelta() * 30;
                 if (signalLost <= 0) signalLost = 0;
             }
         }

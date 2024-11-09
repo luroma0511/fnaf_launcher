@@ -1,12 +1,9 @@
 package util.ui;
 
-import candys3.GameData;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import core.Engine;
 import util.InputManager;
 import util.SpriteObject;
-import util.TextureHandler;
 import util.Time;
 
 public class Button extends SpriteObject {
@@ -56,11 +53,11 @@ public class Button extends SpriteObject {
         selected = cond;
     }
 
-    public void render(Engine engine, boolean exclamation){
-        render(engine, selected, hovered, exclamation);
+    public void render(Engine engine, int night, boolean exclamation){
+        render(engine, night, selected, hovered, exclamation);
     }
 
-    public void render(Engine engine, boolean cond, boolean hovered, boolean exclamation){
+    public void render(Engine engine, int night, boolean cond, boolean hovered, boolean exclamation){
         TextureRegion region;
         var textureHandler = engine.appHandler.getTextureHandler();
         var batch = engine.appHandler.getRenderHandler().batch;
@@ -71,10 +68,10 @@ public class Button extends SpriteObject {
         } else region = textureHandler.getRegion(menuUI.checkbox, 84, 0);
         if (hovered) batch.setColor(1, 1, 1, 1);
         else if (engine.game.equals("candys3")) {
-            if (GameData.night == 1) {
+            if (night == 1) {
                 if (cond) batch.setColor(0.85f, 0.7f, 1, 1);
                 else batch.setColor(0.5f, 0, 1, 1);
-            } else if (GameData.night == 2) {
+            } else if (night == 2) {
                 if (cond) batch.setColor(1, 0.7f, 0.7f, 1);
                 else batch.setColor(1, 0, 0, 1);
             } else {

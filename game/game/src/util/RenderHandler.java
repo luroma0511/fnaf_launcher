@@ -48,7 +48,8 @@ public class RenderHandler {
         lock = !appHandler.getTextureHandler().queue.isEmpty();
         if (!lock) return false;
         Time.lock = true;
-        appHandler.getTextureHandler().load("assets/" + game);
+        if (game.isEmpty()) appHandler.getTextureHandler().load("assets");
+        else appHandler.getTextureHandler().load("assets/" + game);
         return true;
     }
 

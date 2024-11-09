@@ -5,33 +5,38 @@ import candys3.Candys3Deluxe;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.ScreenUtils;
+import title.TitleScreen;
 import util.deluxe.*;
 import util.*;
+import util.discord.Discord;
 import util.error.GameError;
 import util.gamejolt.GamejoltManager;
 import util.gamejolt.GamejoltTrophyUI;
+import util.ui.Options;
 
 public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
     public final AppHandler appHandler;
     private GameError gameError;
+    public TitleScreen titleScreen;
     public Candys2Deluxe candys2Deluxe;
     public Candys3Deluxe candys3Deluxe;
+    public Options options;
 
-    public final String game;
-    public final String version = "v1.1.4";
+    public String game = "";
+    public final String version = "v1.2.0";
     public final CandysUser user;
     public final CandysJSONHandler jsonHandler;
     public final GamejoltManager gamejoltManager;
     public final GamejoltTrophyUI gamejoltTrophyUI;
     public final DeluxeGuestStoreTable scoreTable;
+    public final Discord discord = new Discord();
 
     public Engine(int width, int height, String[] arg){
         appHandler = new AppHandler(width, height);
         jsonHandler = new CandysJSONHandler();
-        game = arg[1];
 
-        if (arg[0].equals("Guest")){
-            user = new CandysUser(arg[0]);
+        if (arg.length == 0){
+            user = new CandysUser("Guest");
             gamejoltManager = null;
             gamejoltTrophyUI = null;
 
@@ -71,7 +76,6 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
 
     @Override
     public void create(){
-
         if (gamejoltManager != null) {
             gamejoltManager.initialize();
             gamejoltManager.execute(() -> {
@@ -99,8 +103,11 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
             });
         }
         appHandler.init();
-        if (game.equals("candys2")) candys2Deluxe = new Candys2Deluxe(this);
-        if (game.equals("candys3")) candys3Deluxe = new Candys3Deluxe(this);
+        appHandler.getFontManager().addFont("font");
+        options = new Options(appHandler.getTextureHandler());
+        titleScreen = new TitleScreen(this);
+        candys2Deluxe = new Candys2Deluxe(this, options);
+        candys3Deluxe = new Candys3Deluxe(this, options);
     }
 
     @Override
@@ -113,22 +120,25 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
     @Override
     public void render(){
         Time.update();
-        boolean lock = (candys2Deluxe != null && candys2Deluxe.menu.options != null && candys2Deluxe.menu.options.keySwitching)
-                || (candys3Deluxe != null && candys3Deluxe.getMenu().options != null && candys3Deluxe.getMenu().options.keySwitching);
+        boolean lock = options != null && options.keySwitching;
         if (!lock) appHandler.getInput().fullscreen(appHandler.window, user);
+
+        discord.update();
 
         try {
             if (gameError == null) {
-                if (candys2Deluxe != null) candys2Deluxe.update(this);
-                else if (candys3Deluxe != null) candys3Deluxe.update(this);
+                if (game.equals("candys2")) candys2Deluxe.update(this);
+                else if (game.equals("candys3")) candys3Deluxe.update(this);
+                else titleScreen.update(this);
             }
 
             if (appHandler.getRenderHandler().requests(appHandler, game)) appHandler.getInput().setLock();
             appHandler.getRenderHandler().viewportAdjust(appHandler.getInput());
 
             if (gameError == null) {
-                if (candys2Deluxe != null) candys2Deluxe.render(this);
-                else if (candys3Deluxe != null) candys3Deluxe.render(this);
+                if (game.equals("candys2")) candys2Deluxe.render(this);
+                else if (game.equals("candys3")) candys3Deluxe.render(this);
+                else titleScreen.render(this);
             } else {
                 var fontManager = appHandler.getFontManager();
                 var renderHandler = appHandler.getRenderHandler();
@@ -149,7 +159,7 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
                 FrameBufferManager.render(batch, renderHandler.screenBuffer, true);
 
                 if (gameError.font == null) {
-                    if (game.equals("candys2")) gameError.font = fontManager.getFont("candys2/font1");
+                    if (game.equals("candys2")) gameError.font = fontManager.getFont("font");
                     else gameError.font = fontManager.getFont("candys3/captionFont");
                 }
                 fontManager.setCurrentFont(gameError.font);
@@ -176,8 +186,8 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
             }
         } catch (Exception e) {
             gameError = new GameError(e);
-            if (candys2Deluxe != null) candys2Deluxe.setState(0);
-            else if (candys3Deluxe != null) candys3Deluxe.setState(0);
+            if (game.equals("candys2")) candys2Deluxe.setState(0);
+            else if (game.equals("candys3")) candys3Deluxe.setState(0);
             appHandler.soundHandler.stopAllSounds();
             appHandler.getRenderHandler().batchEnd();
         }
@@ -187,8 +197,8 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
     @Override
     public void dispose(){
         if (gamejoltManager != null) gamejoltManager.dispose();
-        if (candys2Deluxe != null) candys2Deluxe.dispose();
-        if (candys3Deluxe != null) candys3Deluxe.dispose();
+        candys2Deluxe.dispose();
+        candys3Deluxe.dispose();
         VideoManager.dispose();
         appHandler.dispose();
     }

@@ -13,6 +13,9 @@ public class Monitor {
     public float glitchCooldown;
     public float glitchFrame;
     public boolean error;
+    public int brokenCameras;
+
+    public boolean[] brokenCam = new boolean[6];
 
     public int[] xPos = new int[]{
             746, 729, 781, 844, 926, 965
@@ -82,6 +85,12 @@ public class Monitor {
         if (glitchCooldown > 0) return;
         glitchCooldown = 0;
         soundHandler.play("phoneBeep");
+    }
+
+    public void destroy(SoundHandler soundHandler, int location){
+        brokenCam[location - 1] = true;
+        soundHandler.play("camBreak");
+        brokenCameras++;
     }
 
     public void dispose(){

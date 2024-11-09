@@ -1,8 +1,8 @@
 package candys3.Game.Objects;
 
+import candys3.Game.Game;
 import candys3.Game.Objects.Character.Cat;
 import candys3.Game.Objects.Character.Rat;
-import candys3.GameData;
 import util.*;
 
 public class Player {
@@ -63,12 +63,12 @@ public class Player {
         jumpscare = false;
     }
 
-    public void update(Window window, InputManager inputManager, Room room, Rat rat, Cat cat){
-        if (purpleAlpha == 1 && !GameData.noJumpscares) freeze = true;
+    public void update(Game game, Window window, InputManager inputManager, Room room, Rat rat, Cat cat){
+        if (purpleAlpha == 1 && !game.noJumpscares) freeze = true;
 
         if ((room.getState() != 0 || room.getFrame() > 0) && y > 72) y = 72;
 
-        if (!attack || GameData.freeScroll) {
+        if (!attack || game.freeScroll) {
             if (room.getFrame() == 0 && room.getState() != 2 && !freeze) {
                 int boundsX = room.getBoundsX() - room.width;
                 int boundsY = room.getBoundsY() - room.height;
@@ -140,7 +140,7 @@ public class Player {
         } else if (shakeX != 0) shakeX = 0;
     }
 
-    public void updateEffects(Room room, SoundHandler soundHandler){
+    public void updateEffects(Game game, Room room, SoundHandler soundHandler){
         float mouseY = flashlight.getY();
         if (!attack) overlayFade = Time.decreaseTimeValue(overlayFade, 0, 0.2f);
         else if (overlayFade != 1) overlayFade = 1;
@@ -156,7 +156,7 @@ public class Player {
         if ((mouseY <= 256 || room.getState() != 0) && room.getFrame() == 0 && y < 720 - room.height && !freeze) buttonFade = Time.increaseTimeValue(buttonFade, 1, 4);
         else buttonFade = Time.decreaseTimeValue(buttonFade, 0, 4);
 
-        if (GameData.hardCassette) {
+        if (game.hardCassette) {
             if (room.isMusicPlaying() || (jumpscare && blacknessTimes == 0)) {
                 purpleSpeed = 0;
                 purpleAlpha = Time.decreaseTimeValue(purpleAlpha, 0, 3);

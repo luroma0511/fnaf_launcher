@@ -1,7 +1,7 @@
 package candys3.Game.Objects.Character;
 
 import candys3.Game.Game;
-import candys3.GameData;
+import candys3.Menu.Menu;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -13,18 +13,18 @@ public class Characters {
     private Rat rat;
     private Cat cat;
 
-    public void ratCatLoad(TextureHandler textureHandler){
-        if (GameData.ratAI != 0 || GameData.night == 2) {
-            rat = new Rat(GameData.night);
+    public void ratCatLoad(TextureHandler textureHandler, Menu menu){
+        if (menu.rat.getAi() != 0 || menu.night == 2) {
+            rat = new Rat((byte) menu.night);
             textureHandler.addImages("game/" + rat.getName() + "/", "candys3/game/textures/characters/common.txt");
             textureHandler.addImages("game/" + rat.getName() + "/", "candys3/game/textures/characters/rat.txt");
             if (rat.getType() == 1) textureHandler.add("game/Shadow Rat/Classic/Jumpscare");
         } else {
             rat = null;
         }
-        if (GameData.catAI != 0 || GameData.night == 2) {
-            cat = new Cat(GameData.night);
-            if (GameData.night == 0) {
+        if (menu.cat.getAi() != 0 || menu.night == 2) {
+            cat = new Cat((byte) menu.night);
+            if (menu.night == 0) {
                 textureHandler.addImages("game/Cat/", "candys3/game/textures/characters/common.txt");
                 textureHandler.addImages("game/Cat/", "candys3/game/textures/characters/cat.txt");
             } else {
@@ -36,15 +36,15 @@ public class Characters {
         }
     }
 
-    public void reset(){
-        if (rat != null) rat = new Rat(GameData.night);
-        if (cat != null) cat = new Cat(GameData.night);
+    public void reset(int night){
+        if (rat != null) rat = new Rat((byte) night);
+        if (cat != null) cat = new Cat((byte) night);
     }
 
-    public void update(SoundHandler soundHandler, Player player, Room room){
+    public void update(SoundHandler soundHandler, Game game, Player player, Room room){
         boolean twitch = false;
-        if (rat != null) twitch = rat.execute(soundHandler, player, cat, room, false);
-        if (cat != null) twitch = cat.execute(soundHandler, player, rat, room, twitch);
+        if (rat != null) twitch = rat.execute(soundHandler, game, player, cat, room, false);
+        if (cat != null) twitch = cat.execute(soundHandler, game, player, rat, room, twitch);
         if (twitch && !soundHandler.isPlaying("twitch")){
             soundHandler.play("twitch");
             soundHandler.setSoundEffect(soundHandler.LOOP, "twitch", 1);
@@ -140,8 +140,8 @@ public class Characters {
         }
     }
 
-    private void flashDebug(RenderHandler renderHandler, Window window, float attackHealth, byte type){
-        if (!GameData.flashDebug) return;
+    private void flashDebug(RenderHandler renderHandler, Window window, boolean flashDebug, float attackHealth, byte type){
+        if (!flashDebug) return;
         renderHandler.shapeDrawer.setColor(0.2f, 0.2f, 0.2f, 1);
         renderHandler.shapeDrawer.filledRectangle(
                 (float) window.width() / 4 + CameraManager.getX(),
@@ -159,8 +159,8 @@ public class Characters {
                 50);
     }
 
-    private void hitboxDebug(RenderHandler renderHandler, Hitbox hitbox){
-        if (!GameData.hitboxDebug || hitbox.size == 0) return;
+    private void hitboxDebug(RenderHandler renderHandler, Hitbox hitbox, boolean hitboxDebug){
+        if (!hitboxDebug || hitbox.size == 0) return;
         renderHandler.shapeDrawer.setColor(1, 1, 1, 1);
         renderHandler.shapeDrawer.filledCircle(
                 hitbox.getX(),
@@ -168,7 +168,7 @@ public class Characters {
                 hitbox.size);
     }
 
-    public void debug(SpriteBatch batch, RenderHandler renderHandler, Window window, Player player, Room room) {
+    public void debug(SpriteBatch batch, RenderHandler renderHandler, Window window, boolean flashDebug, boolean hitboxDebug, Player player, Room room) {
         if (player.isJumpscare()) return;
         boolean roomView = room.getState() == 0 && room.getFrame() == 0;
 
@@ -177,7 +177,7 @@ public class Characters {
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
         renderHandler.drawScreen();
         if (rat != null && player.getSide() == rat.getSide() && roomView) {
-            hitboxDebug(renderHandler, rat.getHitbox());
+            hitboxDebug(renderHandler, rat.getHitbox(), hitboxDebug);
         }
         FrameBufferManager.end(batch, Game.ratDebugBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
@@ -186,15 +186,15 @@ public class Characters {
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
         renderHandler.drawScreen();
         if (cat != null && player.getSide() == cat.getSide() && roomView) {
-            hitboxDebug(renderHandler, cat.getHitbox());
+            hitboxDebug(renderHandler, cat.getHitbox(), hitboxDebug);
         }
         FrameBufferManager.end(batch, Game.catDebugBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         if (rat != null && rat.getAttack().isAttack()) {
-            flashDebug(renderHandler, window, rat.getAttack().getKillTimer() / 2, rat.getType());
+            flashDebug(renderHandler, window, flashDebug, rat.getAttack().getKillTimer() / 2, rat.getType());
         }
         if (cat != null && cat.getAttack().isAttack()) {
-            flashDebug(renderHandler, window, cat.getAttack().getKillTimer() / 2, cat.getType());
+            flashDebug(renderHandler, window, flashDebug, cat.getAttack().getKillTimer() / 2, cat.getType());
         }
     }
 

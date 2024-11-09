@@ -7,16 +7,17 @@ import candys3.Game.Game;
 import candys3.Win.Win;
 import candys3.Menu.Menu;
 import util.*;
+import util.ui.Options;
 
 public class Candys3Deluxe extends StateManager {
     private final Game game;
     private final Menu menu;
     private final Win win;
 
-    public Candys3Deluxe(Engine engine){
+    public Candys3Deluxe(Engine engine, Options options){
         super();
         game = new Game();
-        menu = new Menu();
+        menu = new Menu(options);
         win = new Win();
         engine.appHandler.getFontManager().addFont("candys3/candysFont");
         engine.appHandler.getFontManager().addFont("candys3/captionFont");
@@ -32,7 +33,7 @@ public class Candys3Deluxe extends StateManager {
         }
 
         if (sameStates()) return;
-        if (getState() == 0) menu.load(engine);
+        if (getState() == 0) menu.load(engine, true);
         else if (getState() == 1) game.reset(engine.appHandler.getRenderHandler());
         else win.load(engine.appHandler.soundHandler, engine.appHandler.getTextureHandler());
         transitionState();
@@ -98,19 +99,19 @@ public class Candys3Deluxe extends StateManager {
         return win;
     }
 
-    public void fontAlpha(RenderHandler renderHandler, BitmapFont font, float alpha, boolean tweak){
+    public void fontAlpha(RenderHandler renderHandler, BitmapFont font, int night, float alpha, boolean tweak){
         if (tweak) alpha = 0.5f + alpha / 2;
-        if (GameData.night == 0) font.setColor(0.85f, 0, 0.5f, alpha * renderHandler.screenAlpha);
-        else if (GameData.night == 1) font.setColor(0.5f, 0, 1, alpha * renderHandler.screenAlpha);
+        if (night == 0) font.setColor(0.85f, 0, 0.5f, alpha * renderHandler.screenAlpha);
+        else if (night == 1) font.setColor(0.5f, 0, 1, alpha * renderHandler.screenAlpha);
         else font.setColor(1, 0, 0, alpha * renderHandler.screenAlpha);
     }
 
-    public void setNightColor(Engine engine, float divider){
+    public void setNightColor(Engine engine, int night, float divider){
         var renderHandler = engine.appHandler.getRenderHandler();
         var batch = renderHandler.batch;
 
-        if (GameData.night == 2) batch.setColor((float) 1 / divider, 0, 0, renderHandler.screenAlpha);
-        else if (GameData.night == 1) batch.setColor(0.5f / divider, 0, (float) 1 / divider, renderHandler.screenAlpha);
+        if (night == 2) batch.setColor((float) 1 / divider, 0, 0, renderHandler.screenAlpha);
+        else if (night == 1) batch.setColor(0.5f / divider, 0, (float) 1 / divider, renderHandler.screenAlpha);
         else batch.setColor(0.85f / divider, 0, 0.5f / divider, renderHandler.screenAlpha);
     }
 

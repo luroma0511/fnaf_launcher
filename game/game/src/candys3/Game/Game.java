@@ -36,6 +36,21 @@ public class Game {
     public boolean loaded;
     public boolean loadingBegun;
 
+    public int night;
+    public boolean laserVision;
+    public boolean laserPointer;
+    public boolean hardCassette;
+
+    public boolean flashDebug;
+    public boolean hitboxDebug;
+    public boolean noJumpscares;
+    public boolean expandedVision;
+
+    public boolean freeScroll;
+    public boolean infiniteNight;
+    public boolean perspectiveEffect;
+    public boolean classicJumpscares;
+
     public static FrameBuffer lightBuffer;
     public static FrameBuffer roomBuffer;
     public static FrameBuffer ratDebugBuffer;
@@ -56,17 +71,37 @@ public class Game {
     public void load(Engine engine){
         var textureHandler = engine.appHandler.getTextureHandler();
         var soundHandler = engine.appHandler.soundHandler;
-
+        var menu = engine.candys3Deluxe.getMenu();
+        
         if (loadingBegun) return;
         loaded = false;
         loadingBegun = true;
         retry = false;
-        characters.ratCatLoad(textureHandler);
+        night = menu.night;
+        laserVision = menu.laserVisionButton.isSelected();
+        laserPointer = menu.laserPointerButton.isSelected();
+        hardCassette = menu.hardCassetteButton.isSelected();
+
+        GameData.hitboxMultiplier = laserPointer ? 0.75f : 1;
+
+        var cheats = menu.options.get(2);
+        flashDebug = cheats.get(0).isSelected();
+        hitboxDebug = cheats.get(1).isSelected();
+        noJumpscares = cheats.get(2).isSelected();
+        expandedVision = cheats.get(3).isSelected();
+
+        var options = menu.options.get(3);
+        freeScroll = options.get(0).isSelected();
+        infiniteNight = options.get(1).isSelected();
+        perspectiveEffect = options.get(2).isSelected();
+        classicJumpscares = options.get(3).isSelected();
+        
+        characters.ratCatLoad(textureHandler, menu);
         room.load(textureHandler);
         CameraManager.initShader("perspective");
         textureHandler.add("Static/Static");
         textureHandler.addImages("game/", "candys3/game/textures/game.txt");
-        if (GameData.night != 2) textureHandler.add("game/BattleOverlay");
+        if (night != 2) textureHandler.add("game/BattleOverlay");
         else textureHandler.add("game/HellOverlay");
         for (int i = 1; i <= 11; i++){
             textureHandler.add("game/Moving/Turn Back/Moving" + i);
@@ -78,8 +113,8 @@ public class Game {
     }
 
     public void reset(RenderHandler renderHandler){
-        characters.reset();
-        room.reset();
+        characters.reset(night);
+        room.reset(hardCassette);
         player.reset(room);
         Jumpscare.reset();
         nightTime = 0;
@@ -119,32 +154,32 @@ public class Game {
             if (player.isAttack() || player.isJumpscare()) scoreAlpha = Time.increaseTimeValue(scoreAlpha, 1, 4);
             else scoreAlpha = Time.decreaseTimeValue(scoreAlpha, 0, 2);
             if (!player.isJumpscare()) {
-                player.update(window, input, room, characters.getRat(), characters.getCat());
-                if (player.getY() < 720 - room.height) room.input(engine, player);
-                room.update(soundHandler, player);
-                characters.update(soundHandler, player, room);
-                if (!GameData.hardCassette && room.isMusicPlaying()) fastNightTime = Time.increaseTimeValue(fastNightTime, nightTimeLength / 2, 1);
+                player.update(this, window, input, room, characters.getRat(), characters.getCat());
+                if (player.getY() < 720 - room.height) room.input(engine, this, player);
+                room.update(soundHandler, this, player);
+                characters.update(soundHandler, this, player, room);
+                if (!hardCassette && room.isMusicPlaying()) fastNightTime = Time.increaseTimeValue(fastNightTime, nightTimeLength / 2, 1);
                 nightTime = Time.increaseTimeValue(nightTime, Integer.MAX_VALUE, 1);
             }
 
-            boolean cheating = GameData.flashDebug || GameData.hitboxDebug || GameData.noJumpscares
-                    || (GameData.expandedVision && !GameData.laserVision)
+            boolean cheating = flashDebug || hitboxDebug || noJumpscares
+                    || (expandedVision && !laserVision)
                     || characters.getRat() == null || characters.getCat() == null;
 
             Candys3Data data = engine.user.candys3Data;
 
             if (player.isJumpscare() && modifySave){
                 if (!cheating) {
-                    if (GameData.night == 0) writeStars(engine, data.mainCastStars, false);
-                    else if (GameData.night == 1) writeStars(engine, data.shadowCastStars, false);
+                    if (night == 0) writeStars(engine, data.mainCastStars, false);
+                    else if (night == 1) writeStars(engine, data.shadowCastStars, false);
                     else writeStars(engine, data.hellCastStars, false);
                     writeScore(engine);
                 }
                 modifySave = false;
             }
-            player.updateEffects(room, soundHandler);
+            player.updateEffects(this, room, soundHandler);
             if (nightTime + fastNightTime < nightTimeLength || !modifySave) return;
-            if (!GameData.infiniteNight) {
+            if (!infiniteNight) {
                 engine.candys3Deluxe.setState(2);
                 engine.appHandler.getTextureHandler().dispose();
                 room.stopMusic();
@@ -154,53 +189,53 @@ public class Game {
 
             if (cheating) return;
 
-            if (!GameData.infiniteNight) characters.dispose();
+            if (!infiniteNight) characters.dispose();
 
             StarData[] starData;
 
-            if (GameData.night == 0) starData = data.mainCastStars;
-            else if (GameData.night == 1) starData = data.shadowCastStars;
+            if (night == 0) starData = data.mainCastStars;
+            else if (night == 1) starData = data.shadowCastStars;
             else starData = data.hellCastStars;
 
             boolean gamejoltExists = writeStars(engine, starData, true);
 
             writeScore(engine);
 
-            if (!gamejoltExists) return;
+            if (!gamejoltExists || engine.gamejoltManager == null) return;
 
             String trophyID;
-            if (GameData.night == 0 && room.getTapePlayAchievement() < 1) engine.gamejoltManager.trophy.addID("233858");
+            if (night == 0 && room.getTapePlayAchievement() < 1) engine.gamejoltManager.trophy.addID("233858");
 
-            if (GameData.hitboxMultiplier < 1 && GameData.laserVision && GameData.hardCassette) {
-                if (GameData.night == 0) trophyID = "233026";
-                else if (GameData.night == 1) trophyID = "233090";
+            if (laserPointer && laserVision && hardCassette) {
+                if (night == 0) trophyID = "233026";
+                else if (night == 1) trophyID = "233090";
                 else trophyID = "233887";
                 engine.gamejoltManager.trophy.addID(trophyID);
             }
 
-            if (GameData.hitboxMultiplier < 1) {
-                if (GameData.night == 0) trophyID = "233023";
-                else if (GameData.night == 1) trophyID = "233088";
+            if (laserPointer) {
+                if (night == 0) trophyID = "233023";
+                else if (night == 1) trophyID = "233088";
                 else trophyID = "233885";
                 engine.gamejoltManager.trophy.addID(trophyID);
             }
 
-            if (GameData.hardCassette) {
-                if (GameData.night == 0) trophyID = "233024";
-                else if (GameData.night == 1) trophyID = "233089";
+            if (hardCassette) {
+                if (night == 0) trophyID = "233024";
+                else if (night == 1) trophyID = "233089";
                 else trophyID = "233886";
                 engine.gamejoltManager.trophy.addID(trophyID);
             }
 
-            if (GameData.laserVision) {
-                if (GameData.night == 0) trophyID = "245016";
-                else if (GameData.night == 1) trophyID = "245017";
+            if (laserVision) {
+                if (night == 0) trophyID = "245016";
+                else if (night == 1) trophyID = "245017";
                 else trophyID = "245018";
                 engine.gamejoltManager.trophy.addID(trophyID);
             }
 
-            if (GameData.night == 0) trophyID = "232928";
-            else if (GameData.night == 1) trophyID = "233087";
+            if (night == 0) trophyID = "232928";
+            else if (night == 1) trophyID = "233087";
             else trophyID = "233884";
             engine.gamejoltManager.trophy.addID(trophyID);
             modifySave = false;
@@ -232,11 +267,11 @@ public class Game {
         batch.enableBlending();
         renderHandler.batchBegin();
 
-        if (GameData.hitboxDebug || GameData.flashDebug){
-            characters.debug(batch, engine.appHandler.getRenderHandler(), engine.appHandler.window, player, room);
+        if (hitboxDebug || flashDebug){
+            characters.debug(batch, engine.appHandler.getRenderHandler(), engine.appHandler.window, flashDebug, hitboxDebug, player, room);
         }
 
-        room.render(engine, characters, player.getFlashlight());
+        room.render(engine, characters, player.getFlashlight(), this);
 
         if (player.getOverlayAlpha() > 0) {
             int srcFunc = batch.getBlendSrcFunc();
@@ -244,10 +279,10 @@ public class Game {
             //DON'T CHANGE THIS!!!
             batch.setBlendFunction(GL20.GL_SRC_COLOR, GL20.GL_DST_ALPHA);
             TextureRegion region;
-            if (GameData.night != 2) region = textureHandler.get("game/BattleOverlay");
+            if (night != 2) region = textureHandler.get("game/BattleOverlay");
             else region = textureHandler.get("game/HellOverlay");
-            if (GameData.night == 0) batch.setColor(player.getOverlayAlpha() * 0.85f, 0, player.getOverlayAlpha() * 0.5f, 1);
-            else if (GameData.night == 1) batch.setColor(player.getOverlayAlpha() * 0.75f, 0, player.getOverlayAlpha(), 1);
+            if (night == 0) batch.setColor(player.getOverlayAlpha() * 0.85f, 0, player.getOverlayAlpha() * 0.5f, 1);
+            else if (night == 1) batch.setColor(player.getOverlayAlpha() * 0.75f, 0, player.getOverlayAlpha(), 1);
             else batch.setColor(player.getOverlayAlpha(), player.getOverlayAlpha(), player.getOverlayAlpha(), 1);
             batch.draw(region, CameraManager.getX(), CameraManager.getY(), 1280, 720);
             batch.setColor(1, 1, 1, 1);
@@ -303,7 +338,7 @@ public class Game {
         FrameBufferManager.end(batch, renderHandler.screenBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         FrameBufferManager.render(batch, renderHandler.screenBuffer, true);
 
-        if (GameData.hitboxDebug) {
+        if (hitboxDebug) {
             int srcFunc = batch.getBlendSrcFunc();
             int dstFunc = batch.getBlendDstFunc();
             //DON'T CHANGE THIS!!!
@@ -334,7 +369,7 @@ public class Game {
         fontManager.setSize(40);
         candysFont.setColor(1, 1, 1, 1);
         nightTimeBuilder.delete(0, nightTimeBuilder.length());
-        if (GameData.infiniteNight) {
+        if (infiniteNight) {
             int hour = (int) nightTime / 60;
             nightTimeBuilder.append(hour).append(":");
             int tempTime = (int) (nightTime % 60);
@@ -346,37 +381,37 @@ public class Game {
             nightTimeBuilder.append(hour).append(" AM");
         }
         fontManager.setText(nightTimeBuilder.toString());
-        fontManager.setOutline(0.35f);
+        fontManager.setOutlineLength(0.35f);
         fontManager.setRelativePosition(
                 window.width() - fontManager.getLayout().width - 20,
                 window.height() - fontManager.getLayout().height + 8);
         fontManager.render(batch);
-        fontManager.setOutline(0.5f);
+        fontManager.setOutlineLength(0.5f);
 
-        engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, scoreAlpha, false);
+        engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, night, scoreAlpha, false);
         fontManager.setText("Score: " + player.getFlashPoints());
 
-        fontManager.setOutline(0.25f);
-        if (GameData.night != 1) fontManager.setColor(0.2f, 0, 0, scoreAlpha);
-        else fontManager.setColor(0.1f, 0, 0.2f, scoreAlpha);
+        fontManager.setOutlineLength(0.25f);
+        if (night != 1) fontManager.setOutlineColor(0.2f, 0, 0, scoreAlpha);
+        else fontManager.setOutlineColor(0.1f, 0, 0.2f, scoreAlpha);
         fontManager.setRelativePosition(20, window.height() - fontManager.getLayout().height + 8);
         fontManager.render(batch);
-        fontManager.setOutline(0.5f);
-        fontManager.setColor(0, 0, 0, 1);
+        fontManager.setOutlineLength(0.5f);
+        fontManager.setOutlineColor(0, 0, 0, 1);
 
-        if (!GameData.flashDebug && !GameData.hitboxDebug && !GameData.noJumpscares
-            && (!GameData.expandedVision || GameData.hitboxMultiplier != 1)) return;
+        if (!flashDebug && !hitboxDebug && !noJumpscares
+            && (!expandedVision || laserPointer)) return;
         fontManager.setSize(24);
         candysFont.setColor(1, 0, 0, 1);
         fontManager.setText("Cheats on!");
-        fontManager.setOutline(0.25f);
-        fontManager.setColor(0.15f, 0, 0, 1);
+        fontManager.setOutlineLength(0.25f);
+        fontManager.setOutlineColor(0.15f, 0, 0, 1);
         fontManager.setRelativePosition(
                 window.width() - fontManager.getLayout().width - 20,
                 window.height() - fontManager.getLayout().height - 40);
         fontManager.render(batch);
-        fontManager.setOutline(0.5f);
-        fontManager.setColor(0, 0, 0, 1);
+        fontManager.setOutlineLength(0.5f);
+        fontManager.setOutlineColor(0, 0, 0, 1);
     }
 
     private void renderGameOver(Engine engine){
@@ -398,7 +433,7 @@ public class Game {
         renderHandler.drawScreen();
 
         TextureRegion region = textureHandler.getRegion("Static/Static", 1024, (int) staticFrame % 8);
-        engine.candys3Deluxe.setNightColor(engine, 2);
+        engine.candys3Deluxe.setNightColor(engine, night, 2);
         batch.draw(region, 0, 0, 1280, 720);
         batch.setColor(1, 1, 1, 1);
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1 - renderHandler.screenAlpha);
@@ -407,7 +442,7 @@ public class Game {
         FrameBufferManager.render(batch, renderHandler.screenBuffer, true);
 
         fontManager.setCurrentFont(candysFont);
-        engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, 1, false);
+        engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, night, 1, false);
         fontManager.setSize(54);
         fontManager.setText("GAME OVER");
         fontManager.setPosition(true, true,
@@ -416,7 +451,7 @@ public class Game {
         fontManager.render(batch);
 
         fontManager.setSize(26);
-        if (!retry) engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, 1, false);
+        if (!retry) engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, night, 1, false);
         else candysFont.setColor(1, 1, 1, 1);
         fontManager.setText("Retry");
         fontManager.setPosition(true, true,
@@ -424,7 +459,7 @@ public class Game {
                 (float) window.height() / 2 - 54);
         fontManager.render(batch);
 
-        if (!menu) engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, 1, false);
+        if (!menu) engine.candys3Deluxe.fontAlpha(renderHandler, candysFont, night, 1, false);
         else candysFont.setColor(1, 1, 1, 1);
         fontManager.setText("Menu");
         fontManager.setPosition(true, true,
@@ -454,15 +489,15 @@ public class Game {
 
         if (engine.gamejoltManager != null) {
             engine.gamejoltManager.execute(() -> {
-                String tableID = GameData.night == 0 ? "767298" : GameData.night == 1 ? "909490" : "909960";
+                String tableID = night == 0 ? "767298" : night == 1 ? "909490" : "909960";
                 scoreFetch(engine, tableID, Integer.parseInt(player.getFlashPoints()), player.getFlashPoints() + " Points");
-                tableID = GameData.night == 0 ? "909489" : GameData.night == 1 ? "909491" : "909961";
+                tableID = night == 0 ? "909489" : night == 1 ? "909491" : "909961";
                 scoreFetch(engine, tableID, (int) nightTime, time + " seconds");
             });
         }
 
         if (engine.scoreTable == null) return;
-        engine.scoreTable.setCandys3Score(GameData.night, player.getFlashPoints() + " Points", time + " seconds");
+        engine.scoreTable.setCandys3Score(night, player.getFlashPoints() + " Points", time + " seconds");
         FileUtils.writeTable(engine.jsonHandler, engine.scoreTable);
     }
 
@@ -475,10 +510,10 @@ public class Game {
 
     private boolean writeStars(Engine engine, StarData[] starsData, boolean complete) {
         setStar(starsData[0], complete);
-        if (GameData.laserVision) setStar(starsData[1], complete);
-        if (GameData.hitboxMultiplier < 1) setStar(starsData[2], complete);
-        if (GameData.hardCassette) setStar(starsData[3], complete);
-        if (GameData.laserVision && GameData.hitboxMultiplier < 1 && GameData.hardCassette) setStar(starsData[4], complete);
+        if (laserVision) setStar(starsData[1], complete);
+        if (laserPointer) setStar(starsData[2], complete);
+        if (hardCassette) setStar(starsData[3], complete);
+        if (laserVision && laserPointer && hardCassette) setStar(starsData[4], complete);
 
         if (engine.gamejoltManager == null) {
             FileUtils.writeUser(engine.jsonHandler, engine.user);
@@ -496,7 +531,7 @@ public class Game {
         starData.time = Math.max((int) nightTime, starData.time);
         if (!complete) return;
         starData.complete = true;
-        if (GameData.freeScroll) starData.special = true;
+        if (freeScroll) starData.special = true;
     }
 
     public void dispose(){

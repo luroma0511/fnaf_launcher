@@ -1,6 +1,5 @@
 package util.ui;
 
-import candys3.GameData;
 import util.*;
 
 public class MenuCharacter extends SpriteObject {
@@ -63,11 +62,11 @@ public class MenuCharacter extends SpriteObject {
         return inputManager.isLeftPressed() || inputManager.isRightPressed();
     }
 
-    public void debugRender(RenderHandler renderHandler, String game){
+    public void debugRender(RenderHandler renderHandler, int night, String game){
         if (game.equals("candys2")){
             renderHandler.shapeDrawer.setColor(0.85f, 0.85f, 0.85f, 0.5f);
         } else {
-            if (GameData.night == 0) renderHandler.shapeDrawer.setColor(1, 0, 0, 0.5f);
+            if (night == 0) renderHandler.shapeDrawer.setColor(1, 0, 0, 0.5f);
             else renderHandler.shapeDrawer.setColor(0.5f, 0, 1, 0.5f);
         }
         renderHandler.shapeDrawer.filledRectangle(

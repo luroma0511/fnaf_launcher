@@ -1,6 +1,5 @@
 package candys3.Game.Objects;
 
-import candys3.GameData;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
@@ -48,7 +47,7 @@ public class Room extends SpriteObject {
         super();
     }
 
-    public void reset(){
+    public void reset(boolean hardCassette){
         if (tapeMusic == null) tapeMusic = Gdx.audio.newMusic(Gdx.files.local("assets/candys3/sounds/tapemusic.wav"));
         tapeWeasel = false;
         state = 0;
@@ -62,7 +61,7 @@ public class Room extends SpriteObject {
         rewindFrame = 0;
         tapeState = 0;
         tapePos = 0;
-        if (GameData.hardCassette) tapePlayAchievement = 0;
+        if (hardCassette) tapePlayAchievement = 0;
         else tapePlayAchievement = 1;
         tapeStop = false;
         tapeAdjusted = true;
@@ -80,7 +79,7 @@ public class Room extends SpriteObject {
         if (rewind == null) rewind = textureHandler.loadImageBuffer("assets/candys3", "game/Tape/RewindButton");
     }
 
-    public void input(Engine engine, Player player){
+    public void input(Engine engine, Game game, Player player){
         if (frame > 0) return;
         hoverButton = false;
         var mx = engine.appHandler.getInput().getX();
@@ -141,7 +140,7 @@ public class Room extends SpriteObject {
                         tapeWeasel = false;
                     } else if (tapeState == 0 && textureHandler.isAlpha(rewind, (int) ((mx - 763) / 1.25f), (int) ((376.25f - my) / 1.25f))) {
                         soundHandler.play("tapeButton");
-                        if (tapePos != 0 && !GameData.hardCassette) {
+                        if (tapePos != 0 && !game.hardCassette) {
                             soundHandler.play("tapeRewind");
                             soundHandler.setSoundEffect(soundHandler.LOOP, "tapeRewind", 1);
                         }
@@ -166,7 +165,7 @@ public class Room extends SpriteObject {
         }
     }
 
-    public void update(SoundHandler soundHandler, Player player){
+    public void update(SoundHandler soundHandler, Game game, Player player){
         if (frame > 0) frame = Time.increaseTimeValue(frame, limit + 1, 27);
         if ((int) frame == limit + 1){
             frame = 0;
@@ -233,11 +232,11 @@ public class Room extends SpriteObject {
                 tapeState = 0;
             }
         }
-        if (GameData.hardCassette) tapeMusic.setVolume(0);
+        if (game.hardCassette) tapeMusic.setVolume(0);
         else if (tapeMusic.isPlaying()) tapeMusic.setVolume(0.065f + tapeVolume);
     }
 
-    public void render(Engine engine, Characters characters, Flashlight flashlight){
+    public void render(Engine engine, Characters characters, Flashlight flashlight, Game game){
         var renderHandler = engine.appHandler.getRenderHandler();
         var batch = renderHandler.batch;
         var textureHandler = engine.appHandler.getTextureHandler();
@@ -255,10 +254,10 @@ public class Room extends SpriteObject {
                 region = textureHandler.get("game/Flashlight");
 
                 float multiplier = 1;
-                if (GameData.laserVision) {
-                    if (GameData.expandedVision) multiplier = 0.8f;
+                if (game.laserVision) {
+                    if (game.expandedVision) multiplier = 0.8f;
                     else multiplier = 0.6f;
-                } else if (GameData.expandedVision) multiplier = 1.25f;
+                } else if (game.expandedVision) multiplier = 1.25f;
 
                 float width = (float) region.getRegionWidth() * multiplier;
                 float height = (float) region.getRegionHeight() * multiplier;
@@ -286,7 +285,7 @@ public class Room extends SpriteObject {
 
         if (Game.roomBuffer == null) Game.roomBuffer = FrameBufferManager.newFrameBuffer();
         Game.roomBuffer.begin();
-        if (GameData.night == 2) batch.setColor(1, 0, 0, 1);
+        if (game.night == 2) batch.setColor(1, 0, 0, 1);
         if (state != 2) batch.draw(region, 0, 0);
         else {
             batch.draw(region, CameraManager.getX(), CameraManager.getY());
@@ -310,7 +309,7 @@ public class Room extends SpriteObject {
 
         renderHandler.screenBuffer.begin();
 
-        if (state != 2 && GameData.perspective) CameraManager.applyShader(batch);
+        if (state != 2 && game.perspectiveEffect) CameraManager.applyShader(batch);
 
         boolean debug = false;
         

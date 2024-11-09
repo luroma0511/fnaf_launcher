@@ -1,35 +1,48 @@
 package util;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector4;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class FontManager {
+    private final ShaderProgram outlineShader;
+    private final ShaderProgram shadowShader;
     private final GlyphLayout layout = new GlyphLayout();
-    private final ShaderProgram shader;
-    private float outline = 0.5f;
+    private final Map<String, BitmapFont> fontMap = new HashMap<>();
+    private final Vector4 outlineColor = new Vector4(0, 0, 0, 1);
+    private float outlineLength = 0.5f;
+    private final Vector2 shadowOffset = new Vector2(0, 0);
+    private final Vector4 shadowColor = new Vector4(0, 0, 0, 1);
+    private float shadowSmoothing = 0.5f;
+    private float textureSize;
+    private String currentShader;
     private float x;
     private float y;
-    private final Vector4 color = new Vector4(0, 0, 0, 1);
-    private final Map<String, BitmapFont> fontMap = new HashMap<>();
 
     private BitmapFont currentFont;
 
     {
-        String vertex = Loader.loadFile("res/shaders/font.vert");
-        String frag = Loader.loadFile("res/shaders/font.frag");
-        assert vertex != null;
-        assert frag != null;
-        shader = new ShaderProgram(vertex, frag);
+        String vert = Loader.loadFile("res/shaders/font.vert");
+        String frag = Loader.loadFile("res/shaders/outlineFont.frag");
+        outlineShader = initShader(vert, frag);
+        frag = Loader.loadFile("res/shaders/shadowFont.frag");
+        shadowShader = initShader(vert, frag);
+    }
+
+    private ShaderProgram initShader(String vert, String frag){
+        var shader = new ShaderProgram(vert, frag);
         if (!shader.isCompiled()) Gdx.app.error("shader", "compilation failed:\n" + shader.getLog());
+        return shader;
     }
 
     public void addFont(String name){
@@ -96,10 +109,23 @@ public class FontManager {
         this.y = y + CameraManager.getY();
     }
 
+    private void setOutlineShader(SpriteBatch batch){
+        batch.setShader(outlineShader);
+        outlineShader.setUniformf("outlineLen", outlineLength);
+        outlineShader.setUniformf("outlineColor", outlineColor);
+    }
+
+    private void setShadowShader(SpriteBatch batch){
+        batch.setShader(shadowShader);
+        shadowShader.setUniformf("shadowSmoothing", shadowSmoothing);
+        shadowShader.setUniformf("shadowColor", shadowColor);
+        shadowShader.setUniformf("shadowOffset", shadowOffset);
+        shadowShader.setUniformf("textureSize", textureSize);
+    }
+
     public void render(SpriteBatch batch) {
-        batch.setShader(shader);
-        shader.setUniformf("outlineLen", outline);
-        shader.setUniformf("outlineColor", color);
+        if (currentShader.equals("outline")) setOutlineShader(batch);
+        else setShadowShader(batch);
         currentFont.draw(batch, layout, x, y);
         batch.setShader(null);
     }
@@ -108,14 +134,57 @@ public class FontManager {
         return layout;
     }
 
-    public void setOutline(float outline) {
-        this.outline = outline;
+    public void setOutlineLength(float outlineLength) {
+        this.outlineLength = outlineLength;
     }
 
-    public void setColor(float r, float g, float b, float a){
-        color.x = r;
-        color.y = g;
-        color.z = b;
-        color.w = a;
+    public void setOutlineColor(Color color){
+        setOutlineColor(color.r, color.g, color.b, color.a);
+    }
+
+    public void setOutlineColor(float r, float g, float b, float a){
+        outlineColor.x = r;
+        outlineColor.y = g;
+        outlineColor.z = b;
+        outlineColor.w = a;
+    }
+
+    public void setShadowColor(Color color){
+        setShadowColor(color.r, color.g, color.b, color.a);
+    }
+
+    public void setShadowColor(float r, float g, float b, float a){
+        shadowColor.x = r * 1.25f;
+        shadowColor.y = g * 1.25f;
+        shadowColor.z = b * 1.25f;
+        shadowColor.w = a;
+    }
+
+    public void setShadowOffset(float x, float y){
+        shadowOffset.x = x;
+        shadowOffset.y = y;
+    }
+
+    public void setShadowSmoothing(float shadowSmoothing) {
+        this.shadowSmoothing = shadowSmoothing;
+    }
+
+    public void setTextureSize(float textureSize) {
+        this.textureSize = textureSize;
+    }
+
+    public void resetOutline(){
+        setOutlineColor(0, 0, 0, 1);
+        setOutlineLength(0.5f);
+    }
+
+    public void resetShadow(){
+        setShadowColor(0, 0, 0, 1);
+        setShadowOffset(0, 0);
+        setShadowSmoothing(0.5f);
+    }
+
+    public void setCurrentShader(String currentShader) {
+        this.currentShader = currentShader;
     }
 }

@@ -81,14 +81,14 @@ public class Game {
         faultyBattery = menu.faultyBatteryButton.isSelected();
         faultyPhones = menu.faultyPhonesButton.isSelected();
 
-        var cheats = menu.getOptions().get(2);
+        var cheats = menu.options.get(2);
         mapDebug = cheats.get(0).isSelected();
         hitboxDebug = cheats.get(1).isSelected();
         noJumpscares = cheats.get(2).isSelected();
         cheating = mapDebug || hitboxDebug || noJumpscares;
         modifySave = !cheating;
 
-        var options = menu.getOptions().get(3);
+        var options = menu.options.get(3);
         infiniteNight = options.get(0).isSelected();
         perspectiveEffect = options.get(1).isSelected();
 
@@ -103,6 +103,7 @@ public class Game {
         textureHandler.add("game/camera/vignette");
         textureHandler.add("game/camera/reboot");
         textureHandler.add("game/camera/static");
+        textureHandler.add("game/camera/broken");
 
         textureHandler.add("game/gui/button");
         textureHandler.add("game/gui/ui");
@@ -356,9 +357,6 @@ public class Game {
                 region = textureHandler.getRegion("game/camera/reboot", 1024, (int) player.monitor.glitchFrame);
                 region.getTexture().setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
                 batch.draw(region, x, y, width, height);
-            } else if (player.signalLost > 0) {
-                region = textureHandler.getRegion("game/camera/static", 1024, (int) (6 - player.signalLost));
-                batch.draw(region, x, y, width, height);
             } else {
                 boolean character = false;
                 if (mode == 0) character = candysShowdown.renderCamera(engine, player.monitor.activeCamera);
@@ -377,7 +375,24 @@ public class Game {
                 batch.setColor(1, 1, 1, 1);
                 batch.flush();
                 batch.setBlendFunction(srcFunc, dstFunc);
+
+                if (player.signalLost > 0) {
+                    region = textureHandler.getRegion("game/camera/static", 1024, (int) (6 - player.signalLost));
+                    batch.draw(region, x, y, width, height);
+                }
             }
+
+            srcFunc = batch.getBlendSrcFunc();
+            dstFunc = batch.getBlendDstFunc();
+            batch.setBlendFunction(GL20.GL_DST_COLOR, GL20.GL_SRC_COLOR);
+
+            batch.setColor(0.5f, 0.5f, 0.5f, 1);
+            region = textureHandler.get("game/camera/vignette");
+            batch.draw(region, x, y, width, height);
+            batch.setColor(1, 1, 1, 1);
+
+            batch.flush();
+            batch.setBlendFunction(srcFunc, dstFunc);
 
             if (!player.monitor.error && player.monitor.glitchCooldown == 0) {
                 region = textureHandler.get("game/gui/ui");
@@ -460,16 +475,18 @@ public class Game {
             return;
         }
 
-        var font2 = fontManager.getFont("candys2/font2");
+        var font2 = fontManager.getFont("candys2/fontPixel");
         fontManager.setCurrentFont(font2);
-        font2.setColor(0.8f, 0.8f, 0.8f, 1);
-        fontManager.setSize(24);
-        int yPosition = 618;
-        fontManager.setText("Map Radar: " + (mapDebug ? "On" : "Off"));
-        fontManager.setPosition(248, yPosition);
-//        fontManager.render(batch);
-        if (mapDebug){
+        font2.setColor(0.9f, 0.9f, 0.9f, 1);
+        if (player.inCamera) {
+            fontManager.setSize(24);
+            int yPosition = 618;
+            fontManager.setText("Map Radar: " + (mapDebug ? "On" : "Off"));
+            fontManager.setPosition(248, yPosition);
+            fontManager.render(batch);
+            if (mapDebug) {
 
+            }
         }
 
         fontManager.setSize(32);
@@ -528,7 +545,7 @@ public class Game {
         batch.flush();
         batch.setBlendFunction(srcFunc, dstFunc);
 
-        var font1 = fontManager.getFont("candys2/font1");
+        var font1 = fontManager.getFont("font");
         fontManager.setCurrentFont(font1);
         fontManager.setSize(60);
         font1.setColor(1, 1, 1, 1);
@@ -541,15 +558,15 @@ public class Game {
         if (!retryHover && !reset){
             font1.setColor(0.5f, 0.1f, 0.2f, 1);
             fontManager.setText("RETRY");
-            fontManager.setColor(0.15f, 0, 0.05f, 1);
+            fontManager.setOutlineColor(0.15f, 0, 0.05f, 1);
         } else {
-            fontManager.setColor(0.1f, 0.1f, 0.1f, 1);
+            fontManager.setOutlineColor(0.1f, 0.1f, 0.1f, 1);
         }
-        fontManager.setOutline(0.25f);
+        fontManager.setOutlineLength(0.25f);
         fontManager.render(batch);
-        fontManager.setColor(0, 0,0, 1);
+        fontManager.setOutlineColor(0, 0,0, 1);
         font1.setColor(1, 1, 1, 1);
-        fontManager.setOutline(0.5f);
+        fontManager.setOutlineLength(0.5f);
 
         fontManager.setText("MENU");
         width = fontManager.getLayout().width;
@@ -558,15 +575,15 @@ public class Game {
         if (!menuHover){
             font1.setColor(0.5f, 0.1f, 0.2f, 1);
             fontManager.setText("MENU");
-            fontManager.setColor(0.15f, 0, 0.05f, 1);
+            fontManager.setOutlineColor(0.15f, 0, 0.05f, 1);
         } else {
-            fontManager.setColor(0.1f, 0.1f, 0.1f, 1);
+            fontManager.setOutlineColor(0.1f, 0.1f, 0.1f, 1);
         }
-        fontManager.setOutline(0.25f);
+        fontManager.setOutlineLength(0.25f);
         fontManager.render(batch);
-        fontManager.setColor(0, 0,0, 1);
+        fontManager.setOutlineColor(0, 0,0, 1);
         font1.setColor(1, 1, 1, 1);
-        fontManager.setOutline(0.5f);
+        fontManager.setOutlineLength(0.5f);
 
         fontManager.render(batch);
 

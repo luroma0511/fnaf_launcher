@@ -55,7 +55,8 @@ public class Menu {
     private float modeSection;
     private int modeSectionTarget;
 
-    public Menu(){
+    public Menu(Options options){
+        this.options = options;
         modeSection = 0;
         modeSectionTarget = 0;
         captionFBO = FrameBufferManager.newFrameBuffer();
@@ -70,17 +71,17 @@ public class Menu {
         cat = new MenuCharacter(792, 36, 429, 664, true, "cat.txt");
 //        vinnie = new MenuCharacter();
 
-        optionButton = new Button("", 20, 20, 82, 82, null);
+        optionButton = new Button("", 20, 20, 82, null);
         playButton = new Button("", 1196, 20, 64, 76, null);
 
         int x = 144;
-        laserPointerButton = new Button("", x, 20, 82, 82, "laserPointer");
+        laserPointerButton = new Button("", x, 20, 82, "laserPointer");
         x += 86;
-        faultyBatteryButton = new Button("", x, 20, 82, 82, "faultyBattery");
+        faultyBatteryButton = new Button("", x, 20, 82, "faultyBattery");
         x += 86;
-        faultyPhonesButton = new Button("", x, 20, 82, 82, "faultyPhones");
+        faultyPhonesButton = new Button("", x, 20, 82, "faultyPhones");
         x += 86;
-        shadowButton = new Button("", x, 20, 82, 82, "unavailable");
+        shadowButton = new Button("", x, 20, 82, "unavailable");
 
         caption = new Caption();
 
@@ -95,7 +96,7 @@ public class Menu {
         allChallengesStar = new Star("star", xPos, 80, size, size, " All Challenges");
     }
 
-    public void load(Engine engine){
+    public void load(Engine engine, boolean switchOptions){
         var textureHandler = engine.appHandler.getTextureHandler();
         engine.appHandler.soundHandler.addAll("res/data/candys2/menu/sounds.txt");
         textureHandler.add("menu/static");
@@ -120,8 +121,8 @@ public class Menu {
             textureHandler.add("menu/shadow" + extra);
         }
 
-        if (options == null) {
-            options = new Options(engine.appHandler.getTextureHandler());
+        if (switchOptions) {
+            options.clear();
             var user = engine.user;
             options.add(1, Input.Keys.toString(user.fullscreenKey) + " - Fullscreen", null);
             options.add(1, Input.Keys.toString(user.restartGameKey) + " - Restart Game", null);
@@ -369,7 +370,7 @@ public class Menu {
                 }
             }
 
-            caption.update(engine, fontManager.getFont("candys2/font1"), "candys2");
+            caption.update(engine, fontManager.getFont("font"), "candys2");
             playButton.update(null, input, true);
             if (optionButton.isSelected()) playButton.reset();
             if (!playButton.isSelected()) return;
@@ -411,19 +412,6 @@ public class Menu {
         }
     }
 
-    private void setMaxMode(){
-        if (modeSectionTarget == 0) {
-            candy.setAi(20);
-            cindy.setAi(20);
-            chester.setAi(20);
-            penguin.setAi(20);
-            blank.setAi(20);
-        } else {
-            rat.setAi(20);
-            cat.setAi(20);
-        }
-    }
-
     public void render(Engine engine){
         var renderHandler = engine.appHandler.getRenderHandler();
         var batch = renderHandler.batch;
@@ -443,7 +431,7 @@ public class Menu {
         var window = engine.appHandler.window;
         var fontManager = engine.appHandler.getFontManager();
         var textureHandler = engine.appHandler.getTextureHandler();
-        var font1 = fontManager.getFont("candys2/font1");
+        var font1 = fontManager.getFont("font");
 
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
         renderHandler.drawScreen();
@@ -482,15 +470,15 @@ public class Menu {
         var window = engine.appHandler.window;
 
         var fontManager = engine.appHandler.getFontManager();
-        var font1 = fontManager.getFont("candys2/font1");
-        var font2 = fontManager.getFont("candys2/font2");
+        var font1 = fontManager.getFont("font");
+        var font2 = fontManager.getFont("candys2/fontPixel");
 
         TextureRegion region;
         fontManager.setCurrentFont(font1);
         fontManager.setSize(15);
         caption.prepare(engine, captionFBO);
 
-        options.fboDraw(engine);
+        options.fboDraw(engine, modeSectionTarget);
 
         renderHandler.screenBuffer.begin();
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
@@ -500,8 +488,8 @@ public class Menu {
         batch.draw(region,
                 -49.5f + shakeScreen - candy.getInitX() + candy.getX(),
                 -candy.getInitY() + candy.getY() - 28);
-//        if (modeSectionTarget == 0) renderHandler.shapeDrawer.setColor(0.025f * renderHandler.screenAlpha, 0, 0.0625f * renderHandler.screenAlpha, 1);
-//        else renderHandler.shapeDrawer.setColor(0.065f * renderHandler.screenAlpha, 0, 0.025f * renderHandler.screenAlpha, 1);
+//        if (modeSectionTarget == 0) renderHandler.shapeDrawer.setOutlineColor(0.025f * renderHandler.screenAlpha, 0, 0.0625f * renderHandler.screenAlpha, 1);
+//        else renderHandler.shapeDrawer.setOutlineColor(0.065f * renderHandler.screenAlpha, 0, 0.025f * renderHandler.screenAlpha, 1);
 //        renderHandler.drawScreen();
 
         batch.setColor(0.65f, 0.65f, 0.85f, renderHandler.screenAlpha);
@@ -541,9 +529,10 @@ public class Menu {
         batch.setColor(1, 1, 1, 1);
 
         fontManager.setCurrentFont(font2);
-        fontManager.setOutline(0.4f);
-        fontManager.setColor(0.1f, 0, 0.2f, renderHandler.screenAlpha);
+        fontManager.setOutlineLength(0.35f);
+        fontManager.setOutlineColor(0.1f, 0, 0.2f, renderHandler.screenAlpha);
         font2.setColor(0.65f, 0.65f, 0.85f, renderHandler.screenAlpha);
+        fontManager.setCurrentShader("outline");
 
         offset = modeSection * window.width();
 
@@ -558,8 +547,7 @@ public class Menu {
         renderAILevel(batch, fontManager, rat, 2.5f, -offset);
         renderAILevel(batch, fontManager, cat, 2.5f, -offset);
 
-        fontManager.setOutline(0.5f);
-        fontManager.setColor(0, 0, 0, 1);
+        fontManager.resetOutline();
 
         Candys2Data data = engine.user.candys2Data;
         String modeName = modeSectionTarget == 0 ? "Candy's Showdown" : "Rat & Cat Theater";
@@ -587,7 +575,7 @@ public class Menu {
         batch.setColor(0.8f / divider, 0.8f / divider, 1 / divider, renderHandler.screenAlpha);
         batch.draw(region, optionButton.getX(), optionButton.getY());
 
-        options.render(engine);
+        options.render(engine, modeSectionTarget);
 
         batch.setColor(0.6f, 0.6f, 0.8f, renderHandler.screenAlpha);
 
@@ -681,7 +669,16 @@ public class Menu {
         fontManager.render(batch);
     }
 
-    public Options getOptions() {
-        return options;
+    private void setMaxMode(){
+        if (modeSectionTarget == 0) {
+            candy.setAi(20);
+            cindy.setAi(20);
+            chester.setAi(20);
+            penguin.setAi(20);
+            blank.setAi(20);
+        } else {
+            rat.setAi(20);
+            cat.setAi(20);
+        }
     }
 }

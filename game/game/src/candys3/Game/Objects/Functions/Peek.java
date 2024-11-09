@@ -1,8 +1,8 @@
 package candys3.Game.Objects.Functions;
 
+import candys3.Game.Game;
 import candys3.Game.Objects.Player;
 import candys3.Game.Objects.Room;
-import candys3.GameData;
 import util.SoundHandler;
 import util.Time;
 
@@ -17,8 +17,8 @@ public class Peek {
         this.delay = delay;
     }
 
-    public boolean input(SoundHandler soundHandler, Player player, Room room, boolean hovered, float delayTime){
-        if (flashTime == 0 || (cooldown == 0 && !GameData.noJumpscares) || room.getFrame() != 0 || room.getState() != 0) return false;
+    public boolean input(SoundHandler soundHandler, Game game, Player player, Room room, boolean hovered, float delayTime){
+        if (flashTime == 0 || (cooldown == 0 && !game.noJumpscares) || room.getFrame() != 0 || room.getState() != 0) return false;
         if (!hovered) {
             if (!player.isAttack() && player.isScared()) player.setScared();
             cooldown = Time.decreaseTimeValue(cooldown, 0, 1);

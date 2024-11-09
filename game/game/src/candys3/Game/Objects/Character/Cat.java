@@ -1,5 +1,6 @@
 package candys3.Game.Objects.Character;
 
+import candys3.Game.Game;
 import candys3.Game.Objects.Functions.*;
 import candys3.Game.Objects.Player;
 import candys3.Game.Objects.Room;
@@ -53,14 +54,14 @@ public class Cat extends SpriteObject {
         }
     }
 
-    public boolean execute(SoundHandler soundHandler, Player player, Rat rat, Room room, boolean twitching){
+    public boolean execute(SoundHandler soundHandler, Game game, Player player, Rat rat, Room room, boolean twitching){
         var flashlight = player.getFlashlight();
-        twitching = input(soundHandler, player, rat, room, flashlight.getX(), flashlight.getY(), twitching);
-        twitching = update(soundHandler, rat, player, room, twitching);
+        twitching = input(soundHandler, game, player, rat, room, flashlight.getX(), flashlight.getY(), twitching);
+        twitching = update(soundHandler, game, rat, player, room, twitching);
         return twitching;
     }
 
-    private boolean input(SoundHandler soundHandler, Player player, Rat rat, Room room, float mx, float my, boolean twitching){
+    private boolean input(SoundHandler soundHandler, Game game, Player player, Rat rat, Room room, float mx, float my, boolean twitching){
         boolean hovered = hitbox.isHovered(mx, my);
         boolean imageHovered = this.mouseOverWithPanning(mx, my);
         switch (state){
@@ -98,7 +99,7 @@ public class Cat extends SpriteObject {
                 bed.input(soundHandler, player, room, imageHovered);
                 break;
             case 3:
-                if (peek.input(soundHandler, player, room, hovered, 0.75f) && type == 2){
+                if (peek.input(soundHandler, game, player, room, hovered, 0.75f) && type == 2){
                     transitionCooldown = 1.15f;
                     player.setBlacknessDelay(1.25f);
                     attack.stopAudio(soundHandler);
@@ -109,7 +110,7 @@ public class Cat extends SpriteObject {
         return twitching;
     }
 
-    private boolean update(SoundHandler soundHandler, Rat rat, Player player, Room room, boolean twitching){
+    private boolean update(SoundHandler soundHandler, Game game, Rat rat, Player player, Room room, boolean twitching){
         if (!start){
             for (String sound: Arrays.asList("cat", "catLeft", "catRight")) {
                 soundHandler.play(sound);
@@ -129,13 +130,13 @@ public class Cat extends SpriteObject {
         } else if (type == 2) soundHandler.setSoundEffect(soundHandler.VOLUME, "cat", 0.3f);
         switch (state){
             case 0:
-                if (!GameData.noJumpscares && ((type == 0 && bedSide.getPhase() == 3 && bedSide.getDelay() == 0) || (type != 0 && bedSide.getFrame() == 43))){
+                if (!game.noJumpscares && ((type == 0 && bedSide.getPhase() == 3 && bedSide.getDelay() == 0) || (type != 0 && bedSide.getFrame() == 43))){
                     player.setJumpscare();
                     if (type == 0) {
                         if (player.getSide() != side) Jumpscare.set("game/Cat/Jumpscare/side", 0, side == 0);
                         else Jumpscare.set("game/Cat/Jumpscare/bed");
                     } else if (type == 1) {
-                        if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
+                        if (!game.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
                         else Jumpscare.classicSet("game/Shadow Cat/Classic/Jumpscare", 2, 145, 850, 20);
                     } else Jumpscare.set("game/Shadow Cat/HellJumpscare");
                     return twitching;
@@ -360,11 +361,11 @@ public class Cat extends SpriteObject {
                 bedSide.setSoundLock();
                 break;
             case 1:
-                if (attack.getKillTimer() == 0 && attack.getReactionTimer() == 0 && !GameData.noJumpscares){
+                if (attack.getKillTimer() == 0 && attack.getReactionTimer() == 0 && !game.noJumpscares){
                     player.setJumpscare();
                     if (type == 0) Jumpscare.set("game/Cat/Jumpscare/room");
                     else if (type == 1) {
-                        if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
+                        if (!game.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
                         else Jumpscare.classicSet("game/Shadow Cat/Classic/Jumpscare", 2, 145, 850, 20);
                     } else Jumpscare.set("game/Shadow Cat/HellJumpscare");
                     return twitching;
@@ -413,11 +414,11 @@ public class Cat extends SpriteObject {
                 attack.setMoved();
                 break;
             case 2:
-                if (bed.killTime() && !GameData.noJumpscares) {
+                if (bed.killTime() && !game.noJumpscares) {
                     player.setJumpscare();
                     if (type == 0) Jumpscare.set("game/Cat/Jumpscare/bed");
                     else if (type == 1) {
-                        if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
+                        if (!game.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
                         else Jumpscare.classicSet("game/Shadow Cat/Classic/Jumpscare", 2, 145, 850, 20);
                     } else Jumpscare.set("game/Shadow Cat/HellJumpscare");
                     return twitching;
@@ -437,11 +438,11 @@ public class Cat extends SpriteObject {
                     soundHandler.play("peek");
                     break;
                 }
-                if (GameData.noJumpscares) break;
+                if (game.noJumpscares) break;
                 player.setJumpscare();
                 if (type == 0) Jumpscare.set("game/Cat/Jumpscare/bed");
                 else if (type == 1) {
-                    if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
+                    if (!game.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
                     else Jumpscare.classicSet("game/Shadow Cat/Classic/Jumpscare", 2, 145, 850, 20);
                 } else Jumpscare.set("game/Shadow Cat/HellJumpscare");
                 break;
@@ -466,11 +467,11 @@ public class Cat extends SpriteObject {
                     break;
                 }
                 if (!peek.update()) {
-                    if (peek.notKillTime() || GameData.noJumpscares) return twitching;
+                    if (peek.notKillTime() || game.noJumpscares) return twitching;
                     player.setJumpscare();
                     if (type == 0) Jumpscare.set("game/Cat/Jumpscare/bed");
                     else if (type == 1) {
-                        if (!GameData.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
+                        if (!game.classicJumpscares) Jumpscare.set("game/Shadow Cat/Jumpscare", 0.75f);
                         else Jumpscare.classicSet("game/Shadow Cat/Classic/Jumpscare", 2, 145, 850, 20);
                     } else Jumpscare.set("game/Shadow Cat/HellJumpscare");
                     return twitching;
