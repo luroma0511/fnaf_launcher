@@ -14,6 +14,7 @@ public class Door {
     private byte knockTimes;
     private float knockDelay;
     private boolean knockHard;
+    private boolean firstToEnter;
 
     private final float initialCooldown;
 

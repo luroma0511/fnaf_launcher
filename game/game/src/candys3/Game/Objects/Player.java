@@ -84,14 +84,14 @@ public class Player {
             float targetX;
             float targetY;
             if (side == 0){
-                targetX = 656;
+                targetX = 580;
                 targetY = 660;
             } else if (side == 1){
                 targetX = 1536;
                 targetY = 592;
             } else {
-                targetX = 2432;
-                targetY = 664;
+                targetX = 2496;
+                targetY = 700;
             }
             if (room.getState() == 1 && y > 72) y = 72;
             targetX -= (float) room.width / 2;

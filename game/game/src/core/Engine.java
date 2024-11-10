@@ -186,6 +186,7 @@ public class Engine extends ApplicationAdapter implements CandysDeluxeKeys {
             }
         } catch (Exception e) {
             gameError = new GameError(e);
+            System.out.println(gameError.text);
             if (game.equals("candys2")) candys2Deluxe.setState(0);
             else if (game.equals("candys3")) candys3Deluxe.setState(0);
             appHandler.soundHandler.stopAllSounds();

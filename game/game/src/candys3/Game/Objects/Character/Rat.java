@@ -59,14 +59,15 @@ public class Rat extends SpriteObject {
         }
     }
 
-    public boolean execute(SoundHandler soundHandler, Game game, Player player, Cat cat, Room room, boolean twitching){
+    public boolean execute(SoundHandler soundHandler, Game game, Player player, Room room, boolean twitching){
         var flashlight = player.getFlashlight();
-        twitching = input(soundHandler, game, cat, player, room, flashlight.getX(), flashlight.getY(), twitching);
-        twitching = update(soundHandler, game, cat, player, room, flashlight, twitching);
+        twitching = input(soundHandler, game, player, room, flashlight.getX(), flashlight.getY(), twitching);
+        twitching = update(soundHandler, game, player, room, flashlight, twitching);
         return twitching;
     }
 
-    private boolean input(SoundHandler soundHandler, Game game, Cat cat, Player player, Room room, float mx, float my, boolean twitching){
+    private boolean input(SoundHandler soundHandler, Game game, Player player, Room room, float mx, float my, boolean twitching){
+        var cat = game.characters.getCat();
         boolean hovered = hitbox.isHovered(mx, my);
         boolean imageHovered = this.mouseOverWithPanning(mx, my);
         switch (state){
@@ -95,7 +96,9 @@ public class Rat extends SpriteObject {
         return twitching;
     }
 
-    private boolean update(SoundHandler soundHandler, Game game, Cat cat, Player player, Room room, Flashlight flashlight, boolean twitching){
+    private boolean update(SoundHandler soundHandler, Game game, Player player, Room room, Flashlight flashlight, boolean twitching){
+        var cat = game.characters.getCat();
+        var vinnie = game.characters.getVinnie();
         if (!hellStart && type == 2){
             soundHandler.play("get_in");
             player.setBlacknessTimes(2);
@@ -106,7 +109,12 @@ public class Rat extends SpriteObject {
             case 0:
                 door.update(soundHandler, player, side);
                 boolean catInRoom = cat != null && cat.getState() == 1;
+                boolean delayEntry = vinnie != null && (vinnie.getState() == 1 || vinnie.getState() >= 3);
                 if (door.isSignal()) {
+                    if (delayEntry) {
+                        door.pause();
+                        break;
+                    }
                     boolean catLeaving = cat != null && cat.getState() == 4;
                     if (catInRoom) {
                         door.check();
@@ -248,7 +256,7 @@ public class Rat extends SpriteObject {
                         player.setBlacknessSpeed(1);
                         state = 2;
                         bed.reset(30, 1);
-                        tape.reset(random, 1);
+                        tape.reset(1);
                         changePath();
                         break;
                     }
@@ -447,7 +455,7 @@ public class Rat extends SpriteObject {
         } else if (state == 2){
             if (type == 0) bed.reset(10, 1.15f);
             else bed.reset(8, 1.15f);
-            tape.reset(random, 4 - type);
+            tape.reset(4 - type);
         } else if (state == 3) {
             if (type == 0) peek.reset(3, 2.25f, 1.25f);
             else peek.reset(1.5f, 2.75f, 1.25f);

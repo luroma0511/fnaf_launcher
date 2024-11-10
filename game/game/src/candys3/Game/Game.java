@@ -30,7 +30,7 @@ public class Game {
     private float fastNightTime;
     private final float nightTimeLength;
     private final StringBuilder nightTimeBuilder;
-    private final Characters characters;
+    public final Characters characters;
     private final Player player;
     private final Room room;
     public boolean loaded;

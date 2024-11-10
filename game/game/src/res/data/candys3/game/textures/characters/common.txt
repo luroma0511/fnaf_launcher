@@ -1,6 +1,3 @@
-Battle/Left
-Battle/Middle
-Battle/Right
 Bed/Left
 Bed/Right
 Peek/Left

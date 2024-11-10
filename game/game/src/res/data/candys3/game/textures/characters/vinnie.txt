@@ -1,0 +1,13 @@
+Battle/Left/1
+Battle/Left/2
+Battle/Left/3
+Battle/Middle/1
+Battle/Middle/2
+Battle/Middle/3
+Battle/Right/1
+Battle/Right/2
+Battle/Right/3
+Tape/Tape
+Door/Left
+Door/Middle
+Door/Right

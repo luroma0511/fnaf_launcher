@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FontManager {
-    private final ShaderProgram outlineShader;
-    private final ShaderProgram shadowShader;
+    private ShaderProgram outlineShader;
+    private ShaderProgram shadowShader;
     private final GlyphLayout layout = new GlyphLayout();
     private final Map<String, BitmapFont> fontMap = new HashMap<>();
     private final Vector4 outlineColor = new Vector4(0, 0, 0, 1);
@@ -25,13 +25,13 @@ public class FontManager {
     private final Vector4 shadowColor = new Vector4(0, 0, 0, 1);
     private float shadowSmoothing = 0.5f;
     private float textureSize;
-    private String currentShader;
+    private String currentShader = "outline";
     private float x;
     private float y;
 
     private BitmapFont currentFont;
 
-    {
+    public void load(){
         String vert = Loader.loadFile("res/shaders/font.vert");
         String frag = Loader.loadFile("res/shaders/outlineFont.frag");
         outlineShader = initShader(vert, frag);
@@ -145,6 +145,7 @@ public class FontManager {
     public void setOutlineColor(float r, float g, float b, float a){
         outlineColor.x = r;
         outlineColor.y = g;
+
         outlineColor.z = b;
         outlineColor.w = a;
     }

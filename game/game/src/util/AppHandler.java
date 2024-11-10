@@ -33,6 +33,7 @@ public class AppHandler {
         renderHandler = new RenderHandler();
         textureHandler = new TextureHandler();
         fontManager = new FontManager();
+        fontManager.load();
         menuUI = new MenuUI(textureHandler);
     }
 

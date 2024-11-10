@@ -54,14 +54,15 @@ public class Cat extends SpriteObject {
         }
     }
 
-    public boolean execute(SoundHandler soundHandler, Game game, Player player, Rat rat, Room room, boolean twitching){
+    public boolean execute(SoundHandler soundHandler, Game game, Player player, Room room, boolean twitching){
         var flashlight = player.getFlashlight();
-        twitching = input(soundHandler, game, player, rat, room, flashlight.getX(), flashlight.getY(), twitching);
-        twitching = update(soundHandler, game, rat, player, room, twitching);
+        twitching = input(soundHandler, game, player, room, flashlight.getX(), flashlight.getY(), twitching);
+        twitching = update(soundHandler, game, player, room, twitching);
         return twitching;
     }
 
-    private boolean input(SoundHandler soundHandler, Game game, Player player, Rat rat, Room room, float mx, float my, boolean twitching){
+    private boolean input(SoundHandler soundHandler, Game game, Player player, Room room, float mx, float my, boolean twitching){
+        var rat = game.characters.getRat();
         boolean hovered = hitbox.isHovered(mx, my);
         boolean imageHovered = this.mouseOverWithPanning(mx, my);
         switch (state){
@@ -110,7 +111,8 @@ public class Cat extends SpriteObject {
         return twitching;
     }
 
-    private boolean update(SoundHandler soundHandler, Game game, Rat rat, Player player, Room room, boolean twitching){
+    private boolean update(SoundHandler soundHandler, Game game, Player player, Room room, boolean twitching){
+        var rat = game.characters.getRat();
         if (!start){
             for (String sound: Arrays.asList("cat", "catLeft", "catRight")) {
                 soundHandler.play(sound);

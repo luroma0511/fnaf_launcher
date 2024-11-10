@@ -3,8 +3,6 @@ package candys3.Game.Objects.Functions;
 import candys3.Game.Objects.Room;
 import util.Time;
 
-import java.util.Random;
-
 public class Tape {
     private float frame;
     private float cooldown;
@@ -28,10 +26,10 @@ public class Tape {
         return false;
     }
 
-    public void reset(Random random, int chance){
+    public void reset(int chance){
         leave = false;
         frame = 12.99f;
-        cooldown = random.nextInt(chance) * 0.75f;
+        cooldown = (float) ((Math.random() * chance) * 0.75f);
     }
 
     public int getFrame(){

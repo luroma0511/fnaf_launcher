@@ -12,11 +12,13 @@ import util.*;
 public class Characters {
     private Rat rat;
     private Cat cat;
+    private Vinnie vinnie;
 
     public void ratCatLoad(TextureHandler textureHandler, Menu menu){
         if (menu.rat.getAi() != 0 || menu.night == 2) {
             rat = new Rat((byte) menu.night);
             textureHandler.addImages("game/" + rat.getName() + "/", "candys3/game/textures/characters/common.txt");
+            textureHandler.addImages("game/" + rat.getName() + "/", "candys3/game/textures/characters/battleCommon.txt");
             textureHandler.addImages("game/" + rat.getName() + "/", "candys3/game/textures/characters/rat.txt");
             if (rat.getType() == 1) textureHandler.add("game/Shadow Rat/Classic/Jumpscare");
         } else {
@@ -26,25 +28,36 @@ public class Characters {
             cat = new Cat((byte) menu.night);
             if (menu.night == 0) {
                 textureHandler.addImages("game/Cat/", "candys3/game/textures/characters/common.txt");
+                textureHandler.addImages("game/Cat/", "candys3/game/textures/characters/battleCommon.txt");
                 textureHandler.addImages("game/Cat/", "candys3/game/textures/characters/cat.txt");
             } else {
                 textureHandler.addImages("game/Shadow Cat/", "candys3/game/textures/characters/common.txt");
+                textureHandler.addImages("game/Shadow Cat/", "candys3/game/textures/characters/battleCommon.txt");
                 textureHandler.addImages("game/Shadow Cat/", "candys3/game/textures/characters/shadowCat.txt");
             }
         } else {
             cat = null;
+        }
+        if (menu.vinnie.getAi() != 0 && menu.night != 2){
+            vinnie = new Vinnie((byte) menu.night);
+            textureHandler.addImages("game/Vinnie/", "candys3/game/textures/characters/common.txt");
+            textureHandler.addImages("game/Vinnie/", "candys3/game/textures/characters/vinnie.txt");
+        } else {
+            vinnie = null;
         }
     }
 
     public void reset(int night){
         if (rat != null) rat = new Rat((byte) night);
         if (cat != null) cat = new Cat((byte) night);
+        if (vinnie != null) vinnie = new Vinnie((byte) night);
     }
 
     public void update(SoundHandler soundHandler, Game game, Player player, Room room){
         boolean twitch = false;
-        if (rat != null) twitch = rat.execute(soundHandler, game, player, cat, room, false);
-        if (cat != null) twitch = cat.execute(soundHandler, game, player, rat, room, twitch);
+        if (rat != null) twitch = rat.execute(soundHandler, game, player, room, false);
+        if (cat != null) twitch = cat.execute(soundHandler, game, player, room, twitch);
+        if (vinnie != null) twitch = vinnie.execute(soundHandler, game, player, room, twitch);
         if (twitch && !soundHandler.isPlaying("twitch")){
             soundHandler.play("twitch");
             soundHandler.setSoundEffect(soundHandler.LOOP, "twitch", 1);
@@ -113,6 +126,40 @@ public class Characters {
                     catRegion = textureHandler.getRegion(cat.getPath(), (int) cat.getWidth(), cat.getLeaveFrame());
             }
             if (catRegion != null) batch.draw(catRegion, cat.getX(), cat.getY());
+        }
+
+        if (vinnie != null){
+            TextureRegion vinnieRegion = null;
+            switch (vinnie.getState()){
+                case 0:
+                    if (vinnie.getDoor().getFrame() == 13 || room.getState() != 0 || room.getFrame() != 0) break;
+                    vinnieRegion = textureHandler.getRegion(vinnie.getPath(), (int) vinnie.getWidth(), (int) vinnie.getDoor().getFrame());
+                    break;
+                case 1:
+                    if (room.getState() != 0 || room.getFrame() != 0) break;
+                    String path = "1";
+                    int attackPosition = (int) (vinnie.getAttackPosition() / 2);
+                    if (vinnie.getTwitchFrame() == 1) path = "2";
+                    else if ((int) vinnie.getAttackPosition() % 2 == 1) path = "3";
+                    vinnieRegion = textureHandler.getRegion(vinnie.getPath() + path, (int) vinnie.getWidth(), attackPosition);
+                    break;
+                case 2:
+                    if (room.getState() == 1 && room.getFrame() == 0) vinnieRegion = textureHandler.get(vinnie.getPath());
+                    break;
+                case 3:
+                    if (room.getState() != 0 || room.getFrame() != 0) break;
+                    vinnieRegion = textureHandler.getRegion(vinnie.getPath(), (int) vinnie.getWidth(), vinnie.getTwitchFrame());
+                    break;
+                case 4:
+                    if (room.getState() != 0 || room.getFrame() != 0 || vinnie.getLeaveFrame() == 18) break;
+                    vinnieRegion = textureHandler.getRegion(vinnie.getPath(), (int) vinnie.getWidth(), vinnie.getLeaveFrame());
+            }
+            if (vinnieRegion != null) batch.draw(vinnieRegion, vinnie.getX(), vinnie.getY());
+
+            if (vinnie.getState() == 2 && room.getState() == 2 && room.getFrame() == 0 && vinnie.getTapeFrame() != 0){
+                batch.draw(textureHandler.getRegion("game/" + vinnie.getName() + "/Tape/Tape", 750, 12 - rat.getTapeFrame()),
+                        CameraManager.getX() + 194, CameraManager.getY() + 338);
+            }
         }
     }
 
@@ -190,6 +237,15 @@ public class Characters {
         }
         FrameBufferManager.end(batch, Game.catDebugBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
+        if (Game.vinnieDebugBuffer == null) Game.vinnieDebugBuffer = FrameBufferManager.newFrameBuffer();
+        Game.vinnieDebugBuffer.begin();
+        renderHandler.shapeDrawer.setColor(0, 0, 0, 1);
+        renderHandler.drawScreen();
+        if (vinnie != null && player.getSide() == vinnie.getSide() && roomView) {
+            hitboxDebug(renderHandler, vinnie.getHitbox(), hitboxDebug);
+        }
+        FrameBufferManager.end(batch, Game.catDebugBuffer, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
         if (rat != null && rat.getAttack().isAttack()) {
             flashDebug(renderHandler, window, flashDebug, rat.getAttack().getKillTimer() / 2, rat.getType());
         }
@@ -209,5 +265,9 @@ public class Characters {
 
     public Cat getCat() {
         return cat;
+    }
+
+    public Vinnie getVinnie() {
+        return vinnie;
     }
 }

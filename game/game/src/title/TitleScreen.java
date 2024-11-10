@@ -25,6 +25,7 @@ public class TitleScreen {
     private float xPosition;
     private boolean settings;
     private String settingsID = "";
+    private boolean loaded;
 
     private final Color purple = new Color(185f/255, 169f/255, 236f/255, 1);
     private final Color yellow = new Color(85f/255, 85f/255, 33f/255, 1);
@@ -52,22 +53,25 @@ public class TitleScreen {
         candys2Button = new Button("", x, y, w, h, null);
         y -= 70;
         candys3Button = new Button("", x, y, w, h, null);
-
-        load(engine);
     }
 
     public void load(Engine engine){
         xPosition = 0;
         var textureHandler = engine.appHandler.getTextureHandler();
+        shadowCat.load(textureHandler);
         textureHandler.add("titleScreen/gamejolt");
         textureHandler.add("titleScreen/discord");
-        shadowCat.load(textureHandler);
         engine.appHandler.soundHandler.load("assets", "titleMenu");
         engine.discord.setDetails("Title Screen");
         engine.discord.setState("");
     }
 
     public void update(Engine engine){
+        if (!loaded) {
+            load(engine);
+            loaded = true;
+        }
+
         if (engine.isOnline()) {
             engine.gamejoltTrophyUI.update(engine.game, engine.appHandler.soundHandler, engine.gamejoltManager);
         }

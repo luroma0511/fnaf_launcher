@@ -31,3 +31,5 @@ flashlight
 lookbed1
 lookbed2
 shadowJumpscare
+dodgeVinnie
+knockVinnie

@@ -173,7 +173,7 @@ public class Menu {
 
             vinnie.characterPan(input, window);
             vinnie.hover(input, 7, 4, 1.375f, 1.5f);
-            vinnie.update(caption, input, focus && night < 2, false);
+            vinnie.update(caption, input, focus && night < 2);
 
             rainbowPos += Time.convertValue(96);
             if (rainbowPos > 256) rainbowPos -= 256;
@@ -619,24 +619,6 @@ public class Menu {
             fontManager.setRelativePosition(20, 678);
             fontManager.render(batch);
         }
-
-        float position = 672;
-        fontManager.setSize(15);
-        fontManager.setText("F11 - Fullscreen");
-        fontManager.setRelativePosition(20, position);
-        fontManager.render(batch);
-        position -= 22;
-        fontManager.setText("F2 - Return to Menu");
-        fontManager.setRelativePosition(20, position);
-        fontManager.render(batch);
-        position -= 22;
-        fontManager.setText("R - Restart Night");
-        fontManager.setRelativePosition(20, position);
-        fontManager.render(batch);
-        position -= 22;
-        fontManager.setText("Patch " + engine.version);
-        fontManager.setRelativePosition(20, position);
-        fontManager.render(batch);
 
         renderHandler.shapeDrawer.setColor(0, 0, 0, 1 - renderHandler.screenAlpha);
         renderHandler.drawScreen();
